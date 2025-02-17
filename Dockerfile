@@ -81,7 +81,7 @@ ARG BUILD_DATE
 ARG VERSION
 ARG MODS_VERSION="v3"
 ARG PKG_INST_VERSION="v1"
-ARG KWOWN_VERSION="v1"
+ARG AETHERXOWN_VERSION="v1"
 ARG WITHCONTENV_VERSION="v1"
 LABEL build_version="Version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 LABEL maintainer="Aetherinox"
@@ -92,7 +92,7 @@ LABEL maintainer="Aetherinox"
 
 ADD --chmod=755 "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/core/docker-images.${MODS_VERSION}" "/docker-images"
 ADD --chmod=755 "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/core/package-install.${PKG_INST_VERSION}" "/etc/s6-overlay/s6-rc.d/init-mods-package-install/run"
-ADD --chmod=755 "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/core/aetherxown.${KWOWN_VERSION}" "/usr/bin/aetherxown"
+ADD --chmod=755 "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/core/aetherxown.${AETHERXOWN_VERSION}" "/usr/bin/aetherxown"
 
 # #
 #   Env vars
