@@ -397,7 +397,8 @@ jobs:
                   embed-description: |
                       ### 📦 Docker Deployment  ${{ job.status == 'success' && '✅' || '❌' }}  `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
 
-                      A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github.
+                      A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github. The image is available at:
+                      - https://github.com/${{ github.repository }}/pkgs/container/${{ env.IMAGE_NAME }}
 
                       - Workflow: `${{ github.workflow }} (#${{github.run_number}})`
                       - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
@@ -623,7 +624,8 @@ jobs:
                   embed-description: |
                       ### 📦 Docker Deployment  ${{ job.status == 'success' && '✅' || '❌' }}  `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
 
-                      A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github.
+                      A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github. The image is available at:
+                      - https://github.com/${{ github.repository }}/pkgs/container/${{ env.IMAGE_NAME }}
 
                       - Workflow: `${{ github.workflow }} (#${{github.run_number}})`
                       - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
