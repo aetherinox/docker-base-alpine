@@ -231,7 +231,7 @@ flowchart TB
 
 subgraph GRAPH_TVAPP ["Build thetvapp:latest"]
     direction TB
-    obj_step10["`&gt; git clone https://git.binaryninja.net/pub_projects/tvapp2.git`"]
+    obj_step10["`&gt; git clone git.binaryninja.net/pub_projects/tvapp2.git`"]
     obj_step11["`**Dockerfile
      Dockerfile.aarch64**`"]
     obj_step12["`&gt; docker build &bsol;
