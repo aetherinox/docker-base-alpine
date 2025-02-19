@@ -143,6 +143,17 @@ jobs:
                   echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
             # #
+            #   Release › Github › Checkout › Arm64
+            # #
+
+            - name: >-
+                ✅ Checkout
+              id: task_cleanup_gh_checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            # #
             #   Cleanup › Start
             # #
 
