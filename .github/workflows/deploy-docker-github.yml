@@ -404,19 +404,19 @@ jobs:
                       - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
                       - Version: `${{ env.IMAGE_VERSION }}`
                       - Pull URL: ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
-                      - Release URL: ${{github.event.release.html_url}}
-                      - Environment: ${{ github.event.deployment.environment }}
                       - Branch: `${{ github.ref_name }}`
                       - Commit: `${{ github.event.head_commit.message }}`
                       - Triggered By: ${{ github.actor }}
 
                       ### Tags
+                      -# This docker image will use the following tags:
 
                       ```
                       ${{ steps.task_release_gh_meta.outputs.tags }}
                       ```
 
                       ### Labels
+                      -# This docker image embeds the following labels:
 
                       ```
                       ${{ steps.task_release_gh_meta.outputs.labels }}
@@ -634,19 +634,19 @@ jobs:
                       - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
                       - Version: `${{ env.IMAGE_VERSION }}`
                       - Pull URL: ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
-                      - Release URL: ${{github.event.release.html_url}}
-                      - Environment: ${{ github.event.deployment.environment }}
                       - Branch: `${{ github.ref_name }}`
                       - Commit: `${{ github.event.head_commit.message }}`
                       - Triggered By: ${{ github.actor }}
 
                       ### Tags
+                      -# This docker image will use the following tags:
 
                       ```
                       ${{ steps.task_release_gh_meta.outputs.tags }}
                       ```
 
                       ### Labels
+                      -# This docker image embeds the following labels:
 
                       ```
                       ${{ steps.task_release_gh_meta.outputs.labels }}
