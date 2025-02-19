@@ -207,7 +207,7 @@ jobs:
                       - Triggered By: ${{ github.actor }}
                       - Status: `${{ job.status == 'success' && '✅ Successful' || '❌ Failed' }}`
 
-                  embed-color: ${{ env.STATUS == 'success' && '5763719' || '15418782' }}
+                  embed-color: ${{ job.status == 'success' && '5763719' || '15418782' }}
                   embed-footer-text: "Completed at ${{ env.NOW }} UTC"
                   embed-timestamp: "${{ steps.task_release_set_timestamp.outputs.NOW_LONG }}"
                   embed-author-name: "${{steps.embed.outputs.EMBED_AUTHOR_NAME}}"
