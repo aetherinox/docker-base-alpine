@@ -517,3 +517,25 @@ jobs:
                   push: ${{ github.event_name != 'pull_request' }}
                   tags: ${{ steps.task_release_gh_meta.outputs.tags }}
                   labels: ${{ steps.task_release_gh_meta.outputs.labels }}
+
+            # #
+            #   Release › Notify Github
+            # #
+
+            - name: '🔔 Send Discord Webhook Message'
+              uses: tsickert/discord-webhook@v6.0.0
+              with:
+                  username: 'Io'
+                  avatar-url: 'https://media.discordapp.net/attachments/1341459814345211974/1341629834169815112/github.jpg?ex=67b6b1a6&is=67b56026&hm=56f00917aa1b4c8692f40f82d210e7c571d19350d1a13f3a67ffe35cb4e8e99c&=&format=webp'
+                  webhook-url: ${{ secrets.DISCORD_WEBHOOK_CHAN_DOCKER_BASE_ALPINE }}
+                  embed-title: "$**Github Workflow Completed** 🚀"
+                  embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  embed-description: |
+                      **Github Workflow Completed** 🚀
+                      **Image** ${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}
+                      **Version** ${{ env.IMAGE_VERSION }}
+                      **Pull URL** ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
+                      **Branch** ${{ github.ref }}
+                      **Tag** ${{ steps.task_release_gh_meta.outputs.tags }}
+                      **Lablels** ${{ steps.task_release_gh_meta.outputs.labels }}
+                  embed-color: ${{ env.STATUS == 'success' && '3066993' || '15158332' }}
