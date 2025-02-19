@@ -339,6 +339,10 @@ jobs:
                   labels: |
                       org.opencontainers.image.VERSION=${{ env.IMAGE_VERSION }}
                       org.opencontainers.image.BUILD_DATE=${{ env.NOW_DOCKER_LABEL }}
+                      org.opencontainers.image.licenses=MIT
+                      org.opencontainers.image.revision=${{ github.sha }}
+                      org.opencontainers.image.vendor=${{ env.IMAGE_AUTHOR }}
+                      org.opencontainers.image.ref.name=${{ env.GIT_REF }}
 
             # #
             #   Release › Github › Checkpoint › Arm64
@@ -572,6 +576,10 @@ jobs:
                   labels: |
                       org.opencontainers.image.VERSION=${{ env.IMAGE_VERSION }}
                       org.opencontainers.image.BUILD_DATE=${{ env.NOW_DOCKER_LABEL }}
+                      org.opencontainers.image.licenses=MIT
+                      org.opencontainers.image.revision=${{ github.sha }}
+                      org.opencontainers.image.vendor=${{ env.IMAGE_AUTHOR }}
+                      org.opencontainers.image.ref.name=${{ env.GIT_REF }}
 
             # #
             #   Release › Github › Checkpoint › Amd64
