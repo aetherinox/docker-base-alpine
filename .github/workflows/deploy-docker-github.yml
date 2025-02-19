@@ -393,7 +393,7 @@ jobs:
                   webhook-url: ${{ secrets.DISCORD_WEBHOOK_CHAN_DOCKER_BASE_ALPINE }}
                   embed-title: "**Github Workflow Ran**"
                   embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  embed-thumbnail-url: 'https://i.imgur.com/8BVDkla.jpg'
+                  embed-thumbnail-url: 'https://i.imgur.com/zDIzE8T.jpg'
                   embed-description: |
                       ### 📦 Docker Deployment  ${{ job.status == 'success' && '✅' || '❌' }}  `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
 
@@ -403,15 +403,17 @@ jobs:
                       - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
                       - Version: `${{ env.IMAGE_VERSION }}`
                       - Pull URL: ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
-                      - Branch: `${{ github.ref }}`
+                      - Branch: `${{ github.ref_name }}`
                       - Triggered By: ${{ github.actor }}
 
                       #### Tags
+
                       ```
                       ${{ steps.task_release_gh_meta.outputs.tags }}
                       ```
 
                       #### Labels
+
                       ```
                       ${{ steps.task_release_gh_meta.outputs.labels }}
                       ```
@@ -617,7 +619,7 @@ jobs:
                   webhook-url: ${{ secrets.DISCORD_WEBHOOK_CHAN_DOCKER_BASE_ALPINE }}
                   embed-title: "**Github Workflow Ran**"
                   embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  embed-thumbnail-url: 'https://i.imgur.com/8BVDkla.jpg'
+                  embed-thumbnail-url: 'https://i.imgur.com/zDIzE8T.jpg'
                   embed-description: |
                       ### 📦 Docker Deployment  ${{ job.status == 'success' && '✅' || '❌' }}  `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
 
@@ -627,15 +629,17 @@ jobs:
                       - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
                       - Version: `${{ env.IMAGE_VERSION }}`
                       - Pull URL: ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
-                      - Branch: `${{ github.ref }}`
+                      - Branch: `${{ github.ref_name }}`
                       - Triggered By: ${{ github.actor }}
 
                       #### Tags
+
                       ```
                       ${{ steps.task_release_gh_meta.outputs.tags }}
                       ```
 
                       #### Labels
+
                       ```
                       ${{ steps.task_release_gh_meta.outputs.labels }}
                       ```
