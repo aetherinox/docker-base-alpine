@@ -3,6 +3,7 @@
 #   @author             Aetherinox
 #   @url                https://github.com/Aetherinox
 #   @usage              deploys docker container to github
+#                       upload this workflow to both the `main` branch and the `alpine-base` branch. you can activate the workflow in the actions tab
 #   @secrets            secrets.ADMINSERV_GPG_KEY_ASC                   gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
 #                       secrets.ADMINSERV_GPG_PASSPHRASE                gpg private key passphrase
 #                       secrets.IMAGE_GHCR_TOKEN                        github personal access token (classic) with package:write permission
@@ -117,7 +118,7 @@ env:
     IMAGE_GHCR_USERNAME:  ${{ github.event.inputs.IMAGE_GHCR_USERNAME || 'Aetherinox' }}
     BOT_NAME_1:           EuropaServ
     BOT_NAME_DEPENDABOT:  dependabot[bot]
-    
+
 # #
 #   Jobs
 #
