@@ -329,7 +329,7 @@ docker build --build-arg VERSION=1.0.0 --build-arg BUILD_DATE=20250218 -t thetva
 <br />
 
 ### Using docker buildx
-This section explains how to build your applications's docker image using `docker buildx` instead of `docker build`. It is useful when generating your app's image for multiple platforms.
+This section explains how to build your application's docker image using `docker buildx` instead of `docker build`. It is useful when generating your app's image for multiple platforms.
 
 <br />
 
@@ -431,9 +431,7 @@ After you have your **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects
 - hub.docker.com (Docker Hub)
 - ghcr.io (Github)
 
-After it is uploaded, you can use the `docker run` command, or create a `docker-compose.yml`, and call the docker image to be used. 
-
-This is discussed in the section **[Using TvApp Image](#using-tvapp-image)** below.
+After it is uploaded, you can use the `docker run` command, or create a `docker-compose.yml`, and call the docker image to be used.  This is discussed in the section **[Using TvApp Image](#using-tvapp-image)** below.
 
 <br />
 
