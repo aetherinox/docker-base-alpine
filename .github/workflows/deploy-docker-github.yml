@@ -395,7 +395,7 @@ jobs:
                   embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   embed-thumbnail-url: 'https://i.imgur.com/zDIzE8T.jpg'
                   embed-description: |
-                      ### 📦 Docker Deployment  ${{ job.status == 'success' && '✅' || '❌' }}  `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
+                      ## 📦 Docker Deployment  ${{ job.status == 'success' && '✅' || '❌' }}  `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
 
                       A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github. The image is available at:
                       - https://github.com/${{ github.repository }}/pkgs/container/${{ env.IMAGE_NAME }}
@@ -404,16 +404,19 @@ jobs:
                       - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
                       - Version: `${{ env.IMAGE_VERSION }}`
                       - Pull URL: ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
+                      - Release URL: ${{github.event.release.html_url}}
+                      - Environment: ${{ github.event.deployment.environment }}
                       - Branch: `${{ github.ref_name }}`
+                      - Commit: `${{ github.event.head_commit.message }}`
                       - Triggered By: ${{ github.actor }}
 
-                      #### Tags
+                      ### Tags
 
                       ```
                       ${{ steps.task_release_gh_meta.outputs.tags }}
                       ```
 
-                      #### Labels
+                      ### Labels
 
                       ```
                       ${{ steps.task_release_gh_meta.outputs.labels }}
@@ -622,7 +625,7 @@ jobs:
                   embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   embed-thumbnail-url: 'https://i.imgur.com/zDIzE8T.jpg'
                   embed-description: |
-                      ### 📦 Docker Deployment  ${{ job.status == 'success' && '✅' || '❌' }}  `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
+                      ## 📦 Docker Deployment  ${{ job.status == 'success' && '✅' || '❌' }}  `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
 
                       A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github. The image is available at:
                       - https://github.com/${{ github.repository }}/pkgs/container/${{ env.IMAGE_NAME }}
@@ -631,16 +634,19 @@ jobs:
                       - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
                       - Version: `${{ env.IMAGE_VERSION }}`
                       - Pull URL: ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
+                      - Release URL: ${{github.event.release.html_url}}
+                      - Environment: ${{ github.event.deployment.environment }}
                       - Branch: `${{ github.ref_name }}`
+                      - Commit: `${{ github.event.head_commit.message }}`
                       - Triggered By: ${{ github.actor }}
 
-                      #### Tags
+                      ### Tags
 
                       ```
                       ${{ steps.task_release_gh_meta.outputs.tags }}
                       ```
 
-                      #### Labels
+                      ### Labels
 
                       ```
                       ${{ steps.task_release_gh_meta.outputs.labels }}
