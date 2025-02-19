@@ -1,8 +1,15 @@
 # #
 #   @type               github workflow
 #   @desc               cleans up the list of deployments in the environment history
+#                       edit the 'environment:' to determine which deployment to keep clean
+#                           - can be ran manually
 #   @author             Aetherinox
 #   @url                https://github.com/Aetherinox
+#
+#   @secrets            secrets.SELF_TOKEN_CL                                                 Github Access Token (Classic)
+#                       secrets.DISCORD_WEBHOOK_CHAN_DOCKER_BASE_ALPINE_WORKFLOWS             Discord Webbhook URL; right-click on channel, click "Integrations"
+# #
+
 # #
 
 name: "⚙️ Deploy › Clean"
