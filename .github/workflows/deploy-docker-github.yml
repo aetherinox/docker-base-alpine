@@ -393,9 +393,9 @@ jobs:
                   webhook-url: ${{ secrets.DISCORD_WEBHOOK_CHAN_DOCKER_BASE_ALPINE }}
                   embed-title: "**Github Workflow Ran**"
                   embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  embed-thumbnail-url: "https://proxycroak.com/static/img/favicons/favicon-196x196.png"
+                  embed-thumbnail-url: 'https://i.imgur.com/8BVDkla.jpg'
                   embed-description: |
-                      ### 📦 Docker Deployment ${{ job.status == 'success' && '✅' || '❌' }} `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
+                      ### 📦 Docker Deployment  ${{ job.status == 'success' && '✅' || '❌' }}  `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
 
                       A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github.
 
@@ -404,12 +404,20 @@ jobs:
                       - Version: `${{ env.IMAGE_VERSION }}`
                       - Pull URL: ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
                       - Branch: `${{ github.ref }}`
-                      - Tag: `${{ steps.task_release_gh_meta.outputs.tags }}`
-                      - Lablels: `${{ steps.task_release_gh_meta.outputs.labels }}`
                       - Triggered By: ${{ github.actor }}
+
+                      #### Tags
+                      ```
+                      ${{ steps.task_release_gh_meta.outputs.tags }}
+                      ```
+
+                      #### Labels
+                      ```
+                      ${{ steps.task_release_gh_meta.outputs.labels }}
+                      ```
                   embed-color: ${{ env.STATUS == 'success' && '3066993' || '15158332' }}
-                  embed-footer-text: "Completed at ${{ env.NOW }} UTC | "
-                  embed-timestamp: ${{ steps.task_release_set_timestamp.outputs.NOW_LONG }}
+                  embed-footer-text: "Completed at ${{ env.NOW }} UTC"
+                  embed-timestamp: "${{ steps.task_release_set_timestamp.outputs.NOW_LONG }}"
                   embed-author-name: "${{steps.embed.outputs.EMBED_AUTHOR_NAME}}"
                   embed-author-url: "${{ github.event.release.author.html_url }}"
                   embed-author-icon-url: "${{ github.event.release.author.avatar_url }}"
@@ -609,9 +617,9 @@ jobs:
                   webhook-url: ${{ secrets.DISCORD_WEBHOOK_CHAN_DOCKER_BASE_ALPINE }}
                   embed-title: "**Github Workflow Ran**"
                   embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  embed-thumbnail-url: "https://proxycroak.com/static/img/favicons/favicon-196x196.png"
+                  embed-thumbnail-url: 'https://i.imgur.com/8BVDkla.jpg'
                   embed-description: |
-                      ### 📦 Docker Deployment ${{ job.status == 'success' && '✅' || '❌' }} `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
+                      ### 📦 Docker Deployment  ${{ job.status == 'success' && '✅' || '❌' }}  `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
 
                       A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github.
 
@@ -620,12 +628,20 @@ jobs:
                       - Version: `${{ env.IMAGE_VERSION }}`
                       - Pull URL: ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
                       - Branch: `${{ github.ref }}`
-                      - Tag: `${{ steps.task_release_gh_meta.outputs.tags }}`
-                      - Lablels: `${{ steps.task_release_gh_meta.outputs.labels }}`
                       - Triggered By: ${{ github.actor }}
+
+                      #### Tags
+                      ```
+                      ${{ steps.task_release_gh_meta.outputs.tags }}
+                      ```
+
+                      #### Labels
+                      ```
+                      ${{ steps.task_release_gh_meta.outputs.labels }}
+                      ```
                   embed-color: ${{ env.STATUS == 'success' && '3066993' || '15158332' }}
-                  embed-footer-text: "Completed at ${{ env.NOW }} UTC | "
-                  embed-timestamp: ${{ steps.task_release_set_timestamp.outputs.NOW_LONG }}
+                  embed-footer-text: "Completed at ${{ env.NOW }} UTC"
+                  embed-timestamp: "${{ steps.task_release_set_timestamp.outputs.NOW_LONG }}"
                   embed-author-name: "${{steps.embed.outputs.EMBED_AUTHOR_NAME}}"
                   embed-author-url: "${{ github.event.release.author.html_url }}"
                   embed-author-icon-url: "${{ github.event.release.author.avatar_url }}"
