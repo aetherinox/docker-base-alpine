@@ -419,8 +419,6 @@ You should see:
 
 Now you are ready to build your application's docker image, run the command:
 
-<br />
-
 ```shell
 docker buildx build --no-cache --pull --build-arg VERSION=1.0.0 --build-arg BUILD_DATE=02-18-25 -t thetvapp:latest -t thetvapp:1.0.0 --platform=linux/amd64 --provenance=true --sbom=true --builder=container --push .
 ```
