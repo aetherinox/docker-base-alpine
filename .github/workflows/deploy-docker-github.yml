@@ -215,6 +215,18 @@ jobs:
         steps:
 
             # #
+            #   Release › Get Timestamp
+            # #
+
+            - name: '🕛 Get Timestamp'
+              id: task_release_set_timestamp
+              run: |
+                  echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
+                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_OUTPUT
+                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_OUTPUT
+                  echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+            # #
             #   Release › Github › Start › Arm64
             # #
 
@@ -324,6 +336,9 @@ jobs:
                       type=ref,enable=${{ github.event_name == 'pull_request' || github.event_name == 'push' }},priority=600,prefix=,suffix=-arm64,event=tag
                   flavor: |
                       latest=false
+                  labels: |
+                      org.opencontainers.image.VERSION=${{ env.IMAGE_VERSION }}
+                      org.opencontainers.image.BUILD_DATE=${{ env.NOW_DOCKER_LABEL }}
 
             # #
             #   Release › Github › Checkpoint › Arm64
@@ -357,17 +372,6 @@ jobs:
                   push: ${{ github.event_name != 'pull_request' }}
                   tags: ${{ steps.task_release_gh_meta.outputs.tags }}
                   labels: ${{ steps.task_release_gh_meta.outputs.labels }}
-
-            # #
-            #   Release › Get Timestamp
-            # #
-
-            - name: '🕛 Get Timestamp'
-              id: task_release_set_timestamp
-              run: |
-                  echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
-                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_OUTPUT
-                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_OUTPUT
 
             # #
             #   Release › Get Weekly Commits
@@ -442,6 +446,18 @@ jobs:
             id-token: write
         needs: [ job-docker-release-tags-create, job-docker-release-github-arm64 ]
         steps:
+
+            # #
+            #   Release › Get Timestamp
+            # #
+
+            - name: '🕛 Get Timestamp'
+              id: task_release_set_timestamp
+              run: |
+                  echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
+                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_OUTPUT
+                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_OUTPUT
+                  echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
             # #
             #   Release › Github › Start › Amd64
@@ -553,6 +569,9 @@ jobs:
                       type=raw,enable=${{ inputs.DEV_RELEASE }},priority=400,prefix=,suffix=,value=development
                   flavor: |
                       latest=${{ !inputs.DEV_RELEASE }}
+                  labels: |
+                      org.opencontainers.image.VERSION=${{ env.IMAGE_VERSION }}
+                      org.opencontainers.image.BUILD_DATE=${{ env.NOW_DOCKER_LABEL }}
 
             # #
             #   Release › Github › Checkpoint › Amd64
@@ -586,17 +605,6 @@ jobs:
                   push: ${{ github.event_name != 'pull_request' }}
                   tags: ${{ steps.task_release_gh_meta.outputs.tags }}
                   labels: ${{ steps.task_release_gh_meta.outputs.labels }}
-
-            # #
-            #   Release › Get Timestamp
-            # #
-
-            - name: '🕛 Get Timestamp'
-              id: task_release_set_timestamp
-              run: |
-                  echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
-                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_OUTPUT
-                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_OUTPUT
 
             # #
             #   Release › Get Weekly Commits
