@@ -1,9 +1,10 @@
 # #
 #   @type               github workflow
 #   @desc               pull request autoscan
-#                         scans all of the files related to a particular pull request
-#                         if the code in the files being submitted contains code that is forbidden,
-#                         a report is generated and posted as a comment in the PR.
+#                           scans all of the files related to a particular pull request
+#                           if the code in the files being submitted contains code that is forbidden,
+#                           a report is generated and posted as a comment in the PR.
+#                       sends notifications to discord using webhooks
 #   @author             Aetherinox
 #   @url                https://github.com/Aetherinox
 # #
@@ -19,7 +20,6 @@ on:
     pull_request_target:
         branches:
             - main
-            - master
 
 # #
 #   environment variables
@@ -823,27 +823,27 @@ jobs:
                   username: 'Io'
                   avatar-url: 'https://i.imgur.com/8BVDkla.jpg'
                   webhook-url: ${{ secrets.DISCORD_WEBHOOK_CHAN_DOCKER_BASE_ALPINE_WORKFLOWS }}
-                  embed-title: "**Issues › Scan Workflow Ran**"
+                  embed-title: "🎫 **Issues › Scan Workflow Ran**"
                   embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  embed-thumbnail-url: 'https://i.imgur.com/zDIzE8T.jpg'
+                  embed-thumbnail-url: 'https://cdn.pixabay.com/photo/2022/01/30/13/33/github-6980894_960_720.png'
                   embed-description: |
-                      ## 📦 Issues › Scan  ${{ job.status == 'success' && '✅' || '❌' }}
+                      ## 🎫 Issues › Scan  ${{ job.status == 'success' && '✅' || '❌' }}
 
-                      **${{ job.status == 'success' && '✅ Success' || '❌ Failure' }}** › Your container just ran the `Issues › Scan` workflow. Every time this workflow is ran,
-                      your list of pull requests will be scanned to determine what files have been changed. It will scan each modified file and see if the code conforms with
-                      our rules, and will then post a status report inside the pull request that is open.
+                      **${{ job.status == 'success' && '✅ Success' || '❌ Failure' }}** › Your container just ran the `Issues › Scan` workflow. Every time this workflow is ran, your list of pull requests will be scanned to determine what files have been changed. It will scan each modified file and see if the code conforms with our rules, and will then post a status report inside the pull request that is open.
 
                       The PR will be assigned tags depending on the outcome of the code scan. If issues are detected in the code, a list of each file and issue will be posted in the PR.
 
                       - Workflow: `${{ github.workflow }} (#${{github.run_number}})`
-                      - Triggered By: ${{ github.actor }}
+                      - Triggered By: `${{ github.actor }}`
                       - Status: `${{ job.status == 'success' && '✅ Successful' || '❌ Failed' }}`
 
                       ## ${{ github.event.pull_request.title }} (${{ github.event.pull_request.number }})
 
-                      - PR URL: ${{ github.event.pull_request.html_url }}
-                      - Repo: ${{ github.repository }}:${{ github.head_ref }}
-                      - Author: `${{ github.event.pull_request.user.login }}` (${{ github.event.pull_request.author_association }})
+                      - Pull Request: ${{ github.event.pull_request.html_url }}
+                      - Author: https://github.com/${{ github.event.pull_request.user.login }} (${{ github.event.pull_request.author_association }})
+                      - Repo: https://github.com/${{ github.repository }}
+                      - Branch: `${{ github.head_ref }}`
+                      - Author: https://github.com/${{ github.event.pull_request.user.login }} (${{ github.event.pull_request.author_association }})
                       - Status: `${{ github.event.pull_request.state }}`
 
                       ### Scan Results
@@ -875,25 +875,25 @@ jobs:
                   webhook-url: ${{ secrets.DISCORD_WEBHOOK_CHAN_DOCKER_BASE_ALPINE_WORKFLOWS }}
                   embed-title: "**Issues › Scan Workflow Ran**"
                   embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  embed-thumbnail-url: 'https://i.imgur.com/zDIzE8T.jpg'
+                  embed-thumbnail-url: 'https://cdn.pixabay.com/photo/2022/01/30/13/33/github-6980894_960_720.png'
                   embed-description: |
-                      ## 📦 Issues › Scan  ${{ job.status == 'success' && '✅' || '❌' }}
+                      ## 🎫 Issues › Scan  ${{ job.status == 'success' && '✅' || '❌' }}
 
-                      **${{ job.status == 'success' && '✅ Success' || '❌ Failure' }}** › Your container just ran the `Issues › Scan` workflow. Every time this workflow is ran,
-                      your list of pull requests will be scanned to determine what files have been changed. It will scan each modified file and see if the code conforms with
-                      our rules, and will then post a status report inside the pull request that is open.
+                      **${{ job.status == 'success' && '✅ Success' || '❌ Failure' }}** › Your container just ran the `Issues › Scan` workflow. Every time this workflow is ran, your list of pull requests will be scanned to determine what files have been changed. It will scan each modified file and see if the code conforms with our rules, and will then post a status report inside the pull request that is open.
 
                       The PR will be assigned tags depending on the outcome of the code scan. If issues are detected in the code, a list of each file and issue will be posted in the PR.
 
                       - Workflow: `${{ github.workflow }} (#${{github.run_number}})`
-                      - Triggered By: ${{ github.actor }}
+                      - Triggered By: `${{ github.actor }}`
                       - Status: `${{ job.status == 'success' && '✅ Successful' || '❌ Failed' }}`
 
-                      ### ${{ github.event.pull_request.title }} (${{ github.event.pull_request.number }})
+                      ## ${{ github.event.pull_request.title }} (${{ github.event.pull_request.number }})
 
-                      - PR URL: ${{ github.event.pull_request.html_url }}
-                      - Repo: ${{ github.repository }}:${{ github.head_ref }}
-                      - Author: `${{ github.event.pull_request.user.login }}` (${{ github.event.pull_request.author_association }})
+                      - Pull Request: ${{ github.event.pull_request.html_url }}
+                      - Author: https://github.com/${{ github.event.pull_request.user.login }} (${{ github.event.pull_request.author_association }})
+                      - Repo: https://github.com/${{ github.repository }}
+                      - Branch: `${{ github.head_ref }}`
+                      - Author: https://github.com/${{ github.event.pull_request.user.login }} (${{ github.event.pull_request.author_association }})
                       - Status: `${{ github.event.pull_request.state }}`
 
                       ### Scan Results
@@ -902,7 +902,7 @@ jobs:
                       - Renamed Files: ${{ steps.task_autocheck_changed_files_get.outputs.renamed_files_count }}
                       - Copied Files: ${{ steps.task_autocheck_changed_files_get.outputs.copied_files_count }}
                       - Deleted Files: ${{ steps.task_autocheck_changed_files_get.outputs.deleted_files_count }}
-                      
+
                   embed-color: ${{ job.status == 'success' && '5763719' || '15418782' }}
                   embed-footer-text: "Completed at ${{ env.NOW }} UTC"
                   embed-timestamp: "${{ env.NOW_LONG }}"
