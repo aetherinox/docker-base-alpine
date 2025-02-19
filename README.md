@@ -357,7 +357,11 @@ docker buildx rm container
 
 <br />
 
-Next, create your new docker image. The command below will push the image if you are signed into hub.docker.com
+Next, create your new docker image. Two different commands are provided below:
+- Method to save docker image locally
+- Push docker image to registry
+
+<br />
 
 #### Save Local Image
 The command below will save a local copy of your application's docker image, which can be immediately used, or seen using `docker ps`
