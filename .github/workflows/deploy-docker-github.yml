@@ -403,7 +403,7 @@ jobs:
                       - Workflow: `${{ github.workflow }} (#${{github.run_number}})`
                       - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
                       - Version: `${{ env.IMAGE_VERSION }}`
-                      - Pull URL: ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
+                      - Pull URL: `ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}`
                       - Branch: `${{ github.ref_name }}`
                       - Triggered By: ${{ github.actor }}
 
@@ -632,7 +632,7 @@ jobs:
                       - Workflow: `${{ github.workflow }} (#${{github.run_number}})`
                       - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
                       - Version: `${{ env.IMAGE_VERSION }}`
-                      - Pull URL: ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
+                      - Pull URL: `ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}`
                       - Branch: `${{ github.ref_name }}`
                       - Triggered By: ${{ github.actor }}
 
