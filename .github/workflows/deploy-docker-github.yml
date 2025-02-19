@@ -399,21 +399,21 @@ jobs:
                   username: 'Io'
                   avatar-url: 'https://i.imgur.com/8BVDkla.jpg'
                   webhook-url: ${{ secrets.DISCORD_WEBHOOK_CHAN_DOCKER_BASE_ALPINE_RELEASES }}
-                  embed-title: "**Github Workflow Ran**"
+                  embed-title: "📦 **Deploy › Docker › Github Workflow Ran**"
                   embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   embed-thumbnail-url: 'https://i.imgur.com/zDIzE8T.jpg'
                   embed-description: |
-                      ## 📦 Docker Deployment  ${{ job.status == 'success' && '✅' || '❌' }}  `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
+                      ## 📦 Docker › Deploy  ${{ job.status == 'success' && '✅' || '❌' }} › `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
 
                       A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github. The image is available at:
                       - https://github.com/${{ github.repository }}/pkgs/container/${{ env.IMAGE_NAME }}
 
-                      - Workflow: `${{ github.workflow }} (#${{github.run_number}})`
                       - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
                       - Version: `${{ env.IMAGE_VERSION }}`
-                      - Pull URL: `ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}`
+                      - Pull URL: https://ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
                       - Branch: `${{ github.ref_name }}`
-                      - Triggered By: ${{ github.actor }}
+                      - Workflow: `${{ github.workflow }} (#${{github.run_number}})`
+                      - Triggered By: `${{ github.actor }}`
 
                       ### Tags
                       -# This docker image will use the following tags:
@@ -428,10 +428,10 @@ jobs:
                       ```
                       ${{ steps.task_release_gh_meta.outputs.labels }}
                       ```
-                  embed-color: ${{ env.STATUS == 'success' && '3066993' || '15158332' }}
+                  embed-color: ${{ job.status == 'success' && '5763719' || '15418782' }}
                   embed-footer-text: "Completed at ${{ env.NOW }} UTC"
-                  embed-timestamp: "${{ steps.task_release_set_timestamp.outputs.NOW_LONG }}"
-                  embed-author-name: "${{steps.embed.outputs.EMBED_AUTHOR_NAME}}"
+                  embed-timestamp: "${{ env.NOW_LONG }}"
+                  embed-author-name: "${{ github.event.release.author.name }}"
                   embed-author-url: "${{ github.event.release.author.html_url }}"
                   embed-author-icon-url: "${{ github.event.release.author.avatar_url }}"
 
@@ -459,8 +459,8 @@ jobs:
               id: task_release_set_timestamp
               run: |
                   echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
-                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_OUTPUT
-                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_OUTPUT
+                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_ENV
+                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_ENV
                   echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
             # #
@@ -636,21 +636,21 @@ jobs:
                   username: 'Io'
                   avatar-url: 'https://i.imgur.com/8BVDkla.jpg'
                   webhook-url: ${{ secrets.DISCORD_WEBHOOK_CHAN_DOCKER_BASE_ALPINE_RELEASES }}
-                  embed-title: "**Github Workflow Ran**"
+                  embed-title: "📦 **Deploy › Docker › Github Workflow Ran**"
                   embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   embed-thumbnail-url: 'https://i.imgur.com/zDIzE8T.jpg'
                   embed-description: |
-                      ## 📦 Docker Deployment  ${{ job.status == 'success' && '✅' || '❌' }}  `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
+                      ## 📦 Docker › Deploy  ${{ job.status == 'success' && '✅' || '❌' }} › `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
 
                       A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github. The image is available at:
                       - https://github.com/${{ github.repository }}/pkgs/container/${{ env.IMAGE_NAME }}
 
-                      - Workflow: `${{ github.workflow }} (#${{github.run_number}})`
                       - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}`
                       - Version: `${{ env.IMAGE_VERSION }}`
-                      - Pull URL: `ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}`
+                      - Pull URL: https://ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
                       - Branch: `${{ github.ref_name }}`
-                      - Triggered By: ${{ github.actor }}
+                      - Workflow: `${{ github.workflow }} (#${{github.run_number}})`
+                      - Triggered By: `${{ github.actor }}`
 
                       ### Tags
                       -# This docker image will use the following tags:
@@ -665,9 +665,9 @@ jobs:
                       ```
                       ${{ steps.task_release_gh_meta.outputs.labels }}
                       ```
-                  embed-color: ${{ env.STATUS == 'success' && '3066993' || '15158332' }}
+                  embed-color: ${{ job.status == 'success' && '5763719' || '15418782' }}
                   embed-footer-text: "Completed at ${{ env.NOW }} UTC"
-                  embed-timestamp: "${{ steps.task_release_set_timestamp.outputs.NOW_LONG }}"
-                  embed-author-name: "${{steps.embed.outputs.EMBED_AUTHOR_NAME}}"
+                  embed-timestamp: "${{ env.NOW_LONG }}"
+                  embed-author-name: "${{ github.event.release.author.name }}"
                   embed-author-url: "${{ github.event.release.author.html_url }}"
                   embed-author-icon-url: "${{ github.event.release.author.avatar_url }}"
