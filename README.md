@@ -35,7 +35,10 @@ This branch `docker/base-alpine` contains the base docker alpine image which is 
 - [Build `TvApp` Image](#build-tvapp-image)
   - [amd64](#amd64-1)
   - [arm64 / aarch64](#arm64--aarch64-1)
-  - [hub.docker.com / ghcr.io / local](#hubdockercom--ghcrio--local)
+  - [Using docker buildx](#using-docker-buildx)
+    - [Save Local Image](#save-local-image)
+    - [Upload to Registry](#upload-to-registry)
+  - [Upload to hub.docker.com / ghcr.io / local](#upload-to-hubdockercom--ghcrio--local)
   - [Image Tags](#image-tags)
 - [Using TvApp Image](#using-tvapp-image)
   - [docker run](#docker-run)
@@ -276,7 +279,7 @@ GRAPH_ALPINE --> obj_step20 --> obj_step21 --> obj_step22 --> obj_step23 --> obj
 
 <br />
 
-Once the base alpine image is built, you can now build the actual docker version of your app (such as [iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)).
+Once the base alpine image is built, you can now build the actual docker version of your app (such as [iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2).
 
 <br />
 
@@ -325,7 +328,56 @@ docker build --build-arg VERSION=1.0.0 --build-arg BUILD_DATE=20250218 -t thetva
 
 <br />
 
-### hub.docker.com / ghcr.io / local
+### Using docker buildx
+This section explains how to build your applications's docker image using `docker buildx` instead of `docker build`. It is useful when generating your app's image for multiple platforms.
+
+<br />
+
+All of the needed Docker files already exist in the repository. To get started, clone the repo to a folder
+```shell ignore
+mkdir docker-alpine-base && cd docker-alpine-base
+git clone https://github.com/Aetherinox/docker-base-alpine.git ./
+```
+
+<br />
+
+Once the image files are downloaded, create a new container for **buildx**
+
+```shell ignore
+docker buildx create --driver docker-container --name container --bootstrap --use
+```
+
+<br />
+
+**Optional**:  If you first need to remove the container because you created it previously, run the command:
+
+```shell ignore
+docker buildx rm container
+```
+
+<br />
+
+Next, create your new docker image. The command below will push the image if you are signed into hub.docker.com
+
+#### Save Local Image
+The command below will save a local copy of your application's docker image, which can be immediately used, or seen using `docker ps`
+
+```shell
+docker buildx build --no-cache --pull --build-arg VERSION=1.0.0 --build-arg BUILD_DATE=02-18-25 -t thetvapp:latest -t thetvapp:1.0.0 --platform=linux/amd64 --output type=docker --output type=docker .
+```
+
+<br />
+
+#### Upload to Registry
+The command below will push your application's new docker image to a registry.
+
+```shell
+docker buildx build --no-cache --pull --build-arg VERSION=1.0.0 --build-arg BUILD_DATE=02-18-25 -t thetvapp:latest -t thetvapp:1.0.0 --platform=linux/amd64 --provenance=true --sbom=true --builder=container --push .
+```
+
+<br />
+
+### Upload to hub.docker.com / ghcr.io / local
 After you have your **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)** image built, you can either upload the image to a public repository such as:
 
 - hub.docker.com (Docker Hub)
