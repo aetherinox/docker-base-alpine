@@ -373,7 +373,53 @@ docker buildx build --no-cache --pull --build-arg VERSION=1.0.0 --build-arg BUIL
 <br />
 
 #### Upload to Registry
-The command below will push your application's new docker image to a registry.
+The command below will push your application's new docker image to a registry. Before you can push the image, ensure you are signed into Docker CLI. Open your Linux terminal and see if you are already signed in:
+
+```shell ignore
+docker info | grep Username
+```
+
+<br />
+
+If nothing is printed; then you are not signed in. Initiate the web login:
+
+```shell ignore
+docker login
+```
+
+<br />
+
+Some text will appear on-screen, copy the code, open your browser, and go to https://login.docker.com/activate
+
+```console
+USING WEB BASED LOGIN
+To sign in with credentials on the command line, use 'docker login -u <username>'
+
+Your one-time device confirmation code is: XXXX-XXXX
+Press ENTER to open your browser or submit your device code here: https://login.docker.com/activate
+
+Waiting for authentication in the browser…
+```
+
+<br />
+
+Once you are finished in your browser, you can return to your Linux terminal, and it should bring you back to where you can type a command. You can now verify again if you are signed in:
+
+```shell ignore
+docker info | grep Username
+```
+
+You should see:
+
+```console
+ Username: YourUsername
+```
+
+<br />
+
+Now you are ready to build your application's docker image, run the command:
+
+<br />
 
 ```shell
 docker buildx build --no-cache --pull --build-arg VERSION=1.0.0 --build-arg BUILD_DATE=02-18-25 -t thetvapp:latest -t thetvapp:1.0.0 --platform=linux/amd64 --provenance=true --sbom=true --builder=container --push .
