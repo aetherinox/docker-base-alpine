@@ -405,7 +405,6 @@ jobs:
                       - Version: `${{ env.IMAGE_VERSION }}`
                       - Pull URL: ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
                       - Branch: `${{ github.ref_name }}`
-                      - Commit: `${{ github.event.head_commit.message }}`
                       - Triggered By: ${{ github.actor }}
 
                       ### Tags
@@ -635,7 +634,6 @@ jobs:
                       - Version: `${{ env.IMAGE_VERSION }}`
                       - Pull URL: ghcr.io/${{ env.IMAGE_AUTHOR }}/${{ env.IMAGE_NAME }}
                       - Branch: `${{ github.ref_name }}`
-                      - Commit: `${{ github.event.head_commit.message }}`
                       - Triggered By: ${{ github.actor }}
 
                       ### Tags
