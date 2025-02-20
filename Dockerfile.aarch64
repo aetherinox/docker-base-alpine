@@ -49,7 +49,7 @@ RUN \
 # #
 #   Set version for s6 overlay
 # #
-  
+
 ARG S6_OVERLAY_VERSION="3.1.6.2"
 ARG S6_OVERLAY_ARCH="aarch64"
 
@@ -77,13 +77,13 @@ RUN tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-arch.tar.xz
 
 FROM scratch
 COPY --from=rootfs-stage /root-out/ /
-ARG BUILD_DATE
+ARG BUILDDATE
 ARG VERSION
 ARG MODS_VERSION="v3"
 ARG PKG_INST_VERSION="v1"
 ARG AETHERXOWN_VERSION="v1"
 ARG WITHCONTENV_VERSION="v1"
-LABEL build_version="Version:- ${VERSION} Build-date:- ${BUILD_DATE}"
+LABEL build_version="Version:- ${VERSION} Build-date:- ${BUILDDATE}"
 LABEL maintainer="Aetherinox"
 
 # #

@@ -4,7 +4,7 @@
 
 <br />
 
-This branch `docker/base-alpine` contains the base docker alpine image which is utilized as a base for creating other images such as [TheTvApp](https://git.binaryninja.net/pub_projects/tvapp2). This alpine image is what you will derive your app's Dockerfile from.
+This branch `docker/base-alpine` contains the base docker alpine image which is utilized as a base for creating other images such as [TVApp2](https://git.binaryninja.net/pub_projects/tvapp2). This alpine image is what you will derive your app's Dockerfile from.
 
  Normal users should not need to modify the files in this repository.
  
@@ -64,7 +64,7 @@ This branch `docker/alpine-base` does **NOT** contain any applications. For our 
 
 <br />
 
-To build a docker image using this base and the actual app you want to release (TheTVApp), you need two different docker images:
+To build a docker image using this base and the actual app you want to release (TVApp2), you need two different docker images:
 - **Step 1**: Build **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image **(this repo)**
   - When being build, the alpine-base `Dockerfile` will grab and install the files from the branch **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)**
 - **Step 2**: Build **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)** image
@@ -209,7 +209,7 @@ Once cloned, you can now make whatever adjustments you deem fit. Once your edits
 
 ```shell ignore
 # Build alpine-base amd64
-docker build --build-arg VERSION=3.20 --build-arg BUILD_DATE=20250218 -t alpine-base:latest -t alpine-base:3.20-amd64 -f Dockerfile .
+docker build --build-arg VERSION=3.20 --build-arg BUILDDATE=20250220 -t alpine-base:latest -t alpine-base:3.20-amd64 -f Dockerfile .
 ```
 
 <br />
@@ -218,7 +218,7 @@ docker build --build-arg VERSION=3.20 --build-arg BUILD_DATE=20250218 -t alpine-
 
 ```shell
 # Build alpine-base arm64
-docker build --build-arg VERSION=3.20 --build-arg BUILD_DATE=20250218 -t alpine-base:3.20-arm64 -f Dockerfile.aarch64 .
+docker build --build-arg VERSION=3.20 --build-arg BUILDDATE=20250220 -t alpine-base:3.20-arm64 -f Dockerfile.aarch64 .
 ```
 
 <br />
@@ -229,19 +229,19 @@ The flow of the process is outlined below:
 %%{init: { 'themeVariables': { 'fontSize': '10px' }}}%%
 flowchart TB
 
-subgraph GRAPH_TVAPP ["Build thetvapp:latest"]
+subgraph GRAPH_TVAPP ["Build tvapp2:latest"]
     direction TB
     obj_step10["`&gt; git clone git.binaryninja.net/pub_projects/tvapp2.git`"]
     obj_step11["`**Dockerfile
      Dockerfile.aarch64**`"]
     obj_step12["`&gt; docker build &bsol;
     --build-arg VERSION=1.0.0 &bsol;
-    --build-arg BUILD_DATE=20250218 &bsol;
+    --build-arg BUILDDATE=20250220 &bsol;
     -t tvapp:latest &bsol;
     -t tvapp:1.0.0-amd64 &bsol;
     -f Dockerfile . &bsol;`"]
     obj_step13["`Download **alpine-base** from branch **docker/alpine-base**`"]
-    obj_step14["`New Image: **thetvapp:latest**`"]
+    obj_step14["`New Image: **tvapp2:latest**`"]
 
     style obj_step10 text-align:center,stroke-width:1px,stroke:#555
     style obj_step11 text-align:left,stroke-width:1px,stroke:#555
@@ -258,7 +258,7 @@ direction TB
      Dockerfile.aarch64**`"]
     obj_step22["`&gt; docker build &bsol;
     --build-arg VERSION=3.20 &bsol;
-    --build-arg BUILD_DATE=20250218 &bsol;
+    --build-arg BUILDDATE=20250220 &bsol;
     -t docker-alpine-base:latest &bsol;
     -t docker-alpine-base:3.20-amd64 &bsol;
     -f Dockerfile . &bsol;`"]
@@ -314,7 +314,7 @@ For the argument `VERSION`; specify the current release of your app ([iflip721/t
 
 ```shell
 # Build tvapp amd64
-docker build --build-arg VERSION=1.0.0 --build-arg BUILD_DATE=20250218 -t thetvapp:latest -t thetvapp:1.0.0 -t thetvapp:1.0.0-amd64 -f Dockerfile .
+docker build --build-arg VERSION=1.0.0 --build-arg BUILDDATE=20250220 -t tvapp2:latest -t tvapp2:1.0.0 -t tvapp2:1.0.0-amd64 -f Dockerfile .
 ```
 
 <br />
@@ -323,7 +323,7 @@ docker build --build-arg VERSION=1.0.0 --build-arg BUILD_DATE=20250218 -t thetva
 
 ```shell
 # Build tvapp arm64
-docker build --build-arg VERSION=1.0.0 --build-arg BUILD_DATE=20250218 -t thetvapp:1.0.0-arm64 -f Dockerfile.aarch64 .
+docker build --build-arg VERSION=1.0.0 --build-arg BUILDDATE=20250220 -t tvapp2:1.0.0-arm64 -f Dockerfile.aarch64 .
 ```
 
 <br />
@@ -367,7 +367,7 @@ Next, create your new docker image. Two different commands are provided below:
 The command below will save a local copy of your application's docker image, which can be immediately used, or seen using `docker ps`
 
 ```shell
-docker buildx build --no-cache --pull --build-arg VERSION=1.0.0 --build-arg BUILD_DATE=02-18-25 -t thetvapp:latest -t thetvapp:1.0.0 --platform=linux/amd64 --output type=docker --output type=docker .
+docker buildx build --no-cache --pull --build-arg VERSION=1.0.0 --build-arg BUILDDATE=02-18-25 -t tvapp2:latest -t tvapp2:1.0.0 --platform=linux/amd64 --output type=docker --output type=docker .
 ```
 
 <br />
@@ -420,7 +420,7 @@ You should see:
 Now you are ready to build your application's docker image, run the command:
 
 ```shell
-docker buildx build --no-cache --pull --build-arg VERSION=1.0.0 --build-arg BUILD_DATE=02-18-25 -t thetvapp:latest -t thetvapp:1.0.0 --platform=linux/amd64 --provenance=true --sbom=true --builder=container --push .
+docker buildx build --no-cache --pull --build-arg VERSION=1.0.0 --build-arg BUILDDATE=02-18-25 -t tvapp2:latest -t tvapp2:1.0.0 --platform=linux/amd64 --provenance=true --sbom=true --builder=container --push .
 ```
 
 <br />
@@ -440,8 +440,8 @@ When building your images with the commands provided above, ensure you create tw
 
 | Architecture | Dockerfile | Tags |
 | --- | --- | --- |
-| `amd64` | `Dockerfile` | `thetvapp:latest` <br /> `thetvapp:1.0.0` <br /> `thetvapp:1.0.0-amd64` |
-| `arm64` | `Dockerfile.aarch64` | `thetvapp:1.0.0-arm64` |
+| `amd64` | `Dockerfile` | `tvapp2:latest` <br /> `tvapp2:1.0.0` <br /> `tvapp2:1.0.0-amd64` |
+| `arm64` | `Dockerfile.aarch64` | `tvapp2:1.0.0-arm64` |
 
 <br />
 

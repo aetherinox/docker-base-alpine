@@ -339,7 +339,7 @@ jobs:
                       latest=false
                   labels: |
                       org.opencontainers.image.VERSION=${{ env.IMAGE_VERSION }}
-                      org.opencontainers.image.BUILD_DATE=${{ env.NOW_DOCKER_LABEL }}
+                      org.opencontainers.image.BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
                       org.opencontainers.image.licenses=MIT
                       org.opencontainers.image.revision=${{ github.sha }}
                       org.opencontainers.image.vendor=${{ env.IMAGE_AUTHOR }}
@@ -576,7 +576,7 @@ jobs:
                       latest=${{ !inputs.DEV_RELEASE }}
                   labels: |
                       org.opencontainers.image.VERSION=${{ env.IMAGE_VERSION }}
-                      org.opencontainers.image.BUILD_DATE=${{ env.NOW_DOCKER_LABEL }}
+                      org.opencontainers.image.BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
                       org.opencontainers.image.licenses=MIT
                       org.opencontainers.image.revision=${{ github.sha }}
                       org.opencontainers.image.vendor=${{ env.IMAGE_AUTHOR }}
