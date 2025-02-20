@@ -4,9 +4,10 @@
 #   @url                https://github.com/Aetherinox
 #   @usage              deploys docker container to github
 #                       upload this workflow to both the `main` branch and the `alpine-base` branch. you can activate the workflow in the actions tab
-#   @secrets            secrets.ADMINSERV_GPG_KEY_ASC                   gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
-#                       secrets.ADMINSERV_GPG_PASSPHRASE                gpg private key passphrase
-#                       secrets.IMAGE_GHCR_TOKEN                        github personal access token (classic) with package:write permission
+#   @secrets            secrets.ADMINSERV_GPG_KEY_ASC                               gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
+#                       secrets.ADMINSERV_GPG_PASSPHRASE                            gpg private key passphrase
+#                       secrets.IMAGE_GHCR_TOKEN                                    github personal access token (classic) with package:write permission
+#                       secrets.DISCORD_WEBHOOK_CHAN_DOCKER_BASE_ALPINE_RELEASES    discord webhook to report releases from github to discord
 # #
 
 name: "📦 Deploy › Docker › Github"
@@ -222,8 +223,8 @@ jobs:
               id: task_release_set_timestamp
               run: |
                   echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
-                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_OUTPUT
-                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_OUTPUT
+                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_ENV
+                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_ENV
                   echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
             # #
