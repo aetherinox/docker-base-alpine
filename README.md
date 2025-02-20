@@ -4,7 +4,7 @@
 
 <br />
 
-This branch `docker/base-alpine` contains the base docker alpine image which is utilized as a base for creating other images such as [TVApp2](https://git.binaryninja.net/pub_projects/tvapp2). This alpine image is what you will derive your app's Dockerfile from.
+This branch `docker/base-alpine` contains the base docker alpine image which is utilized as a base for creating other images such as **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)**. This alpine image is what you will derive your app's Dockerfile from.
 
  Normal users should not need to modify the files in this repository.
  
@@ -60,14 +60,14 @@ This branch `docker/base-alpine` contains the base docker alpine image which is 
 ## About
 The files contained within this branch `docker/alpine-base` are utilized as a foundation. This base image only provides us with a docker image which has alpine linux, Nginx, a few critical packages, and the **[s6-overlay](https://github.com/just-containers/s6-overlay)** plugin.
 
-This branch `docker/alpine-base` does **NOT** contain any applications. For our example, we will use the application **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)**.
+This branch `docker/alpine-base` does **NOT** contain any applications. For our example, we will use the application **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)**.
 
 <br />
 
 To build a docker image using this base and the actual app you want to release (TVApp2), you need two different docker images:
 - **Step 1**: Build **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image **(this repo)**
   - When being build, the alpine-base `Dockerfile` will grab and install the files from the branch **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)**
-- **Step 2**: Build **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)** image
+- **Step 2**: Build **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)** image
 - **Step 3**: Release the docker image built from **Step 2** to Github's **Ghcr.io** or **hub.docker.com**
 
 <br />
@@ -99,7 +99,7 @@ For this reason, there are a few requirements you can read about below in the se
 
 ## Before Building
 
-Prior to building the ****[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)**** and **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)** docker images, you **must** ensure the following conditions are met. If the below tasks are not performed, your docker container will throw the following errors when started:
+Prior to building the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)** docker images, you **must** ensure the following conditions are met. If the below tasks are not performed, your docker container will throw the following errors when started:
 
 - `Failed to open apk database: Permission denied`
 - `s6-rc: warning: unable to start service init-adduser: command exited 127`
@@ -113,7 +113,7 @@ Prior to building the ****[docker/alpine-base](https://github.com/Aetherinox/doc
 
 You cannot utilize Windows' `Carriage Return Line Feed`. All files must be converted to Unix' `Line Feed`.  This can be done with **[Visual Studio Code](https://code.visualstudio.com/)**. OR; you can run the Linux terminal command `dos2unix` to convert these files.
 
-For the branches **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)**, you can use the following recursive commands:
+For the branches **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)**, you can use the following recursive commands:
 
 <br />
 
@@ -148,7 +148,7 @@ dos2unix with-contenv.v1
 ### Set `+x / 0755` Permissions
 The files contained within this repo **MUST** have `chmod 755` /  `+x` executable permissions. If you are using our Github workflow sample **[deploy-docker-github.yml](https://github.com/Aetherinox/docker-base-alpine/blob/workflows/samples/deploy-docker-github.yml)**, this is done automatically. If you are building the images manually; you need to do this. Ensure those files have the correct permissions prior to building the Alpine base docker image.
 
-If you are building the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** or **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)** images, you must ensure the files in those branches have the proper permissions. All of the executable files are named `run`:
+If you are building the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** or **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)** images, you must ensure the files in those branches have the proper permissions. All of the executable files are named `run`:
 
 ```shell
 find ./ -name 'run' -exec chmod +x {} \;
@@ -231,14 +231,14 @@ flowchart TB
 
 subgraph GRAPH_TVAPP ["Build tvapp2:latest"]
     direction TB
-    obj_step10["`&gt; git clone git.binaryninja.net/pub_projects/tvapp2.git`"]
+    obj_step10["`&gt; git clone github.com/Aetherinox/tvapp2.git`"]
     obj_step11["`**Dockerfile
      Dockerfile.aarch64**`"]
     obj_step12["`&gt; docker build &bsol;
     --build-arg VERSION=1.0.0 &bsol;
     --build-arg BUILDDATE=20250220 &bsol;
-    -t tvapp:latest &bsol;
-    -t tvapp:1.0.0-amd64 &bsol;
+    -t tvapp2:latest &bsol;
+    -t tvapp2:1.0.0-amd64 &bsol;
     -f Dockerfile . &bsol;`"]
     obj_step13["`Download **alpine-base** from branch **docker/alpine-base**`"]
     obj_step14["`New Image: **tvapp2:latest**`"]
@@ -279,7 +279,7 @@ GRAPH_ALPINE --> obj_step20 --> obj_step21 --> obj_step22 --> obj_step23 --> obj
 
 <br />
 
-Once the base alpine image is built, you can now build the actual docker version of your app (such as [iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2).
+Once the base alpine image is built, you can now build the actual docker version of your app (such as **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)**.
 
 <br />
 
@@ -289,31 +289,31 @@ Once the base alpine image is built, you can now build the actual docker version
 
 ## Build `TvApp` Image
 
-After the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image is built, you can now use that docker image as a base to build the **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)** image. Navigate to the repo and open the files:
+After the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image is built, you can now use that docker image as a base to build the **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)** image. Navigate to the repo and open the files:
 
 - `Dockerfile`
 - `Dockerfile.aarch64`
 
 <br />
 
-Next, specify the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image which will be used as the foundation of the **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)** image:
+Next, specify the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image which will be used as the foundation of the **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)** image:
 
 ```dockerfile
 FROM ghcr.io/Aetherinox/alpine-base:3.20-amd64
 ```
 
-After you have completed configuring the **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)** `Dockerfile`, you can now build the image. Remember to build an image for both `amd64` and `aarch64`.
+After you have completed configuring the **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)** `Dockerfile`, you can now build the image. Remember to build an image for both `amd64` and `aarch64`.
 
 <br />
 
-For the argument `VERSION`; specify the current release of your app ([iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)) which will be contained within the docker image. It should be in the format of `YYYYMMDD`:
+For the argument `VERSION`; specify the current release of your app (**[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)**) which will be contained within the docker image. It should be in the format of `YYYYMMDD`:
 
 <br />
 
 ### amd64
 
 ```shell
-# Build tvapp amd64
+# Build tvapp2 amd64
 docker build --build-arg VERSION=1.0.0 --build-arg BUILDDATE=20250220 -t tvapp2:latest -t tvapp2:1.0.0 -t tvapp2:1.0.0-amd64 -f Dockerfile .
 ```
 
@@ -322,7 +322,7 @@ docker build --build-arg VERSION=1.0.0 --build-arg BUILDDATE=20250220 -t tvapp2:
 ### arm64 / aarch64
 
 ```shell
-# Build tvapp arm64
+# Build tvapp2 arm64
 docker build --build-arg VERSION=1.0.0 --build-arg BUILDDATE=20250220 -t tvapp2:1.0.0-arm64 -f Dockerfile.aarch64 .
 ```
 
@@ -426,12 +426,12 @@ docker buildx build --no-cache --pull --build-arg VERSION=1.0.0 --build-arg BUIL
 <br />
 
 ### Upload to hub.docker.com / ghcr.io / local
-After you have your **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)** image built, you can either upload the image to a public repository such as:
+After you have your **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)** image built, you can either upload the image to a public repository such as:
 
 - hub.docker.com (Docker Hub)
 - ghcr.io (Github)
 
-After it is uploaded, you can use the `docker run` command, or create a `docker-compose.yml`, and call the docker image to be used.  This is discussed in the section **[Using TvApp Image](#using-tvapp-image)** below.
+After it is uploaded, you can use the `docker run` command, or create a `docker-compose.yml`, and call the docker image to be used.  This is discussed in the section **[Using TVApp2 Image](#using-tvapp-image)** below.
 
 <br />
 
@@ -455,7 +455,7 @@ the `amd64` arch gets a few extra tags because it should be the default image pe
 
 ## Using TvApp Image
 
-To use the new **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)** image, you can either call it with the `docker run` command, or create a new `docker-compose.yml` and specify the image:
+To use the new **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)** image, you can either call it with the `docker run` command, or create a new `docker-compose.yml` and specify the image:
 
 <br />
 
@@ -464,7 +464,7 @@ To use the new **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvap
 If you want to use your new program docker image in the `docker run` command, execute the following:
 
 ```shell
-docker run -d --restart=unless-stopped -p 443:443 --name tvapp -v ${PWD}/tvapp:/config ghcr.io/iflip721/tvapp:latest
+docker run -d --restart=unless-stopped -p 4124:4124 --name tvapp2 -v ${PWD}/tvapp2:/config ghcr.io/aetherinox/tvapp2:latest
 ```
 
 <br />
@@ -474,24 +474,25 @@ docker run -d --restart=unless-stopped -p 443:443 --name tvapp -v ${PWD}/tvapp:/
 If you'd much rather use a `docker-compose.yml` file and call your application image that way, create a new folder somewhere:
 
 ```shell
-mkdir -p /home/docker/tvapp
+mkdir -p /home/docker/tvapp2
 ```
 
 Then create a new `docker-compose.yml` file and add the following:
 
 ```shell
-sudo nano /home/docker/tvapp/docker-compose.yml
+sudo nano /home/docker/tvapp2/docker-compose.yml
 ```
 
 ```yml
 services:
-    tvapp:
-        container_name: tvapp
-        image: ghcr.io/iflip721/tvapp:latest        # Github image
-      # image: iflip721/tvapp:latest                # Dockerhub image
+    tvapp2:
+        container_name: tvapp2
+        image: ghcr.io/Aetherinox/tvapp2:latest         # Github image hosted by Aetherinox
+      # image: ghcr.io/iflip721/tvapp2:latest           # Github image hosted by iflip721
+      # image: iflip721/tvapp2:latest                   # Dockerhub image
         restart: unless-stopped
         volumes:
-            - ./tvapp:/config
+            - ./tvapp2:/config
         environment:
             - PUID=1000
             - PGID=1000
@@ -503,7 +504,7 @@ services:
 Once the `docker-compose.yml` is set up, you can now start your application container:
 
 ```shell
-cd /home/docker/tvapp/
+cd /home/docker/tvapp2/
 docker compose up -d
 ```
 
@@ -512,8 +513,8 @@ docker compose up -d
 Your app (such as TvApp) should now be running as a container. You can access it by opening your browser and going to:
 
 ```shell
-http://container-ip
-https://container-ip
+http://container-ip:4124
+https://container-ip:4124
 ```
 
 <br />
@@ -524,13 +525,13 @@ https://container-ip
 
 ## Extra Notes
 
-The following are other things to take into consideration when creating the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)** images:
+The following are other things to take into consideration when creating the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)** images:
 
 <br />
 
 ### Custom Scripts
 
-The `docker/alpine-base` and `tvapp` images support the ability of adding custom scripts that will be ran when the container is started. To create / add a new custom script to the container, you need to create a new folder in the container source files `/root` folder
+The `docker/alpine-base` and `TVApp2` images support the ability of adding custom scripts that will be ran when the container is started. To create / add a new custom script to the container, you need to create a new folder in the container source files `/root` folder
 
 ```shell
 mkdir -p /root/custom-cont-init.d/
@@ -559,9 +560,9 @@ When you create the docker image, this new script will automatically be loaded. 
 
 ```yml
 services:
-    tvapp:
+    tvapp2:
         volumes:
-            - ./tvapp:/config
+            - ./tvapp2:/config
             - ./custom-scripts:/custom-cont-init.d:ro
 ```
 
@@ -575,7 +576,7 @@ services:
 
 <br />
 
-The **[iflip721/tvapp2](https://git.binaryninja.net/pub_projects/tvapp2)** image already contains a custom script called `/root/custom-cont-init.d/plugins`. Do **NOT** edit this script. It is what automatically downloads the official application plugins and adds them to the container.
+The **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)** image already contains a custom script called `/root/custom-cont-init.d/plugins`. Do **NOT** edit this script. It is what automatically downloads the official application plugins and adds them to the container.
 
 <br />
 <br />
@@ -590,18 +591,19 @@ You may opt to either use the generated self-signed certificate, or you can add 
 
 ```yml
 services:
-    tvapp:
-        container_name: tvapp
-        image: ghcr.io/iflip721/tvapp:latest        # Github image
-      # image: iflip721/tvapp:latest                # Dockerhub image
+    tvapp2:
+        container_name: tvapp2
+        image: ghcr.io/Aetherinox/tvapp2:latest         # Github image hosted by Aetherinox
+      # image: ghcr.io/iflip721/tvapp2:latest           # Github image hosted by iflip721
+      # image: iflip721/tvapp2:latest                   # Dockerhub image
         restart: unless-stopped
         volumes:
-            - ./tvapp:/config
+            - ./tvapp2:/config
 ```
 
 <br />
 
-Then navigate to the newly mounted folder and add your `📄 cert.crt` and `🔑 cert.key` files to the `📁 /tvapp/keys/*` folder.
+Then navigate to the newly mounted folder and add your `📄 cert.crt` and `🔑 cert.key` files to the `📁 /tvapp2/keys/*` folder.
 
 <br />
 
@@ -618,7 +620,7 @@ Then navigate to the newly mounted folder and add your `📄 cert.crt` and `🔑
 You can access the docker container's shell by running:
 
 ```shell
-docker exec -it tvapp ash
+docker exec -it tvapp2 ash
 ```
 
 <br />
@@ -652,8 +654,8 @@ This image spits out detailed information about its current progress. You can ei
  SSL          : Using existing keys found in /config/keys
  Loader       : Custom files found, loading them ...
  Loader       : Executing ...
- Loader       : Checking tvapp-plugins
- Loader       : tvapp-plugins already installed in /config/www/plugins; skipping
+ Loader       : Checking tvapp2-plugins
+ Loader       : tvapp2-plugins already installed in /config/www/plugins; skipping
  Loader       : plugins: Exited 0
  Core         : Completed loading container
 ```
