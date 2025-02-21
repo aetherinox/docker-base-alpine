@@ -83,7 +83,12 @@ ARG MODS_VERSION="v3"
 ARG PKG_INST_VERSION="v1"
 ARG AETHERXOWN_VERSION="v1"
 ARG WITHCONTENV_VERSION="v1"
-LABEL build_version="Version:- ${VERSION} Build-date:- ${BUILDDATE}"
+
+# #
+#   Set Labels
+# #
+
+LABEL BUILDVERSION="Version:- ${VERSION} Date:- ${BUILDDATE}"
 LABEL maintainer="Aetherinox"
 
 # #
