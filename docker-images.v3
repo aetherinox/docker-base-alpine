@@ -95,7 +95,7 @@ process_custom_services() {
     # #
 
     if [[ -n "$(/bin/ls -A /etc/s6-overlay/s6-rc.d/custom-svc-* 2>/dev/null)" ]]; then
-        echo "[custom-init] removing existing custom services..."
+        echo -e " CustomInit   : Removing existing custom services..."
         rm -rf /etc/s6-overlay/s6-rc.d/custom-svc-*
         rm /etc/s6-overlay/s6-rc.d/user/contents.d/custom-svc-*
     fi
@@ -105,24 +105,25 @@ process_custom_services() {
     # #
 
     if [[ -e "${SERVICES_DIR}" ]] && [[ -n "$(/bin/ls -A ${SERVICES_DIR} 2>/dev/null)" ]]; then
-        echo "[custom-init] Service files found in ${SERVICES_DIR}"
+        echo -e " CustomInit   : Service files found in ${SERVICES_DIR}"
+
         for SERVICE in "${SERVICES_DIR}"/*; do
             NAME="$(basename "${SERVICE}")"
             if [[ -f "${SERVICE}" ]]; then
-                echo "[custom-init] ${NAME}: service detected, copying..."
+                echo -e " CustomInit   : Service detected - ${NAME} - copying..."
                 mkdir -p /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/dependencies.d/
                 cp "${SERVICE}" /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/run
                 chmod +x /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/run
                 echo "longrun" >/etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/type
                 touch /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/dependencies.d/init-services
                 touch /etc/s6-overlay/s6-rc.d/user/contents.d/custom-svc-"${NAME}"
-                echo "[custom-init] ${NAME}: copied"
+                echo -e " CustomInit   : Service copied - ${NAME}"
             elif [[ ! -f "${SERVICE}" ]]; then
-                echo "[custom-init] ${NAME}: is not a file"
+                echo -e " CustomInit   : ${NAME} is not a valid service file, skipping"
             fi
         done
     else
-        echo "[custom-init] No custom services found, skipping..."
+        echo -e " CustomInit   : No custom services found, skipping..."
     fi
 }
 
