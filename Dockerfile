@@ -138,6 +138,7 @@ RUN \
   apk add --no-cache \
     alpine-release \
     bash \
+    nano \
     ca-certificates \
     catatonit \
     coreutils \
