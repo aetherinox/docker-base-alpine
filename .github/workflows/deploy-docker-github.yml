@@ -342,9 +342,6 @@ jobs:
                   images: |
                       ghcr.io/${{ env.REGISTRY_REPO_AUTHOR_LC }}/${{ env.IMAGE_NAME }}
                   tags: |
-                      #  latest yes
-                      type=raw,value=latest,enable=${{ !inputs.DEV_RELEASE }}
-
                       #  dispatch       add x1.x.x-amd64
                       type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=300,prefix=,suffix=-amd64,value=${{ env.IMAGE_VERSION }}
 
@@ -357,7 +354,7 @@ jobs:
                       #  add development tag
                       type=raw,enable=${{ inputs.DEV_RELEASE }},priority=400,prefix=,suffix=,value=development
                   flavor: |
-                      latest=${{ !inputs.DEV_RELEASE }}
+                      latest=false
                   labels: |
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
                       org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
