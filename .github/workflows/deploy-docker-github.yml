@@ -426,8 +426,8 @@ jobs:
                   push: ${{ github.event_name != 'pull_request' }}
                   labels: ${{ steps.task_release_gh_meta_amd64.outputs.labels }}
                   tags: |
-                      ${{ steps.task_release_gh_meta_amd64.outputs.tags }}
                       ${{ !inputs.DEV_RELEASE && env.REGISTRY_URL_TAG_LATEST }}
+                      ${{ steps.task_release_gh_meta_amd64.outputs.tags }}
                   provenance: false
                   sbom: false
                   build-args: |-
