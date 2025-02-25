@@ -426,6 +426,30 @@ jobs:
                       BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
 
             # #
+            #   Release › Github › Export Digest › Amd64
+            # #
+
+            - name: '📄 Export Digest (linux/amd64)'
+              run: |
+                  mkdir -p /tmp/build-digest-amd64
+                  digest="${{ steps.task_release_gh_push_amd64.outputs.digest }}"
+                  digest="${digest#sha256:}"
+                  touch "/tmp/build-digest-amd64/$digest"
+              shell: bash
+
+            # #
+            #   Release › Github › Upload Digest › Amd64
+            # #
+
+            - name: '🔼 Upload Digest (linux/amd64)'
+              uses: actions/upload-artifact@v3
+              with:
+                  name: digest-amd64
+                  path: /tmp/build-digest-amd64/*
+                  if-no-files-found: error
+                  retention-days: 10
+
+            # #
             #   Release › Github › Build and Push › Arm64
             # #
 
@@ -447,6 +471,30 @@ jobs:
                       ARCH=arm64
                       VERSION=${{ env.IMAGE_VERSION }}
                       BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
+
+            # #
+            #   Release › Github › Export Digest › Arm64
+            # #
+
+            - name: '📄 Export Digest (linux/Arm64)'
+              run: |
+                  mkdir -p /tmp/build-digest-arm64
+                  digest="${{ steps.task_release_gh_push_arm64.outputs.digest }}"
+                  digest="${digest#sha256:}"
+                  touch "/tmp/build-digest-arm64/$digest"
+              shell: bash
+
+            # #
+            #   Release › Github › Upload Digest › Arm64
+            # #
+
+            - name: '🔼 Upload Digest (linux/arm64)'
+              uses: actions/upload-artifact@v3
+              with:
+                  name: digest-arm64
+                  path: /tmp/build-digest-arm64/*
+                  if-no-files-found: error
+                  retention-days: 10
 
             # #
             #   Release › Github › Checkpoint
