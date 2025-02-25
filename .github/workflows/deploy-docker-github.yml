@@ -418,6 +418,7 @@ jobs:
                   tags: ${{ steps.task_release_gh_meta_amd64.outputs.tags }}
                   labels: ${{ steps.task_release_gh_meta_amd64.outputs.labels }}
                   provenance: false
+                  sbom: false
                   build-args: |-
                       ARCH=amd64
                       VERSION=${{ env.IMAGE_VERSION }}
@@ -439,6 +440,7 @@ jobs:
                   tags: ${{ steps.task_release_gh_meta_arm64.outputs.tags }}
                   labels: ${{ steps.task_release_gh_meta_arm64.outputs.labels }}
                   provenance: false
+                  sbom: false
                   build-args: |-
                       ARCH=arm64
                       VERSION=${{ env.IMAGE_VERSION }}
