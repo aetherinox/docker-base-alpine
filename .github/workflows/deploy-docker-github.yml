@@ -391,7 +391,7 @@ jobs:
                       #  tag            add tag-arm64
                       type=ref,enable=${{ github.event_name == 'pull_request' || github.event_name == 'push' }},priority=600,prefix=,suffix=-arm64,event=tag
                   flavor: |
-                      latest=${{ !inputs.DEV_RELEASE }}
+                      latest=false
                   labels: |
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
                       org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
