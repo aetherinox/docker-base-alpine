@@ -301,14 +301,6 @@ jobs:
                   fi
 
             # #
-            #   Release › Github › QEMU
-            # #
-
-            - name: '⚙️ Set up QEMU'
-              id: task_release_gh_qemu
-              uses: docker/setup-qemu-action@v3
-
-            # #
             #   Release › Github › Setup BuildX
             # #
 
