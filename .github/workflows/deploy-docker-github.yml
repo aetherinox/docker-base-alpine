@@ -442,7 +442,7 @@ jobs:
             # #
 
             - name: '🔼 Upload Digest (linux/amd64)'
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: digest-amd64
                   path: /tmp/build-digest-amd64/*
@@ -489,7 +489,7 @@ jobs:
             # #
 
             - name: '🔼 Upload Digest (linux/arm64)'
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: digest-arm64
                   path: /tmp/build-digest-arm64/*
