@@ -264,6 +264,15 @@ jobs:
                   echo "NOW_DOCKER_TS=$(date -u +'%FT%T.%3NZ')" >> $GITHUB_ENV                                                                                  #  2025-02-25T12:50:11.569Z
 
             # #
+            #   Release › Set › Latest Tag
+            # #
+
+            - name: '🏷️ Set Tag Latest'
+              id: task_release_set_tag_latest
+              run: |
+                  echo "REGISTRY_URL_TAG_LATEST=`echo ghcr.io/${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}:latest | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}     #  aetherinox/docker-base-alpine
+
+            # #
             #   Release › Github › Install Dependencies
             # #
 
@@ -343,7 +352,7 @@ jobs:
                       ghcr.io/${{ env.REGISTRY_REPO_AUTHOR_LC }}/${{ env.IMAGE_NAME }}
                   tags: |
                       #  latest yes
-                      type=raw,value=latest,enable=${{ !inputs.DEV_RELEASE }}
+                      type=raw,value=latest,enable=false
 
                       #  dispatch       add x1.x.x-amd64
                       type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=300,prefix=,suffix=-amd64,value=${{ env.IMAGE_VERSION }}
@@ -415,8 +424,10 @@ jobs:
                   file: Dockerfile
                   platforms: linux/amd64
                   push: ${{ github.event_name != 'pull_request' }}
-                  tags: ${{ steps.task_release_gh_meta_amd64.outputs.tags }}
                   labels: ${{ steps.task_release_gh_meta_amd64.outputs.labels }}
+                  tags: |
+                      ${{ steps.task_release_gh_meta_amd64.outputs.tags }}
+                      ${{ !inputs.DEV_RELEASE && env.REGISTRY_URL_TAG_LATEST }}
                   provenance: false
                   sbom: false
                   build-args: |-
@@ -437,8 +448,9 @@ jobs:
                   file: Dockerfile.aarch64
                   platforms: linux/arm64
                   push: ${{ github.event_name != 'pull_request' }}
-                  tags: ${{ steps.task_release_gh_meta_arm64.outputs.tags }}
                   labels: ${{ steps.task_release_gh_meta_arm64.outputs.labels }}
+                  tags: |
+                      ${{ steps.task_release_gh_meta_arm64.outputs.tags }}
                   provenance: false
                   sbom: false
                   build-args: |-
@@ -481,6 +493,8 @@ jobs:
                   echo "env.DOCKER_IMAGE ......................... ${{ env.DOCKER_IMAGE }}"
                   echo "env.REGISTRY_REPO_ORG_AUTHOR_LC .......... ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}"
                   echo "env.REGISTRY_REPO_AUTHOR_LC .............. ${{ env.REGISTRY_REPO_AUTHOR_LC }}"
+                  echo "env.REGISTRY_URL_TAG_LATEST .............. ${{ env.REGISTRY_URL_TAG_LATEST }}"
+                  echo "                                           ${{ !inputs.DEV_RELEASE && env.REGISTRY_URL_TAG_LATEST }}"
                   echo "env.DOCKER_SHA ........................... ${{ env.DOCKER_SHA }}"
                   echo ""
                   echo "[ DOCKER IMAGES ] --------------------------------------------------------------------------------------"
