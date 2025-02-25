@@ -165,6 +165,20 @@ jobs:
                   fetch-depth: 0
 
             # #
+            #   Release › Tags › Check Branch
+            # #
+
+            - name: '🌲 Check Branch'
+              id: task_release_branch
+              run: |
+                  if [[ ${{ github.ref_name }} != docker/alpine-base ]]; then
+                      echo " ⚠️⚠️⚠️ Workflow triggered in wrong branch. Must target branch docker/alpine-base ⚠️⚠️⚠️"
+                      exit 1
+                  else
+                      echo "✅✅✅ Correct branch selected ✅✅✅"
+                  fi
+
+            # #
             #   Release › Tags › Fix Permissions
             # #
 
@@ -189,7 +203,8 @@ jobs:
             #   only called in dispatch mode
             # #
 
-            - uses: rickstaa/action-create-tag@v1
+            - name: '🏷️ Create Tag'
+              uses: rickstaa/action-create-tag@v1
               id: task_release_tags_create
               if: ( github.event_name != 'workflow_dispatch' && inputs.DRY_RUN == false )
               with:
@@ -200,12 +215,12 @@ jobs:
                   gpg_passphrase: ${{ secrets.ADMINSERV_GPG_PASSPHRASE }}
 
     # #
-    #   Job › Docker Release › Github › Amd64
+    #   Job › Docker Release › Github
     # #
 
-    job-docker-release-github-amd64:
+    job-docker-release-github:
         name: >-
-            📦 Release › Github › Amd64
+            📦 Release › Github
         runs-on: ubuntu-latest
         permissions:
             contents: write
@@ -216,7 +231,7 @@ jobs:
         steps:
 
             # #
-            #   Release › Github › Start › Amd64
+            #   Release › Github › Start
             # #
 
             - name: '🏳️ Start'
@@ -225,7 +240,7 @@ jobs:
                   echo "Starting Github docker release"
 
             # #
-            #   Release › Github › Checkout › Amd64
+            #   Release › Github › Checkout
             # #
 
             - name: '✅ Checkout'
@@ -286,7 +301,7 @@ jobs:
                   fi
 
             # #
-            #   Release › Github › QEMU › Amd64
+            #   Release › Github › QEMU
             # #
 
             - name: '⚙️ Set up QEMU'
@@ -294,7 +309,7 @@ jobs:
               uses: docker/setup-qemu-action@v3
 
             # #
-            #   Release › Github › Setup BuildX › Amd64
+            #   Release › Github › Setup BuildX
             # #
 
             - name: '⚙️ Setup Buildx'
@@ -305,7 +320,7 @@ jobs:
                   driver-opts: 'image=moby/buildkit:latest'
 
             # #
-            #   Release › Github › Registry Login › Amd64
+            #   Release › Github › Registry Login
             # #
 
             - name: '⚙️ Login to Github'
@@ -430,7 +445,7 @@ jobs:
                       BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
 
             # #
-            #   Release › Github › Checkpoint › Amd64
+            #   Release › Github › Checkpoint
             # #
 
             - name: '⚠️ Checkpoint'
