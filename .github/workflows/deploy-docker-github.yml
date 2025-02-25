@@ -499,6 +499,20 @@ jobs:
                   retention-days: 10
 
             # #
+            #   Release › Github › Clean Untagged Images
+            # #
+
+            - name: '🧹 Clean Untagged Images'
+              uses: quartx-analytics/ghcr-cleaner@v1
+              with:
+                  owner-type: user
+                  token: ${{ secrets.IMAGE_GHCR_TOKEN }}
+                  repository-owner: ${{ github.repository_owner }}
+                  repository-name: ${{ github.repository }}
+                  delete-untagged: true
+                # keep-at-most: 0
+
+            # #
             #   Release › Github › Checkpoint
             # #
 
