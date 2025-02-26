@@ -254,8 +254,8 @@ jobs:
             - name: '🕛 Get Timestamp'
               id: task_release_set_timestamp
               run: |
-                  echo "IMAGE_VERSION_1DIGIT=`echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-2" >> ${GITHUB_ENV}                                                #  v3
-                  echo "IMAGE_VERSION_2DIGIT=`echo ${{ env.IMAGE_VERSION }} | cut --complement -c4" >> ${GITHUB_ENV}                                            #  v3.2
+                  echo "IMAGE_VERSION_1DIGIT=`echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-2`" >> ${GITHUB_ENV}                                               #  3
+                  echo "IMAGE_VERSION_2DIGIT=`echo ${{ env.IMAGE_VERSION }} | cut --complement -c4`" >> ${GITHUB_ENV}                                           #  3.2
                   echo "REGISTRY_REPO_ORG_AUTHOR_LC=`echo ${{github.repository}} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}                                #  aetherinox/docker-base-alpine
                   echo "REGISTRY_REPO_AUTHOR_LC=`echo ${{ env.IMAGE_GHCR_AUTHOR }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}                              #  aetherinox
                   echo "DOCKER_SHA=${GITHUB_SHA}" >> $GITHUB_ENV                                                                                                #  71fad013cfce9116ec62779e4a7e627fe4c33627
