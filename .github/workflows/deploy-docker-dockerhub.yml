@@ -2,13 +2,12 @@
 #   @type               github workflow
 #   @author             Aetherinox
 #   @url                https://github.com/Aetherinox
-#   @usage              deploys docker container to github
-#                       upload this workflow to both the `main` branch and the `alpine-base` branch. you can activate the workflow in the actions tab
+#   @usage              deploys docker container to Dockerhub and send message to discord
+#                       upload this workflow to both the `main` branch of the tvapp2 repository
 #   @secrets            secrets.ADMINSERV_GPG_KEY_ASC                               gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
 #                       secrets.ADMINSERV_GPG_PASSPHRASE                            gpg private key passphrase
-#                       secrets.IMAGE_GHCR_TOKEN                                    github personal access token (classic) with package:write permission
-#                       secrets.SELF_DOCKERHUB_TOKEN                                dockerhub token
-#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_BASEALPINE_RELEASES     discord webhook to report releases from github to discord
+#                       secrets.SELF_DOCKERHUB_TOKEN                                github personal access token (classic) with package:write permission
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_BASEALPINE_RELEASES     Discord webhook to report releases from github to discord
 # #
 
 name: "📦 Deploy › Docker › Dockerhub"
@@ -32,8 +31,8 @@ on:
             # #
             #   Image Name
             #
-            #   used in github image path
-            #       ghcr.io/${{ env.IMAGE_DOCKERHUB_AUTHOR }}/${{ env.IMAGE_NAME }}
+            #   used in dockerhub image path
+            #       ${{ env.IMAGE_DOCKERHUB_AUTHOR }}/${{ env.IMAGE_NAME }}
             # #
 
             IMAGE_NAME:
@@ -116,8 +115,8 @@ on:
 
 env:
     IMAGE_NAME:                 ${{ github.event.inputs.IMAGE_NAME || 'alpine-base' }}
-    IMAGE_DOCKERHUB_AUTHOR:     ${{ github.event.inputs.IMAGE_DOCKERHUB_AUTHOR || 'aetherinox' }}
     IMAGE_VERSION:              ${{ github.event.inputs.IMAGE_VERSION || '3.21' }}
+    IMAGE_DOCKERHUB_AUTHOR:     ${{ github.event.inputs.IMAGE_DOCKERHUB_AUTHOR || 'aetherinox' }}
     IMAGE_DOCKERHUB_USERNAME:   ${{ github.event.inputs.IMAGE_DOCKERHUB_USERNAME || 'aetherinox' }}
     BOT_NAME_1:                 EuropaServ
     BOT_NAME_DEPENDABOT:        dependabot[bot]
@@ -125,7 +124,7 @@ env:
 # #
 #   Jobs
 #
-#   The way pushed docker containers on Github work, the most recent image built goes at the top.
+#   The way pushed docker containers on Dockerhub work, the most recent image built goes at the top.
 #   We will use the order below which builds the :latest image last so that it appears at the very
 #   top of the packages page.
 # #
@@ -140,6 +139,8 @@ jobs:
         name: >-
             📦 Release › Create Tag
         runs-on: ubuntu-latest
+      # runs-on: apollo-x64
+        timeout-minutes: 4
         permissions:
             contents: write
             packages: write
@@ -167,20 +168,6 @@ jobs:
                   fetch-depth: 0
 
             # #
-            #   Release › Tags › Check Branch
-            # #
-
-            - name: '🌲 Check Branch'
-              id: task_release_branch
-              run: |
-                  if [[ ${{ github.ref_name }} != docker/alpine-base ]]; then
-                      echo " ⚠️⚠️⚠️ Workflow triggered in wrong branch. Must target branch docker/alpine-base ⚠️⚠️⚠️"
-                      exit 1
-                  else
-                      echo "✅✅✅ Correct branch selected ✅✅✅"
-                  fi
-
-            # #
             #   Release › Tags › Fix Permissions
             # #
 
@@ -205,8 +192,7 @@ jobs:
             #   only called in dispatch mode
             # #
 
-            - name: '🏷️ Create Tag'
-              uses: rickstaa/action-create-tag@v1
+            - uses: rickstaa/action-create-tag@v1
               id: task_release_tags_create
               if: ( github.event_name != 'workflow_dispatch' && inputs.DRY_RUN == false )
               with:
@@ -222,8 +208,10 @@ jobs:
 
     job-docker-release-dockerhub:
         name: >-
-            📦 Release › Dockerhub
+          📦 Release › Dockerhub
         runs-on: ubuntu-latest
+      # runs-on: apollo-x64
+        timeout-minutes: 10
         permissions:
             contents: write
             packages: write
@@ -233,7 +221,7 @@ jobs:
         steps:
 
             # #
-            #   Release › Dockerhub › Start
+            #   Release › Dockerhub › Start › Amd64
             # #
 
             - name: '🏳️ Start'
@@ -242,15 +230,17 @@ jobs:
                   echo "Starting Dockerhub docker release"
 
             # #
-            #   Release › Dockerhub › Checkout
+            #   Release › Dockerhub › Checkout › Amd64
             # #
 
             - name: '✅ Checkout'
-              id: task_release_dh_checkout
+              id: task_release_gh_checkout
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
             # #
-            #   Release › Get Timestamp
+            #   Release › Dockerhub › Get Timestamp
             # #
 
             - name: '🕛 Get Timestamp'
@@ -283,7 +273,9 @@ jobs:
             - name: '🔐 Apply dos2unix'
               id: task_release_dh_dos2unix
               run: |
+                  echo "⚠️⚠️⚠️ Running DOS2UNIX ⚠️⚠️⚠️"
                   find ./ \( -path "./.git" -o -path "./docs" -o -path "./.github" -o -path "*.png" -o -path "*.jpg" \) -prune -o -name '*' -print | xargs dos2unix --
+                  echo "✅✅✅ Completed DOS2UNIX ✅✅✅"
 
             # #
             #   Release › Dockerhub › Fix Permissions
@@ -305,17 +297,15 @@ jobs:
                   fi
 
             # #
-            #   Release › Dockerhub › QEMU
+            #   Release › Dockerhub › QEMU › Amd64
             # #
 
             - name: '⚙️ Set up QEMU'
               id: task_release_dh_qemu
               uses: docker/setup-qemu-action@v3
-              with:
-                  cache-image: false
 
             # #
-            #   Release › Dockerhub › Setup BuildX
+            #   Release › Dockerhub › Setup BuildX › Amd64
             # #
 
             - name: '⚙️ Setup Buildx'
@@ -326,7 +316,7 @@ jobs:
                   driver-opts: 'image=moby/buildkit:latest'
 
             # #
-            #   Release › Dockerhub › Registry Login
+            #   Release › Dockerhub › Registry Login › Amd64
             # #
 
             - name: '⚙️ Login to Dockerhub'
@@ -337,105 +327,14 @@ jobs:
                   password: ${{ secrets.SELF_DOCKERHUB_TOKEN }}
 
             # #
-            #   Release › Dockerhub › Meta › Arm64
+            #   Release › Dockerhub › Meta
+            #
+            #   this version of meta does not need one for amd64 and one for arm64 because both
+            #   platforms are combined into one release, all sharing the same tags
             # #
 
-            - name: '🔨 Dockerhub: Meta - arm64'
-              id: task_release_dh_meta_arm64
-              uses: docker/metadata-action@v5
-              with:
-                  images: |
-                      ${{ env.REGISTRY_REPO_AUTHOR_LC }}/${{ env.IMAGE_NAME }}
-                  tags: |
-                      #  tag            latest = no
-                      type=raw,value=latest,enable=false
-
-                      #  tag            add pr tag-arm64      ( PR or push only )
-                      type=ref,enable=${{ github.event_name == 'pull_request' || github.event_name == 'push' }},priority=600,prefix=,suffix=-arm64,event=tag
-
-                      #  tag            add 1.0.0-arm64       ( dispatch only + no dev )
-                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=500,prefix=,suffix=-arm64,value=${{ env.IMAGE_VERSION }}
-
-                      #  tag            add development-arm64 ( dispatch only + only dev )
-                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == true }},priority=300,prefix=development-,suffix=,value=arm64
-                  flavor: |
-                      latest=false
-                  labels: |
-                      org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
-                      org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
-                      org.opencontainers.image.licenses=MIT
-                      org.opencontainers.image.revision=${{ github.sha }}
-                      org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
-                      org.opencontainers.image.ref.name=${{ github.ref_name }}
-                      org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
-                      org.opencontainers.image.registry=dockerhub
-                      org.tvapp2.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
-                  annotations: |
-                      org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
-                      org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
-                      org.opencontainers.image.licenses=MIT
-                      org.opencontainers.image.revision=${{ github.sha }}
-                      org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
-                      org.opencontainers.image.ref.name=${{ github.ref_name }}
-                      org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
-                      org.opencontainers.image.registry=dockerhub
-                      org.tvapp2.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
-
-            # #
-            #   Release › Dockerhub › Build and Push › Arm64
-            # #
-
-            - name: '📦 Build & Push (linux/arm64)'
-              id: task_release_dh_push_arm64
-              uses: docker/build-push-action@v6
-              if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
-              with:
-                  context: .
-                  file: Dockerfile
-                  platforms: linux/arm64
-                  push: ${{ github.event_name != 'pull_request' }}
-                  labels: ${{ steps.task_release_dh_meta_arm64.outputs.labels }}
-                  tags: |
-                      ${{ steps.task_release_dh_meta_arm64.outputs.tags }}
-                  provenance: false
-                  sbom: false
-                  build-args: |-
-                      ARCH=aarch64
-                      VERSION=${{ env.IMAGE_VERSION }}
-                      BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
-
-            # #
-            #   Release › Dockerhub › Export Digest › Arm64
-            # #
-
-            - name: '📄 Export Digest (linux/arm64)'
-              if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
-              run: |
-                  mkdir -p /tmp/build-digest-arm64
-                  digest="${{ steps.task_release_dh_push_arm64.outputs.digest }}"
-                  digest="${digest#sha256:}"
-                  touch "/tmp/build-digest-arm64/$digest"
-              shell: bash
-
-            # #
-            #   Release › Dockerhub › Upload Digest › Arm64
-            # #
-
-            - name: '🔼 Upload Digest (linux/arm64)'
-              uses: actions/upload-artifact@v4
-              if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
-              with:
-                  name: digest-arm64
-                  path: /tmp/build-digest-arm64/*
-                  if-no-files-found: error
-                  retention-days: 10
-
-            # #
-            #   Release › Dockerhub › Meta › Amd64
-            # #
-
-            - name: '🔨 Dockerhub: Meta - amd64'
-              id: task_release_dh_meta_amd64
+            - name: '🔨 Dockerhub: Meta'
+              id: task_release_dh_meta
               uses: docker/metadata-action@v5
               with:
                   images: |
@@ -444,23 +343,20 @@ jobs:
                       #  tag            latest = yes          ( no dev )
                       type=raw,value=latest,enable=${{ !inputs.DEV_RELEASE }}
 
-                      #  tag            add pr tag-amd64      ( PR or push only )
-                      type=ref,enable=${{ github.event_name == 'pull_request' || github.event_name == 'push' }},priority=600,prefix=,suffix=-amd64,event=tag
-
-                      #  tag            add 1.0.0-amd64       ( dispatch only + no dev )
-                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=500,prefix=,suffix=-amd64,value=${{ env.IMAGE_VERSION }}
+                      #  tag            add pr tag            ( PR or push only )
+                      type=ref,enable=${{ github.event_name == 'pull_request' || github.event_name == 'push' }},priority=600,prefix=,suffix=,event=tag
 
                       #  tag            add 1.0.0             ( dispatch only + no dev )
-                      #   type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=450,prefix=,suffix=,value=${{ env.IMAGE_VERSION }}
+                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=450,prefix=,suffix=,value=${{ env.IMAGE_VERSION }}
 
                       #  tag            add 1.0               ( dispatch only + no dev )
-                      #   type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=425,prefix=,suffix=,value=${{ env.IMAGE_VERSION_2DIGIT }}
+                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=425,prefix=,suffix=,value=${{ env.IMAGE_VERSION_2DIGIT }}
 
                       #  tag            add 1                 ( dispatch only + no dev )
-                      #   type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=400,prefix=,suffix=,value=${{ env.IMAGE_VERSION_1DIGIT }}
+                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=400,prefix=,suffix=,value=${{ env.IMAGE_VERSION_1DIGIT }}
 
-                      #  tag            add development-amd64 ( dispatch only + only dev )
-                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == true }},priority=300,prefix=development-,suffix=,value=amd64
+                      #  tag            add development       ( dispatch only + only dev )
+                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == true }},priority=300,prefix=,suffix=,value=development
 
                       #  tag            add development       ( amd64 + only dev )
                       type=raw,enable=${{ inputs.DEV_RELEASE }},priority=400,prefix=,suffix=,value=development
@@ -500,9 +396,9 @@ jobs:
                   file: Dockerfile
                   platforms: linux/amd64
                   push: ${{ github.event_name != 'pull_request' }}
-                  labels: ${{ steps.task_release_dh_meta_amd64.outputs.labels }}
+                  labels: ${{ steps.task_release_dh_meta.outputs.labels }}
                   tags: |
-                      ${{ steps.task_release_dh_meta_amd64.outputs.tags }}
+                      ${{ steps.task_release_dh_meta.outputs.tags }}
                   provenance: false
                   sbom: false
                   build-args: |-
@@ -511,33 +407,46 @@ jobs:
                       BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
 
             # #
-            #   Release › Dockerhub › Export Digest › Amd64
+            #   Release › Dockerhub › Build and Push › Arm64
             # #
 
-            - name: '📄 Export Digest (linux/amd64)'
-              if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
-              run: |
-                  mkdir -p /tmp/build-digest-amd64
-                  digest="${{ steps.task_release_dh_push_amd64.outputs.digest }}"
-                  digest="${digest#sha256:}"
-                  touch "/tmp/build-digest-amd64/$digest"
-              shell: bash
-
-            # #
-            #   Release › Dockerhub › Upload Digest › Amd64
-            # #
-
-            - name: '🔼 Upload Digest (linux/amd64)'
-              uses: actions/upload-artifact@v4
+            - name: '📦 Build & Push (linux/arm64)'
+              id: task_release_dh_push_arm64
+              uses: docker/build-push-action@v6
               if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
               with:
-                  name: digest-amd64
-                  path: /tmp/build-digest-amd64/*
-                  if-no-files-found: error
-                  retention-days: 10
+                  context: .
+                  file: Dockerfile
+                  platforms: linux/arm64
+                  push: ${{ github.event_name != 'pull_request' }}
+                  labels: ${{ steps.task_release_dh_meta.outputs.labels }}
+                  tags: |
+                      ${{ steps.task_release_dh_meta.outputs.tags }}
+                  provenance: false
+                  sbom: false
+                  build-args: |-
+                      ARCH=aarch64
+                      VERSION=${{ env.IMAGE_VERSION }}
+                      BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
 
             # #
-            #   Release › Dockerhub › Checkpoint
+            #   Release › Dockerhub › Push Manifest
+            # #
+
+            - name: '📦 Push Manifest'
+              id: task_release_dh_manifest
+              uses: int128/docker-manifest-create-action@v2
+              with:
+                tags: |
+                    ${{ steps.task_release_dh_meta.outputs.tags }}
+                sources: |
+                    ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}@${{ steps.task_release_dh_push_amd64.outputs.digest }}
+                    ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}@${{ steps.task_release_dh_push_arm64.outputs.digest }}
+                index-annotations: |
+                    ${{ steps.task_release_dh_meta.outputs.labels }}
+
+            # #
+            #   Release › Dockerhub › Checkpoint › Amd64
             # #
 
             - name: '⚠️ Checkpoint'
@@ -549,6 +458,8 @@ jobs:
                   echo "github.ref ............................... ${{ github.ref }}"
                   echo "github.ref_name .......................... ${{ github.ref_name }}"
                   echo "github.event_name ........................ ${{ github.event_name }}"
+                  echo "github.repository_owner .................. ${{ github.repository_owner }}"
+                  echo "github.repository ........................ ${{ github.repository }}"
                   echo ""
                   echo "[ INPUTS ] ---------------------------------------------------------------------------------------------"
                   echo "inputs.IMAGE_NAME ........................ ${{ inputs.IMAGE_NAME }}"
@@ -570,30 +481,27 @@ jobs:
                   echo "env.NOW_LONG ............................. ${{ env.NOW_LONG }}"
                   echo "env.NOW_DOCKER_LABEL ..................... ${{ env.NOW_DOCKER_LABEL }}"
                   echo "env.NOW_DOCKER_TS ........................ ${{ env.NOW_DOCKER_TS }}"
-                  echo "env.DOCKER_IMAGE ......................... ${{ env.DOCKER_IMAGE }}"
                   echo "env.REGISTRY_REPO_ORG_AUTHOR_LC .......... ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}"
                   echo "env.REGISTRY_REPO_AUTHOR_LC .............. ${{ env.REGISTRY_REPO_AUTHOR_LC }}"
                   echo "env.DOCKER_SHA ........................... ${{ env.DOCKER_SHA }}"
                   echo ""
                   echo "[ DOCKER IMAGES ] --------------------------------------------------------------------------------------"
                   echo "registry ................................. Dockerhub"
+                  echo "tags ..................................... ${{ steps.task_release_dh_meta.outputs.tags }}"
+                  echo "labels ................................... ${{ steps.task_release_dh_meta.outputs.labels }}"
+                  echo "digest ................................... ${{ steps.task_release_dh_push_amd64.outputs.digest }}"
                   echo ""
-                  echo "(amd64) tags ............................. ${{ steps.task_release_dh_meta_amd64.outputs.tags }}"
-                  echo "(amd64) labels ........................... ${{ steps.task_release_dh_meta_amd64.outputs.labels }}"
-                  echo "(amd64) digest ........................... ${{ steps.task_release_dh_push_amd64.outputs.digest }}"
-                  echo ""
-                  echo "(arm64) tags ............................. ${{ steps.task_release_dh_meta_arm64.outputs.tags }}"
-                  echo "(arm64) labels ........................... ${{ steps.task_release_dh_meta_arm64.outputs.labels }}"
-                  echo "(amd64) digest ........................... ${{ steps.task_release_dh_push_arm64.outputs.digest }}"
+                  echo "(release) tags ........................... ${{ steps.task_release_dh_meta.outputs.tags }}"
+                  echo "(release) labels ......................... ${{ steps.task_release_dh_meta.outputs.labels }}"
                   echo ""
                   echo "[ DOCKER DIGESTS ] -------------------------------------------------------------------------------------"
-                  echo "(amd64) docker image id .................. ${{ steps.task_release_dh_push_amd64.outputs.imageid }}"
-                  echo "(amd64) docker digest .................... ${{ steps.task_release_dh_push_amd64.outputs.digest }}"
-                  echo "(arm64) docker image id .................. ${{ steps.task_release_dh_push_arm64.outputs.imageid }}"
-                  echo "(arm64) docker digest .................... ${{ steps.task_release_dh_push_arm64.outputs.digest }}"
+                  echo "docker image id (amd64) .................. ${{ steps.task_release_dh_push_amd64.outputs.imageid }}"
+                  echo "docker digest (amd64) .................... ${{ steps.task_release_dh_push_amd64.outputs.digest }}"
+                  echo "docker image id (arm64) .................. ${{ steps.task_release_dh_push_arm64.outputs.imageid }}"
+                  echo "docker digest (arm64) .................... ${{ steps.task_release_dh_push_arm64.outputs.digest }}"
 
             # #
-            #   Release › Get Weekly Commits
+            #   Release › Dockerhub › Get Weekly Commits
             # #
 
             - name: '🕛 Get Weekly Commit List'
@@ -604,7 +512,7 @@ jobs:
                   echo 'EOF' >> $GITHUB_ENV
 
             # #
-            #   Release › Notify Dockerhub
+            #   Release › Dockerhub › Notify Github
             # #
 
             - name: '🔔 Send Discord Webhook Message'
