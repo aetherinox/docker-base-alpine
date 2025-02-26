@@ -408,7 +408,7 @@ jobs:
                       type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == true }},priority=300,prefix=,suffix=-development,value=amd64
 
                       #  tag            add tag-arm64
-                      type=ref,enable=${{ github.event_name == 'pull_request' || github.event_name == 'push'}},priority=600,prefix=,suffix=-amd64,event=tag
+                      type=ref,enable=${{ github.event_name == 'pull_request' || github.event_name == 'push' }},priority=600,prefix=,suffix=-amd64,event=tag
 
                       #  add            development tag
                       type=raw,enable=${{ inputs.DEV_RELEASE }},priority=400,prefix=,suffix=,value=development
@@ -557,6 +557,8 @@ jobs:
                   echo "[ ENV ] ------------------------------------------------------------------------------------------------"
                   echo "env.IMAGE_NAME ........................... ${{ env.IMAGE_NAME }}"
                   echo "env.IMAGE_VERSION ........................ ${{ env.IMAGE_VERSION }}"
+                  echo "env.IMAGE_VERSION_1DIGIT ................. ${{ env.IMAGE_VERSION_1DIGIT }}"
+                  echo "env.IMAGE_VERSION_2DIGIT ................. ${{ env.IMAGE_VERSION_2DIGIT }}"
                   echo "env.IMAGE_GHCR_AUTHOR .................... ${{ env.IMAGE_GHCR_AUTHOR }}"
                   echo "env.IMAGE_GHCR_USERNAME .................. ${{ env.IMAGE_GHCR_USERNAME }}"
                   echo "env.NOW .................................. ${{ env.NOW }}"
