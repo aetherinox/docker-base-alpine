@@ -327,7 +327,7 @@ jobs:
             # #
             #   Release › Github › Read Readme
             #
-            #   @usage      org.opencontainers.image.description=${{ steps.task_release_dh_readme_cache.outputs.content }}
+            #   @usage      org.opencontainers.image.description=${{ steps.task_release_gh_readme_cache.outputs.content }}
             # #
 
             - name: '📄 Cache README.md'
