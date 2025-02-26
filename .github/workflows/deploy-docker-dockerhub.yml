@@ -7,11 +7,12 @@
 #   @secrets            secrets.ADMINSERV_GPG_KEY_ASC                               gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
 #                       secrets.ADMINSERV_GPG_PASSPHRASE                            gpg private key passphrase
 #                       secrets.IMAGE_GHCR_TOKEN                                    github personal access token (classic) with package:write permission
+#                       secrets.SELF_DOCKERHUB_TOKEN                                dockerhub token
 #                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_BASEALPINE_RELEASES     discord webhook to report releases from github to discord
 # #
 
-name: "📦 Deploy › Docker › Github"
-run-name: "📦 Deploy › Docker › Github"
+name: "📦 Deploy › Docker › Dockerhub"
+run-name: "📦 Deploy › Docker › Dockerhub"
 
 # #
 #   Triggers
@@ -32,7 +33,7 @@ on:
             #   Image Name
             #
             #   used in github image path
-            #       ghcr.io/${{ env.IMAGE_GHCR_AUTHOR }}/${{ env.IMAGE_NAME }}
+            #       ghcr.io/${{ env.IMAGE_DOCKERHUB_AUTHOR }}/${{ env.IMAGE_NAME }}
             # #
 
             IMAGE_NAME:
@@ -54,26 +55,27 @@ on:
                 type:           string
 
             # #
-            #   Image Author
+            #   Dockerhub › Author
             #
-            #   used in github image path
-            #       ghcr.io/${{ env.IMAGE_GHCR_AUTHOR }}/${{ env.IMAGE_NAME }}
+            #   used in dockerhub image path
+            #       hub.docker.com/r/${{ env.IMAGE_DOCKERHUB_AUTHOR }}/${{ env.IMAGE_NAME }}
             # #
 
-            IMAGE_GHCR_AUTHOR:
-                description:    '🪪 ghcr.io Image Author'
+            IMAGE_DOCKERHUB_AUTHOR:
+                description:    '🪪 Image Author'
                 required:       true
                 default:        'Aetherinox'
                 type:           string
 
             # #
-            #   Image ghcr username
+            #   Dockerhub › Username
             #
-            #   this is the user to sign into ghcr as.
+            #   this is the user to sign into Dockerhub as.
+            #   this username MUST be lowercase or you will get `unauthorized: incorrect username or password`
             # #
 
-            IMAGE_GHCR_USERNAME:
-                description:    '🪪 ghcr.io Username'
+            IMAGE_DOCKERHUB_USERNAME:
+                description:    '🪪 Dockerhub Username'
                 required:       true
                 default:        'Aetherinox'
                 type:           string
@@ -114,9 +116,9 @@ on:
 
 env:
     IMAGE_NAME:                 ${{ github.event.inputs.IMAGE_NAME || 'alpine-base' }}
-    IMAGE_GHCR_AUTHOR:          ${{ github.event.inputs.IMAGE_GHCR_AUTHOR || 'Aetherinox' }}
+    IMAGE_DOCKERHUB_AUTHOR:     ${{ github.event.inputs.IMAGE_DOCKERHUB_AUTHOR || 'Aetherinox' }}
     IMAGE_VERSION:              ${{ github.event.inputs.IMAGE_VERSION || '3.21' }}
-    IMAGE_GHCR_USERNAME:        ${{ github.event.inputs.IMAGE_GHCR_USERNAME || 'Aetherinox' }}
+    IMAGE_DOCKERHUB_USERNAME:   ${{ github.event.inputs.IMAGE_DOCKERHUB_USERNAME || 'Aetherinox' }}
     BOT_NAME_1:                 EuropaServ
     BOT_NAME_DEPENDABOT:        dependabot[bot]
 
@@ -215,12 +217,12 @@ jobs:
                   gpg_passphrase: ${{ secrets.ADMINSERV_GPG_PASSPHRASE }}
 
     # #
-    #   Job › Docker Release › Github
+    #   Job › Docker Release › Dockerhub
     # #
 
-    job-docker-release-github:
+    job-docker-release-dockerhub:
         name: >-
-            📦 Release › Github
+            📦 Release › Dockerhub
         runs-on: ubuntu-latest
         permissions:
             contents: write
@@ -231,20 +233,20 @@ jobs:
         steps:
 
             # #
-            #   Release › Github › Start
+            #   Release › Dockerhub › Start
             # #
 
             - name: '🏳️ Start'
-              id: task_release_gh_start
+              id: task_release_dh_start
               run: |
-                  echo "Starting Github docker release"
+                  echo "Starting Dockerhub docker release"
 
             # #
-            #   Release › Github › Checkout
+            #   Release › Dockerhub › Checkout
             # #
 
             - name: '✅ Checkout'
-              id: task_release_gh_checkout
+              id: task_release_dh_checkout
               uses: actions/checkout@v4
 
             # #
@@ -257,7 +259,7 @@ jobs:
                   echo "IMAGE_VERSION_1DIGIT=`echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1`" >> ${GITHUB_ENV}                                               #  3
                   echo "IMAGE_VERSION_2DIGIT=`echo ${{ env.IMAGE_VERSION }} | cut --complement -c4`" >> ${GITHUB_ENV}                                           #  3.2
                   echo "REGISTRY_REPO_ORG_AUTHOR_LC=`echo ${{github.repository}} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}                                #  aetherinox/docker-base-alpine
-                  echo "REGISTRY_REPO_AUTHOR_LC=`echo ${{ env.IMAGE_GHCR_AUTHOR }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}                              #  aetherinox
+                  echo "REGISTRY_REPO_AUTHOR_LC=`echo ${{ env.IMAGE_DOCKERHUB_AUTHOR }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}                         #  aetherinox
                   echo "DOCKER_SHA=${GITHUB_SHA}" >> $GITHUB_ENV                                                                                                #  71fad013cfce9116ec62779e4a7e627fe4c33627
                   echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV                                                                                        #  02-25-2025 12:49:48
                   echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_ENV                                                                                           #  02-25-2025
@@ -266,29 +268,29 @@ jobs:
                   echo "NOW_DOCKER_TS=$(date -u +'%FT%T.%3NZ')" >> $GITHUB_ENV                                                                                  #  2025-02-25T12:50:11.569Z
 
             # #
-            #   Release › Github › Install Dependencies
+            #   Release › Dockerhub › Install Dependencies
             # #
 
             - name: '📦 Install Dependencies'
-              id: task_release_gh_dependencies
+              id: task_release_dh_dependencies
               run:
                   sudo apt-get install -qq dos2unix
 
             # #
-            #   Release › Github › Execute dos2unix
+            #   Release › Dockerhub › Execute dos2unix
             # #
 
             - name: '🔐 Apply dos2unix'
-              id: task_release_gh_dos2unix
+              id: task_release_dh_dos2unix
               run: |
                   find ./ \( -path "./.git" -o -path "./docs" -o -path "./.github" -o -path "*.png" -o -path "*.jpg" \) -prune -o -name '*' -print | xargs dos2unix --
 
             # #
-            #   Release › Github › Fix Permissions
+            #   Release › Dockerhub › Fix Permissions
             # #
 
             - name: '#️⃣ Manage Permissions'
-              id: task_release_gh_permissions
+              id: task_release_dh_permissions
               run: |
                   find ./ -name 'run' -exec chmod 755 {} \;
                   WRONG_PERM=$(find ./  -path "./.git" -prune -o \( -name "run" -o -name "finish" -o -name "check" \) -not -perm -u=x,g=x,o=x -print)
@@ -303,48 +305,47 @@ jobs:
                   fi
 
             # #
-            #   Release › Github › QEMU
+            #   Release › Dockerhub › QEMU
             # #
 
             - name: '⚙️ Set up QEMU'
-              id: task_release_gh_qemu
+              id: task_release_dh_qemu
               uses: docker/setup-qemu-action@v3
               with:
                   cache-image: false
 
             # #
-            #   Release › Github › Setup BuildX
+            #   Release › Dockerhub › Setup BuildX
             # #
 
             - name: '⚙️ Setup Buildx'
-              id: task_release_gh_buildx
+              id: task_release_dh_buildx
               uses: docker/setup-buildx-action@v3
               with:
                   version: latest
                   driver-opts: 'image=moby/buildkit:latest'
 
             # #
-            #   Release › Github › Registry Login
+            #   Release › Dockerhub › Registry Login
             # #
 
-            - name: '⚙️ Login to Github'
-              id: task_release_gh_registry
+            - name: '⚙️ Login to Dockerhub'
+              id: task_release_dh_registry
               uses: docker/login-action@v3
               with:
-                  registry: ghcr.io
-                  username: ${{ env.IMAGE_GHCR_USERNAME }}
-                  password: ${{ secrets.IMAGE_GHCR_TOKEN }}
+                  username: ${{ env.IMAGE_DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.SELF_DOCKERHUB_TOKEN }}
 
             # #
-            #   Release › Github › Meta › Arm64
+            #   Release › Dockerhub › Meta › Arm64
             # #
 
-            - name: '🔨 Github: Meta - arm64'
-              id: task_release_gh_meta_arm64
+            - name: '🔨 Dockerhub: Meta - arm64'
+              id: task_release_dh_meta_arm64
               uses: docker/metadata-action@v5
               with:
                   images: |
-                      ghcr.io/${{ env.REGISTRY_REPO_AUTHOR_LC }}/${{ env.IMAGE_NAME }}
+                      ${{ env.REGISTRY_REPO_AUTHOR_LC }}/${{ env.IMAGE_NAME }}
                   tags: |
                       #  tag            latest = no
                       type=raw,value=latest,enable=false
@@ -367,7 +368,7 @@ jobs:
                       org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.opencontainers.image.ref.name=${{ github.ref_name }}
                       org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
-                      org.opencontainers.image.registry=github
+                      org.opencontainers.image.registry=dockerhub
                       org.tvapp2.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
                   annotations: |
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
@@ -377,15 +378,15 @@ jobs:
                       org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.opencontainers.image.ref.name=${{ github.ref_name }}
                       org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
-                      org.opencontainers.image.registry=github
+                      org.opencontainers.image.registry=dockerhub
                       org.tvapp2.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
 
             # #
-            #   Release › Github › Build and Push › Arm64
+            #   Release › Dockerhub › Build and Push › Arm64
             # #
 
             - name: '📦 Build & Push (linux/arm64)'
-              id: task_release_gh_push_arm64
+              id: task_release_dh_push_arm64
               uses: docker/build-push-action@v6
               if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
               with:
@@ -393,9 +394,9 @@ jobs:
                   file: Dockerfile.aarch64
                   platforms: linux/arm64
                   push: ${{ github.event_name != 'pull_request' }}
-                  labels: ${{ steps.task_release_gh_meta_arm64.outputs.labels }}
+                  labels: ${{ steps.task_release_dh_meta_arm64.outputs.labels }}
                   tags: |
-                      ${{ steps.task_release_gh_meta_arm64.outputs.tags }}
+                      ${{ steps.task_release_dh_meta_arm64.outputs.tags }}
                   provenance: false
                   sbom: false
                   build-args: |-
@@ -404,19 +405,19 @@ jobs:
                       BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
 
             # #
-            #   Release › Github › Export Digest › Arm64
+            #   Release › Dockerhub › Export Digest › Arm64
             # #
 
             - name: '📄 Export Digest (linux/arm64)'
               run: |
                   mkdir -p /tmp/build-digest-arm64
-                  digest="${{ steps.task_release_gh_push_arm64.outputs.digest }}"
+                  digest="${{ steps.task_release_dh_push_arm64.outputs.digest }}"
                   digest="${digest#sha256:}"
                   touch "/tmp/build-digest-arm64/$digest"
               shell: bash
 
             # #
-            #   Release › Github › Upload Digest › Arm64
+            #   Release › Dockerhub › Upload Digest › Arm64
             # #
 
             - name: '🔼 Upload Digest (linux/arm64)'
@@ -428,15 +429,15 @@ jobs:
                   retention-days: 10
 
             # #
-            #   Release › Github › Meta › Amd64
+            #   Release › Dockerhub › Meta › Amd64
             # #
 
-            - name: '🔨 Github: Meta - amd64'
-              id: task_release_gh_meta_amd64
+            - name: '🔨 Dockerhub: Meta - amd64'
+              id: task_release_dh_meta_amd64
               uses: docker/metadata-action@v5
               with:
                   images: |
-                      ghcr.io/${{ env.REGISTRY_REPO_AUTHOR_LC }}/${{ env.IMAGE_NAME }}
+                      ${{ env.REGISTRY_REPO_AUTHOR_LC }}/${{ env.IMAGE_NAME }}
                   tags: |
                       #  tag            latest = yes          ( no dev )
                       type=raw,value=latest,enable=${{ !inputs.DEV_RELEASE }}
@@ -471,7 +472,7 @@ jobs:
                       org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.opencontainers.image.ref.name=${{ github.ref_name }}
                       org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
-                      org.opencontainers.image.registry=github
+                      org.opencontainers.image.registry=dockerhub
                       org.tvapp2.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
                   annotations: |
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
@@ -481,15 +482,15 @@ jobs:
                       org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.opencontainers.image.ref.name=${{ github.ref_name }}
                       org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
-                      org.opencontainers.image.registry=github
+                      org.opencontainers.image.registry=dockerhub
                       org.tvapp2.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
 
             # #
-            #   Release › Github › Build and Push › Amd64
+            #   Release › Dockerhub › Build and Push › Amd64
             # #
 
             - name: '📦 Build & Push (linux/amd64)'
-              id: task_release_gh_push_amd64
+              id: task_release_dh_push_amd64
               uses: docker/build-push-action@v6
               if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
               with:
@@ -497,9 +498,9 @@ jobs:
                   file: Dockerfile
                   platforms: linux/amd64
                   push: ${{ github.event_name != 'pull_request' }}
-                  labels: ${{ steps.task_release_gh_meta_amd64.outputs.labels }}
+                  labels: ${{ steps.task_release_dh_meta_amd64.outputs.labels }}
                   tags: |
-                      ${{ steps.task_release_gh_meta_amd64.outputs.tags }}
+                      ${{ steps.task_release_dh_meta_amd64.outputs.tags }}
                   provenance: false
                   sbom: false
                   build-args: |-
@@ -508,19 +509,19 @@ jobs:
                       BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
 
             # #
-            #   Release › Github › Export Digest › Amd64
+            #   Release › Dockerhub › Export Digest › Amd64
             # #
 
             - name: '📄 Export Digest (linux/amd64)'
               run: |
                   mkdir -p /tmp/build-digest-amd64
-                  digest="${{ steps.task_release_gh_push_amd64.outputs.digest }}"
+                  digest="${{ steps.task_release_dh_push_amd64.outputs.digest }}"
                   digest="${digest#sha256:}"
                   touch "/tmp/build-digest-amd64/$digest"
               shell: bash
 
             # #
-            #   Release › Github › Upload Digest › Amd64
+            #   Release › Dockerhub › Upload Digest › Amd64
             # #
 
             - name: '🔼 Upload Digest (linux/amd64)'
@@ -532,11 +533,11 @@ jobs:
                   retention-days: 10
 
             # #
-            #   Release › Github › Checkpoint
+            #   Release › Dockerhub › Checkpoint
             # #
 
             - name: '⚠️ Checkpoint'
-              id: task_release_gh_checkpoint
+              id: task_release_dh_checkpoint
               run: |
                   echo ""
                   echo "[ GITHUB ] ---------------------------------------------------------------------------------------------"
@@ -548,8 +549,8 @@ jobs:
                   echo "[ INPUTS ] ---------------------------------------------------------------------------------------------"
                   echo "inputs.IMAGE_NAME ........................ ${{ inputs.IMAGE_NAME }}"
                   echo "inputs.IMAGE_VERSION ..................... ${{ inputs.IMAGE_VERSION }}"
-                  echo "inputs.IMAGE_GHCR_AUTHOR ................. ${{ inputs.IMAGE_GHCR_AUTHOR }}"
-                  echo "inputs.IMAGE_GHCR_USERNAME ............... ${{ inputs.IMAGE_GHCR_USERNAME }}"
+                  echo "inputs.IMAGE_DOCKERHUB_AUTHOR ................. ${{ inputs.IMAGE_DOCKERHUB_AUTHOR }}"
+                  echo "inputs.IMAGE_DOCKERHUB_USERNAME ............... ${{ inputs.IMAGE_DOCKERHUB_USERNAME }}"
                   echo "inputs.DEV_RELEASE ....................... ${{ inputs.DEV_RELEASE }}"
                   echo "inputs.DRY_RUN ........................... ${{ inputs.DRY_RUN }}"
                   echo ""
@@ -558,8 +559,8 @@ jobs:
                   echo "env.IMAGE_VERSION ........................ ${{ env.IMAGE_VERSION }}"
                   echo "env.IMAGE_VERSION_1DIGIT ................. ${{ env.IMAGE_VERSION_1DIGIT }}"
                   echo "env.IMAGE_VERSION_2DIGIT ................. ${{ env.IMAGE_VERSION_2DIGIT }}"
-                  echo "env.IMAGE_GHCR_AUTHOR .................... ${{ env.IMAGE_GHCR_AUTHOR }}"
-                  echo "env.IMAGE_GHCR_USERNAME .................. ${{ env.IMAGE_GHCR_USERNAME }}"
+                  echo "env.IMAGE_DOCKERHUB_AUTHOR .................... ${{ env.IMAGE_DOCKERHUB_AUTHOR }}"
+                  echo "env.IMAGE_DOCKERHUB_USERNAME .................. ${{ env.IMAGE_DOCKERHUB_USERNAME }}"
                   echo "env.NOW .................................. ${{ env.NOW }}"
                   echo "env.NOW_SHORT ............................ ${{ env.NOW_SHORT }}"
                   echo "env.NOW_LONG ............................. ${{ env.NOW_LONG }}"
@@ -571,21 +572,21 @@ jobs:
                   echo "env.DOCKER_SHA ........................... ${{ env.DOCKER_SHA }}"
                   echo ""
                   echo "[ DOCKER IMAGES ] --------------------------------------------------------------------------------------"
-                  echo "registry ................................. Github GHCR"
+                  echo "registry ................................. Dockerhub"
                   echo ""
-                  echo "(amd64) tags ............................. ${{ steps.task_release_gh_meta_amd64.outputs.tags }}"
-                  echo "(amd64) labels ........................... ${{ steps.task_release_gh_meta_amd64.outputs.labels }}"
-                  echo "(amd64) digest ........................... ${{ steps.task_release_gh_push_amd64.outputs.digest }}"
+                  echo "(amd64) tags ............................. ${{ steps.task_release_dh_meta_amd64.outputs.tags }}"
+                  echo "(amd64) labels ........................... ${{ steps.task_release_dh_meta_amd64.outputs.labels }}"
+                  echo "(amd64) digest ........................... ${{ steps.task_release_dh_push_amd64.outputs.digest }}"
                   echo ""
-                  echo "(arm64) tags ............................. ${{ steps.task_release_gh_meta_arm64.outputs.tags }}"
-                  echo "(arm64) labels ........................... ${{ steps.task_release_gh_meta_arm64.outputs.labels }}"
-                  echo "(amd64) digest ........................... ${{ steps.task_release_gh_push_arm64.outputs.digest }}"
+                  echo "(arm64) tags ............................. ${{ steps.task_release_dh_meta_arm64.outputs.tags }}"
+                  echo "(arm64) labels ........................... ${{ steps.task_release_dh_meta_arm64.outputs.labels }}"
+                  echo "(amd64) digest ........................... ${{ steps.task_release_dh_push_arm64.outputs.digest }}"
                   echo ""
                   echo "[ DOCKER DIGESTS ] -------------------------------------------------------------------------------------"
-                  echo "(amd64) docker image id .................. ${{ steps.task_release_gh_push_amd64.outputs.imageid }}"
-                  echo "(amd64) docker digest .................... ${{ steps.task_release_gh_push_amd64.outputs.digest }}"
-                  echo "(arm64) docker image id .................. ${{ steps.task_release_gh_push_arm64.outputs.imageid }}"
-                  echo "(arm64) docker digest .................... ${{ steps.task_release_gh_push_arm64.outputs.digest }}"
+                  echo "(amd64) docker image id .................. ${{ steps.task_release_dh_push_amd64.outputs.imageid }}"
+                  echo "(amd64) docker digest .................... ${{ steps.task_release_dh_push_amd64.outputs.digest }}"
+                  echo "(arm64) docker image id .................. ${{ steps.task_release_dh_push_arm64.outputs.imageid }}"
+                  echo "(arm64) docker digest .................... ${{ steps.task_release_dh_push_arm64.outputs.digest }}"
 
             # #
             #   Release › Get Weekly Commits
@@ -599,7 +600,7 @@ jobs:
                   echo 'EOF' >> $GITHUB_ENV
 
             # #
-            #   Release › Notify Github
+            #   Release › Notify Dockerhub
             # #
 
             - name: '🔔 Send Discord Webhook Message'
@@ -613,19 +614,19 @@ jobs:
                   embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   embed-thumbnail-url: 'https://i.imgur.com/zDIzE8T.jpg'
                   embed-description: |
-                      ### 📦 ᲼Deploy (Github) ᲼${{ job.status == 'success' && '✅' || '❌' }}᲼ › `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}${{ inputs.DEV_RELEASE == true && '-development' || '' }}`
+                      ### 📦 ᲼Deploy (Dockerhub) ᲼${{ job.status == 'success' && '✅' || '❌' }}᲼ › `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}${{ inputs.DEV_RELEASE == true && '-development' || '' }}`
                       ${{ inputs.DEV_RELEASE == true && '### ⚠️⚠️ Development / Pre-release ⚠️⚠️' || '' }}
 
-                      A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github to Github GHCR. The image is available at:
-                      - https://github.com/${{ github.repository }}/pkgs/container/${{ env.IMAGE_NAME }}
+                      A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github to Dockerhub. The image is available at:
+                      - https://hub.docker.com/r/${{ env.IMAGE_DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
 
                       - Version: `${{ env.IMAGE_VERSION }}`
                       - Release Type: `${{ inputs.DEV_RELEASE == true && '⚠️⚠️ Development / Pre-release ⚠️⚠️' || 'Stable' }}`
-                      - Pull: `docker pull ghcr.io/${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}:${{ inputs.DEV_RELEASE == true && 'development' || env.IMAGE_VERSION }}`
-                      - Pull (amd64): `docker pull ghcr.io/${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}@${{ steps.task_release_gh_push_amd64.outputs.digest }}`
-                      - Pull (arm64): `docker pull ghcr.io/${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}@${{ steps.task_release_gh_push_arm64.outputs.digest }}`
+                      - Pull: `docker pull ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}:${{ inputs.DEV_RELEASE == true && 'development' || env.IMAGE_VERSION }}`
+                      - Pull (amd64): `docker pull ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}@${{ steps.task_release_dh_push_amd64.outputs.digest }}`
+                      - Pull (arm64): `docker pull ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}@${{ steps.task_release_dh_push_arm64.outputs.digest }}`
                       - Dry Run: `${{ inputs.DRY_RUN }}`
-                      - Source: `Github` https://github.com/${{ github.repository }}
+                      - Source: `Dockerhub` https://hub.docker.com/r/${{ env.IMAGE_DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
                       - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}${{ inputs.DEV_RELEASE == true && '-development' || '' }}`
                       - Branch: `${{ github.ref_name }}`
                       - Workflow: `${{ github.workflow }} (#${{github.run_number}})`
@@ -637,14 +638,14 @@ jobs:
                       -# This docker image will use the following tags:
 
                       ```
-                      ${{ steps.task_release_gh_meta_amd64.outputs.tags }}
+                      ${{ steps.task_release_dh_meta.outputs.tags }}
                       ```
 
                       ### Labels
                       -# This docker image embeds the following labels:
 
                       ```
-                      ${{ steps.task_release_gh_meta_amd64.outputs.labels }}
+                      ${{ steps.task_release_dh_meta.outputs.labels }}
                       ```
                   embed-color: ${{ job.status == 'success' && '5763719' || '15418782' }}
                   embed-footer-text: "Completed at ${{ env.NOW }} UTC"
@@ -668,7 +669,7 @@ jobs:
             packages: write
             attestations: write
             id-token: write
-        needs: [ job-docker-release-tags-create, job-docker-release-github ]
+        needs: [ job-docker-release-tags-create, job-docker-release-dockerhub ]
         steps:
 
             # #
