@@ -254,6 +254,7 @@ jobs:
             - name: '🕛 Get Timestamp'
               id: task_release_set_timestamp
               run: |
+                  echo "IMAGE_VERSION_2DIGIT=`echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-2" >> ${GITHUB_ENV}                                                #  v1.0
                   echo "REGISTRY_REPO_ORG_AUTHOR_LC=`echo ${{github.repository}} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}                                #  aetherinox/docker-base-alpine
                   echo "REGISTRY_REPO_AUTHOR_LC=`echo ${{ env.IMAGE_GHCR_AUTHOR }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}                              #  aetherinox
                   echo "DOCKER_SHA=${GITHUB_SHA}" >> $GITHUB_ENV                                                                                                #  71fad013cfce9116ec62779e4a7e627fe4c33627
@@ -334,47 +335,10 @@ jobs:
                   password: ${{ secrets.IMAGE_GHCR_TOKEN }}
 
             # #
-            #   Release › Github › Meta › Amd64
-            # #
-
-            - name: '🔨 Github: Meta - Amd64'
-              id: task_release_gh_meta_amd64
-              uses: docker/metadata-action@v5
-              with:
-                  images: |
-                      ghcr.io/${{ env.REGISTRY_REPO_AUTHOR_LC }}/${{ env.IMAGE_NAME }}
-                  tags: |
-                      #  latest yes
-                      type=raw,value=latest,enable=${{ !inputs.DEV_RELEASE }}
-
-                      #  dispatch       add x1.x.x-amd64
-                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=300,prefix=,suffix=-amd64,value=${{ env.IMAGE_VERSION }}
-
-                      #  dispatch       add amd64-development
-                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == true }},priority=300,prefix=,suffix=-development,value=amd64
-
-                      #  tag            add tag-arm64
-                      type=ref,enable=${{ github.event_name == 'pull_request' || github.event_name == 'push'}},priority=600,prefix=,suffix=-amd64,event=tag
-
-                      #  add development tag
-                      type=raw,enable=${{ inputs.DEV_RELEASE }},priority=400,prefix=,suffix=,value=development
-                  flavor: |
-                      latest=false
-                  labels: |
-                      org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
-                      org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
-                      org.opencontainers.image.licenses=MIT
-                      org.opencontainers.image.revision=${{ github.sha }}
-                      org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
-                      org.opencontainers.image.ref.name=${{ github.ref_name }}
-                      org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
-                      org.tvapp2.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
-
-            # #
             #   Release › Github › Meta › Arm64
             # #
 
-            - name: '🔨 Github: Meta - Arm64'
+            - name: '🔨 Github: Meta - arm64'
               id: task_release_gh_meta_arm64
               uses: docker/metadata-action@v5
               with:
@@ -385,7 +349,13 @@ jobs:
                       type=raw,value=latest,enable=false
 
                       #  dispatch       add x1.x.x-arm64
-                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=300,prefix=,suffix=-arm64,value=${{ env.IMAGE_VERSION }}
+                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=500,prefix=,suffix=-arm64,value=${{ env.IMAGE_VERSION }}
+
+                      #  dispatch       add x1.x.x
+                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=450,prefix=,suffix=,value=${{ env.IMAGE_VERSION }}
+
+                      #  dispatch       add x1.x
+                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=400,prefix=,suffix=,value=${{ env.IMAGE_VERSION_2DIGIT }}
 
                       #  dispatch       add arm64-development
                       type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == true }},priority=300,prefix=,suffix=-development,value=arm64
@@ -403,6 +373,96 @@ jobs:
                       org.opencontainers.image.ref.name=${{ github.ref_name }}
                       org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
                       org.tvapp2.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
+
+            # #
+            #   Release › Github › Meta › Amd64
+            # #
+
+            - name: '🔨 Github: Meta - amd64'
+              id: task_release_gh_meta_amd64
+              uses: docker/metadata-action@v5
+              with:
+                  images: |
+                      ghcr.io/${{ env.REGISTRY_REPO_AUTHOR_LC }}/${{ env.IMAGE_NAME }}
+                  tags: |
+                      #  latest yes
+                      type=raw,value=latest,enable=${{ !inputs.DEV_RELEASE }}
+
+                      #  dispatch       add x1.x.x-amd64
+                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=500,prefix=,suffix=-amd64,value=${{ env.IMAGE_VERSION }}
+
+                      #  dispatch       add x1.x.x
+                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=450,prefix=,suffix=,value=${{ env.IMAGE_VERSION }}
+
+                      #  dispatch       add x1.x
+                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=400,prefix=,suffix=,value=${{ env.IMAGE_VERSION_2DIGIT }}
+
+                      #  dispatch       add amd64-development
+                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == true }},priority=300,prefix=,suffix=-development,value=amd64
+
+                      #  tag            add tag-arm64
+                      type=ref,enable=${{ github.event_name == 'pull_request' || github.event_name == 'push'}},priority=600,prefix=,suffix=-amd64,event=tag
+
+                      #  add            development tag
+                      type=raw,enable=${{ inputs.DEV_RELEASE }},priority=400,prefix=,suffix=,value=development
+                  flavor: |
+                      latest=false
+                  labels: |
+                      org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
+                      org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
+                      org.opencontainers.image.licenses=MIT
+                      org.opencontainers.image.revision=${{ github.sha }}
+                      org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
+                      org.opencontainers.image.ref.name=${{ github.ref_name }}
+                      org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
+                      org.tvapp2.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
+
+            # #
+            #   Release › Github › Build and Push › Arm64
+            # #
+
+            - name: '📦 Build & Push (linux/arm64)'
+              id: task_release_gh_push_arm64
+              uses: docker/build-push-action@v6
+              if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
+              with:
+                  context: .
+                  file: Dockerfile.aarch64
+                  platforms: linux/arm64
+                  push: ${{ github.event_name != 'pull_request' }}
+                  labels: ${{ steps.task_release_gh_meta_arm64.outputs.labels }}
+                  tags: |
+                      ${{ steps.task_release_gh_meta_arm64.outputs.tags }}
+                  provenance: false
+                  sbom: false
+                  build-args: |-
+                      ARCH=arm64
+                      VERSION=${{ env.IMAGE_VERSION }}
+                      BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
+
+            # #
+            #   Release › Github › Export Digest › Arm64
+            # #
+
+            - name: '📄 Export Digest (linux/arm64)'
+              run: |
+                  mkdir -p /tmp/build-digest-arm64
+                  digest="${{ steps.task_release_gh_push_arm64.outputs.digest }}"
+                  digest="${digest#sha256:}"
+                  touch "/tmp/build-digest-arm64/$digest"
+              shell: bash
+
+            # #
+            #   Release › Github › Upload Digest › Arm64
+            # #
+
+            - name: '🔼 Upload Digest (linux/arm64)'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: digest-arm64
+                  path: /tmp/build-digest-arm64/*
+                  if-no-files-found: error
+                  retention-days: 10
 
             # #
             #   Release › Github › Build and Push › Amd64
@@ -448,53 +508,6 @@ jobs:
               with:
                   name: digest-amd64
                   path: /tmp/build-digest-amd64/*
-                  if-no-files-found: error
-                  retention-days: 10
-
-            # #
-            #   Release › Github › Build and Push › Arm64
-            # #
-
-            - name: '📦 Build & Push (linux/arm64)'
-              id: task_release_gh_push_arm64
-              uses: docker/build-push-action@v6
-              if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
-              with:
-                  context: .
-                  file: Dockerfile.aarch64
-                  platforms: linux/arm64
-                  push: ${{ github.event_name != 'pull_request' }}
-                  labels: ${{ steps.task_release_gh_meta_arm64.outputs.labels }}
-                  tags: |
-                      ${{ steps.task_release_gh_meta_arm64.outputs.tags }}
-                  provenance: false
-                  sbom: false
-                  build-args: |-
-                      ARCH=arm64
-                      VERSION=${{ env.IMAGE_VERSION }}
-                      BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
-
-            # #
-            #   Release › Github › Export Digest › Arm64
-            # #
-
-            - name: '📄 Export Digest (linux/Arm64)'
-              run: |
-                  mkdir -p /tmp/build-digest-arm64
-                  digest="${{ steps.task_release_gh_push_arm64.outputs.digest }}"
-                  digest="${digest#sha256:}"
-                  touch "/tmp/build-digest-arm64/$digest"
-              shell: bash
-
-            # #
-            #   Release › Github › Upload Digest › Arm64
-            # #
-
-            - name: '🔼 Upload Digest (linux/arm64)'
-              uses: actions/upload-artifact@v4
-              with:
-                  name: digest-arm64
-                  path: /tmp/build-digest-arm64/*
                   if-no-files-found: error
                   retention-days: 10
 
@@ -565,6 +578,20 @@ jobs:
                   echo "(amd64) docker digest .................... ${{ steps.task_release_gh_push_amd64.outputs.digest }}"
                   echo "(arm64) docker image id .................. ${{ steps.task_release_gh_push_arm64.outputs.imageid }}"
                   echo "(arm64) docker digest .................... ${{ steps.task_release_gh_push_arm64.outputs.digest }}"
+
+            # #
+            #   Release › Github › Clean Untagged Images
+            # #
+
+            - name: '🧹 Clean Untagged Images'
+              uses: quartx-analytics/ghcr-cleaner@v1
+              with:
+                  owner-type: user
+                  token: ${{ secrets.IMAGE_GHCR_TOKEN }}
+                  repository-owner: ${{ github.repository_owner }}
+                  repository-name: ${{ github.repository }}
+                  delete-untagged: true
+                # keep-at-most: 0
 
             # #
             #   Release › Get Weekly Commits
