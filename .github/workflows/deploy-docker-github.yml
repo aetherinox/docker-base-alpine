@@ -408,6 +408,7 @@ jobs:
             # #
 
             - name: '📄 Export Digest (linux/arm64)'
+              if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
               run: |
                   mkdir -p /tmp/build-digest-arm64
                   digest="${{ steps.task_release_gh_push_arm64.outputs.digest }}"
@@ -421,6 +422,7 @@ jobs:
 
             - name: '🔼 Upload Digest (linux/arm64)'
               uses: actions/upload-artifact@v4
+              if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
               with:
                   name: digest-arm64
                   path: /tmp/build-digest-arm64/*
@@ -512,6 +514,7 @@ jobs:
             # #
 
             - name: '📄 Export Digest (linux/amd64)'
+              if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
               run: |
                   mkdir -p /tmp/build-digest-amd64
                   digest="${{ steps.task_release_gh_push_amd64.outputs.digest }}"
@@ -525,6 +528,7 @@ jobs:
 
             - name: '🔼 Upload Digest (linux/amd64)'
               uses: actions/upload-artifact@v4
+              if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
               with:
                   name: digest-amd64
                   path: /tmp/build-digest-amd64/*
