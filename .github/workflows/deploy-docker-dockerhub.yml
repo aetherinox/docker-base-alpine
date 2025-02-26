@@ -702,7 +702,7 @@ jobs:
               id: task_cleanup_clean
               uses: quartx-analytics/ghcr-cleaner@v1
               with:
-                  owner-type: org
+                  owner-type: user
                   token: ${{ secrets.IMAGE_GHCR_TOKEN }}
                   repository-owner: ${{ github.repository_owner }}
                   repository-name: ${{ github.repository }}
