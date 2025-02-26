@@ -400,7 +400,7 @@ jobs:
                   provenance: false
                   sbom: false
                   build-args: |-
-                      ARCH=arm64
+                      ARCH=aarch64
                       VERSION=${{ env.IMAGE_VERSION }}
                       BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
 
