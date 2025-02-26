@@ -64,7 +64,7 @@ on:
             IMAGE_DOCKERHUB_AUTHOR:
                 description:    '🪪 Image Author'
                 required:       true
-                default:        'Aetherinox'
+                default:        'aetherinox'
                 type:           string
 
             # #
@@ -77,7 +77,7 @@ on:
             IMAGE_DOCKERHUB_USERNAME:
                 description:    '🪪 Dockerhub Username'
                 required:       true
-                default:        'Aetherinox'
+                default:        'aetherinox'
                 type:           string
 
             # #
@@ -116,9 +116,9 @@ on:
 
 env:
     IMAGE_NAME:                 ${{ github.event.inputs.IMAGE_NAME || 'alpine-base' }}
-    IMAGE_DOCKERHUB_AUTHOR:     ${{ github.event.inputs.IMAGE_DOCKERHUB_AUTHOR || 'Aetherinox' }}
+    IMAGE_DOCKERHUB_AUTHOR:     ${{ github.event.inputs.IMAGE_DOCKERHUB_AUTHOR || 'aetherinox' }}
     IMAGE_VERSION:              ${{ github.event.inputs.IMAGE_VERSION || '3.21' }}
-    IMAGE_DOCKERHUB_USERNAME:   ${{ github.event.inputs.IMAGE_DOCKERHUB_USERNAME || 'Aetherinox' }}
+    IMAGE_DOCKERHUB_USERNAME:   ${{ github.event.inputs.IMAGE_DOCKERHUB_USERNAME || 'aetherinox' }}
     BOT_NAME_1:                 EuropaServ
     BOT_NAME_DEPENDABOT:        dependabot[bot]
 
@@ -549,8 +549,8 @@ jobs:
                   echo "[ INPUTS ] ---------------------------------------------------------------------------------------------"
                   echo "inputs.IMAGE_NAME ........................ ${{ inputs.IMAGE_NAME }}"
                   echo "inputs.IMAGE_VERSION ..................... ${{ inputs.IMAGE_VERSION }}"
-                  echo "inputs.IMAGE_DOCKERHUB_AUTHOR ................. ${{ inputs.IMAGE_DOCKERHUB_AUTHOR }}"
-                  echo "inputs.IMAGE_DOCKERHUB_USERNAME ............... ${{ inputs.IMAGE_DOCKERHUB_USERNAME }}"
+                  echo "inputs.IMAGE_DOCKERHUB_AUTHOR ............ ${{ inputs.IMAGE_DOCKERHUB_AUTHOR }}"
+                  echo "inputs.IMAGE_DOCKERHUB_USERNAME .......... ${{ inputs.IMAGE_DOCKERHUB_USERNAME }}"
                   echo "inputs.DEV_RELEASE ....................... ${{ inputs.DEV_RELEASE }}"
                   echo "inputs.DRY_RUN ........................... ${{ inputs.DRY_RUN }}"
                   echo ""
@@ -559,8 +559,8 @@ jobs:
                   echo "env.IMAGE_VERSION ........................ ${{ env.IMAGE_VERSION }}"
                   echo "env.IMAGE_VERSION_1DIGIT ................. ${{ env.IMAGE_VERSION_1DIGIT }}"
                   echo "env.IMAGE_VERSION_2DIGIT ................. ${{ env.IMAGE_VERSION_2DIGIT }}"
-                  echo "env.IMAGE_DOCKERHUB_AUTHOR .................... ${{ env.IMAGE_DOCKERHUB_AUTHOR }}"
-                  echo "env.IMAGE_DOCKERHUB_USERNAME .................. ${{ env.IMAGE_DOCKERHUB_USERNAME }}"
+                  echo "env.IMAGE_DOCKERHUB_AUTHOR ............... ${{ env.IMAGE_DOCKERHUB_AUTHOR }}"
+                  echo "env.IMAGE_DOCKERHUB_USERNAME ............. ${{ env.IMAGE_DOCKERHUB_USERNAME }}"
                   echo "env.NOW .................................. ${{ env.NOW }}"
                   echo "env.NOW_SHORT ............................ ${{ env.NOW_SHORT }}"
                   echo "env.NOW_LONG ............................. ${{ env.NOW_LONG }}"
