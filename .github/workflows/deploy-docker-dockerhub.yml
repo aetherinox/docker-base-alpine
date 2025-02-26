@@ -442,6 +442,7 @@ jobs:
                 sources: |
                     ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}@${{ steps.task_release_dh_push_amd64.outputs.digest }}
                     ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}@${{ steps.task_release_dh_push_arm64.outputs.digest }}
+                index-annotations: ${{ steps.task_release_dh_meta.outputs.labels }}
 
             # #
             #   Release › Dockerhub › Checkpoint › Amd64
