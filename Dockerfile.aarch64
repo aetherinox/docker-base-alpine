@@ -8,7 +8,7 @@
 #   @repo           https://github.com/aetherinox/docker-base-alpine
 # #
 
-ARG ALPINE_VERSION="3.19"
+ARG ALPINE_VERSION="3.21.3"
 FROM alpine:${ALPINE_VERSION} AS rootfs-stage
 
 # #
@@ -25,7 +25,7 @@ ARG S6_OVERLAY_ARCH="aarch64"
 # #
 
 ENV ROOTFS=/root-out
-ENV REL=v3.20
+ENV REL=v3.21
 ENV ARCH=aarch64
 ENV MIRROR=http://dl-cdn.alpinelinux.org/alpine
 ENV PACKAGES=alpine-baselayout,\
@@ -109,6 +109,7 @@ LABEL org.opencontainers.image.url="https://github.com/${REPO_AUTHOR}/${REPO_NAM
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.architecture="arm64"
 LABEL org.opencontainers.image.ref.name="main"
+LABEL org.opencontainers.image.registry="local"
 LABEL org.alpine.image.maintainers="${REPO_AUTHOR}"
 LABEL org.alpine.image.build-version="Version:- ${VERSION} Date:- ${BUILDDATE}"
 
