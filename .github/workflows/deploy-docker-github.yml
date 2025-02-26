@@ -658,8 +658,8 @@ jobs:
     job-docker-release-cleanup:
         name: >-
             🧹 Release › Cleanup
-      # runs-on: ubuntu-latest
-        runs-on: apollo-x64
+        runs-on: ubuntu-latest
+      # runs-on: apollo-x64
         timeout-minutes: 5
         permissions:
             contents: write
