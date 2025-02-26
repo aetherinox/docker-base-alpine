@@ -3,13 +3,22 @@
 # #
 #   @project        Docker Image - Alpine Base
 #   @usage          base image utilized for all docker images using alpine with s6-overlay integration
-#   @arch           arm64
-#   @file           Dockerfile.aarch64
-#   @repo           https://github.com/aetherinox/docker-base-alpine
+#   @arch           aarch64 / arm64
+#   @file           Dockerfile
+#   @repo           https://github.com/Aetherinox/docker-base-alpine
 # #
 
 ARG ALPINE_VERSION="3.21.3"
 FROM alpine:${ALPINE_VERSION} AS rootfs-stage
+
+# #
+#   alpine › general
+#
+#   ARCH            x86_64
+#                   aarch64
+# #
+
+ARG ARCH=aarch64
 
 # #
 #   alpine › args
@@ -18,7 +27,7 @@ FROM alpine:${ALPINE_VERSION} AS rootfs-stage
 ARG REPO_AUTHOR="aetherinox"
 ARG REPO_NAME="docker-base-alpine"
 ARG S6_OVERLAY_VERSION="3.1.6.2"
-ARG S6_OVERLAY_ARCH="aarch64"
+ARG S6_OVERLAY_ARCH="${ARCH}"
 
 # #
 #   alpine › environment
@@ -26,7 +35,7 @@ ARG S6_OVERLAY_ARCH="aarch64"
 
 ENV ROOTFS=/root-out
 ENV REL=v3.21
-ENV ARCH=aarch64
+ENV ARCH=${ARCH}
 ENV MIRROR=http://dl-cdn.alpinelinux.org/alpine
 ENV PACKAGES=alpine-baselayout,\
 alpine-keys,\
@@ -99,6 +108,7 @@ ARG WITHCONTENV_VERSION="v1"
 # #
 
 LABEL org.opencontainers.image.authors="${REPO_AUTHOR}"
+LABEL org.opencontainers.image.vendor="aetherinox"
 LABEL org.opencontainers.image.title="Alpine Base Image"
 LABEL org.opencontainers.image.description="Alpine base image with s6-overlay integration"
 LABEL org.opencontainers.image.source="https://github.com/${REPO_AUTHOR}/${REPO_NAME}"
@@ -107,7 +117,6 @@ LABEL org.opencontainers.image.repo.2="https://github.com/thebinaryninja/${REPO_
 LABEL org.opencontainers.image.documentation="https://github.com/${REPO_AUTHOR}/${REPO_NAME}/wiki"
 LABEL org.opencontainers.image.url="https://github.com/${REPO_AUTHOR}/${REPO_NAME}"
 LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.architecture="arm64"
 LABEL org.opencontainers.image.ref.name="main"
 LABEL org.opencontainers.image.registry="local"
 LABEL org.alpine.image.maintainers="${REPO_AUTHOR}"
@@ -117,9 +126,9 @@ LABEL org.alpine.image.build-version="Version:- ${VERSION} Date:- ${BUILDDATE}"
 #   scratch › add cdn > core
 # #
 
-ADD --chmod=755 "https://raw.githubusercontent.com/${REPO_AUTHOR}/${REPO_NAME}/docker/core/docker-images.${MODS_VERSION}" "/docker-images"
-ADD --chmod=755 "https://raw.githubusercontent.com/${REPO_AUTHOR}/${REPO_NAME}/docker/core/package-install.${PKG_INST_VERSION}" "/etc/s6-overlay/s6-rc.d/init-mods-package-install/run"
-ADD --chmod=755 "https://raw.githubusercontent.com/${REPO_AUTHOR}/${REPO_NAME}/docker/core/aetherxown.${AETHERXOWN_VERSION}" "/usr/bin/aetherxown"
+ADD --chmod=755 "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/core/docker-images.${MODS_VERSION}" "/docker-images"
+ADD --chmod=755 "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/core/package-install.${PKG_INST_VERSION}" "/etc/s6-overlay/s6-rc.d/init-mods-package-install/run"
+ADD --chmod=755 "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/core/aetherxown.${AETHERXOWN_VERSION}" "/usr/bin/aetherxown"
 
 # #
 #   scratch › env vars
@@ -150,7 +159,7 @@ RUN \
     procps-ng \
     shadow \
     tzdata && \
-  echo "**** CREATE USER 'dockerx' AND GENERATE STRUCTURE ****" && \
+  echo "**** CREATE dockerx USER AND GENERATE STRUCTURE ****" && \
   groupmod -g 1000 users && \
   useradd -u 911 -U -d /config -s /bin/false dockerx && \
   usermod -G users dockerx && \

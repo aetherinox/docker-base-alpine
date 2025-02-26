@@ -12,13 +12,22 @@ ARG ALPINE_VERSION="3.21.3"
 FROM alpine:${ALPINE_VERSION} AS rootfs-stage
 
 # #
+#   alpine › general
+#
+#   ARCH            x86_64
+#                   aarch64
+# #
+
+ARG ARCH=x86_64
+
+# #
 #   alpine › args
 # #
 
 ARG REPO_AUTHOR="aetherinox"
 ARG REPO_NAME="docker-base-alpine"
 ARG S6_OVERLAY_VERSION="3.1.6.2"
-ARG S6_OVERLAY_ARCH="x86_64"
+ARG S6_OVERLAY_ARCH="${ARCH}"
 
 # #
 #   alpine › environment
@@ -26,7 +35,7 @@ ARG S6_OVERLAY_ARCH="x86_64"
 
 ENV ROOTFS=/root-out
 ENV REL=v3.21
-ENV ARCH=x86_64
+ENV ARCH=${ARCH}
 ENV MIRROR=http://dl-cdn.alpinelinux.org/alpine
 ENV PACKAGES=alpine-baselayout,\
 alpine-keys,\
@@ -99,6 +108,7 @@ ARG WITHCONTENV_VERSION="v1"
 # #
 
 LABEL org.opencontainers.image.authors="${REPO_AUTHOR}"
+LABEL org.opencontainers.image.vendor="aetherinox"
 LABEL org.opencontainers.image.title="Alpine Base Image"
 LABEL org.opencontainers.image.description="Alpine base image with s6-overlay integration"
 LABEL org.opencontainers.image.source="https://github.com/${REPO_AUTHOR}/${REPO_NAME}"
@@ -107,7 +117,6 @@ LABEL org.opencontainers.image.repo.2="https://github.com/thebinaryninja/${REPO_
 LABEL org.opencontainers.image.documentation="https://github.com/${REPO_AUTHOR}/${REPO_NAME}/wiki"
 LABEL org.opencontainers.image.url="https://github.com/${REPO_AUTHOR}/${REPO_NAME}"
 LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.architecture="amd64"
 LABEL org.opencontainers.image.ref.name="main"
 LABEL org.opencontainers.image.registry="local"
 LABEL org.alpine.image.maintainers="${REPO_AUTHOR}"
