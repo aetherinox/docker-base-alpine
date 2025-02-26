@@ -390,7 +390,7 @@ jobs:
               if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
               with:
                   context: .
-                  file: Dockerfile.aarch64
+                  file: Dockerfile
                   platforms: linux/arm64
                   push: ${{ github.event_name != 'pull_request' }}
                   labels: ${{ steps.task_release_gh_meta_arm64.outputs.labels }}
