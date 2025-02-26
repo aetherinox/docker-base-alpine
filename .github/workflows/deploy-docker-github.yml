@@ -439,6 +439,9 @@ jobs:
                       #  latest yes
                       type=raw,value=latest,enable=${{ !inputs.DEV_RELEASE }}
 
+                      #  tag            add tag-amd64
+                      type=ref,enable=${{ github.event_name == 'pull_request' || github.event_name == 'push' }},priority=600,prefix=,suffix=-amd64,event=tag
+
                       #  dispatch       add x1.x.x-amd64
                       type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=500,prefix=,suffix=-amd64,value=${{ env.IMAGE_VERSION }}
 
@@ -453,9 +456,6 @@ jobs:
 
                       #  dispatch       add development-amd64
                       type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == true }},priority=300,prefix=development-,suffix=,value=amd64
-
-                      #  tag            add tag-amd64
-                      type=ref,enable=${{ github.event_name == 'pull_request' || github.event_name == 'push' }},priority=600,prefix=,suffix=-amd64,event=tag
 
                       #  add            development tag
                       type=raw,enable=${{ inputs.DEV_RELEASE }},priority=400,prefix=,suffix=,value=development
