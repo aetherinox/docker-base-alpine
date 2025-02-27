@@ -159,21 +159,21 @@ find ./ -name 'run' -exec chmod +x {} \;
 If you want to set the permissions manually, run the following:
 
 ```shell
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/init-adduser/run
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/init-crontab-config/run
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/init-custom-files/run
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/init-envfile/run
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/init-folders/run
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/init-keygen/run
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/init-migrations/run
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/init-nginx/run
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/init-permissions/run
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/init-php/run
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/init-samples/run
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/init-version-checks/run
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/svc-cron/run
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/svc-nginx/run
-sudo chmod +x /root/etc/s6-overlay/s6-rc.d/svc-php-fpm/run
+sudo chmod +x ./root/etc/s6-overlay/s6-rc.d/init-adduser/run \
+  ./root/etc/s6-overlay/s6-rc.d/init-crontab-config/run \
+  ./root/etc/s6-overlay/s6-rc.d/init-custom-files/run \
+  ./root/etc/s6-overlay/s6-rc.d/init-envfile/run \
+  ./root/etc/s6-overlay/s6-rc.d/init-folders/run \
+  ./root/etc/s6-overlay/s6-rc.d/init-keygen/run \
+  ./root/etc/s6-overlay/s6-rc.d/init-migrations/run \
+  ./root/etc/s6-overlay/s6-rc.d/init-permissions/run \
+  ./root/etc/s6-overlay/s6-rc.d/init-samples/run \
+  ./root/etc/s6-overlay/s6-rc.d/init-version-checks/run \
+  ./root/etc/s6-overlay/s6-rc.d/svc-cron/run \
+  ./root/etc/s6-overlay/s6-rc.d/svc-php-fpm/run \
+  ./root/etc/s6-overlay/s6-rc.d/svc-nginx/run \
+  ./root/etc/s6-overlay/s6-rc.d/init-php/run \
+  ./root/etc/s6-overlay/s6-rc.d/init-nginx/run
 ```
 
 <br />
@@ -181,10 +181,10 @@ sudo chmod +x /root/etc/s6-overlay/s6-rc.d/svc-php-fpm/run
 For the branch **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)**, there are a few files to change. The ending version number may change, but the commands to change the permissions are as follows:
 
 ```shell
-sudo chmod +x docker-images.v3
-sudo chmod +x aetherxown.v1
-sudo chmod +x package-install.v1
-sudo chmod +x with-contenv.v1
+sudo chmod +x docker-images.v3 \
+  chmod +x aetherxown.v1 \
+  chmod +x package-install.v1 \
+  chmod +x with-contenv.v1
 ```
 
 <br />
@@ -203,13 +203,48 @@ git clone -b docker/alpine-base https://github.com/Aetherinox/docker-base-alpine
 
 <br />
 
-Once cloned, you can now make whatever adjustments you deem fit. Once your edits are done, you will need to build the base image:
+Once cloned, you can now make whatever adjustments you deem fit. Once your edits are done, you will need to build the base image. If you built the image locally, make sure you remove the line `--pull` from the commands below:
 
 ### amd64
 
-```shell ignore
-# Build alpine-base amd64
-docker build --build-arg VERSION=3.20 --build-arg BUILDDATE=20250220 -t alpine-base:latest -t alpine-base:3.20-amd64 -f Dockerfile .
+```shell
+# alpine-base - amd64: using docker buildx
+docker buildx build \
+  --build-arg ARCH=x86_64 \
+  --build-arg VERSION=3.21 \
+  --build-arg BUILDDATE=20250226 \
+  --tag aetherinox/alpine-base:latest \
+  --tag aetherinox/alpine-base:3.21-amd64 \
+  --tag aetherinox/alpine-base:3.2 \
+  --tag aetherinox/alpine-base:3 \
+  --file Dockerfile \
+  --platform linux/amd64 \
+  --attest type=provenance,disabled=true \
+  --attest type=sbom,disabled=true \
+  --output type=docker \
+  --no-cache \
+  --pull \
+  .
+
+# alpine-base - amd64: using docker build
+docker build \
+  --network=host \
+  --build-arg ARCH=x86_64 \
+  --build-arg VERSION=3.21 \
+  --build-arg BUILDDATE=20250226 \
+  --tag aetherinox/alpine-base:latest \
+  --tag aetherinox/alpine-base:3.21-amd64 \
+  --tag aetherinox/alpine-base:3.2 \
+  --tag aetherinox/alpine-base:3 \
+  --file Dockerfile \
+  --platform linux/amd64 \
+  --attest type=provenance,disabled=true \
+  --attest type=sbom,disabled=true \
+  --builder default \
+  --output type=docker \
+  --no-cache \
+  --pull \
+  .
 ```
 
 <br />
@@ -217,9 +252,62 @@ docker build --build-arg VERSION=3.20 --build-arg BUILDDATE=20250220 -t alpine-b
 ### arm64 / aarch64
 
 ```shell
-# Build alpine-base arm64
-docker build --build-arg VERSION=3.20 --build-arg BUILDDATE=20250220 -t alpine-base:3.20-arm64 -f Dockerfile.aarch64 .
+# alpine-base - arm64: using docker buildx
+docker buildx build \
+  --build-arg ARCH=aarch64 \
+  --build-arg VERSION=3.21 \
+  --build-arg BUILDDATE=20250226 \
+  --tag aetherinox/alpine-base:3.21-arm64 \
+  --file Dockerfile \
+  --platform linux/arm64 \
+  --attest type=provenance,disabled=true \
+  --attest type=sbom,disabled=true \
+  --output type=docker \
+  --no-cache \
+  --pull \
+  .
+
+# alpine-base - arm64: using docker build
+docker build \
+  --network=host \
+  --build-arg ARCH=aarch64 \
+  --build-arg VERSION=3.21 \
+  --build-arg BUILDDATE=20250226 \
+  --file Dockerfile \
+  --platform linux/arm64 \
+  --attest type=provenance,disabled=true \
+  --attest type=sbom,disabled=true \
+  --tag aetherinox/alpine-base:3.21-arm64 \
+  --builder default \
+  --output type=docker \
+  --no-cache \
+  --pull \
+  .
 ```
+
+<br />
+
+If you need to get the digest for both images so that you can merge the two into a single manifest and release, obtain the digests by using:
+
+```shell
+$ docker images --all --no-trunc | grep aetherinox
+
+aetherinox/alpine-base       3.21-arm64       sha256:6bbe08af5b1dbe396168feec13d01ff99e2232ca29c783ef3cd6ff18e74529b2   22 seconds ago       38.8MB
+aetherinox/alpine-base       3.21-amd64       sha256:fd9c44373af2915fe805ff93179ce56160cb90bd25830f764694dbc8c6341816   About a minute ago   27.2MB
+```
+
+<br />
+
+To merge the manifest / images and push a single multi-platform release, run:
+
+```shell
+docker buildx imagetools create \
+  -t aetherinox/alpine-base:3.21 \
+  sha256:6bbe08af5b1dbe396168feec13d01ff99e2232ca29c783ef3cd6ff18e74529b2 \ 
+  sha256:fd9c44373af2915fe805ff93179ce56160cb90bd25830f764694dbc8c6341816
+```
+
+<br />
 
 <br />
 
@@ -260,7 +348,7 @@ direction TB
     --build-arg VERSION=3.20 &bsol;
     --build-arg BUILDDATE=20250220 &bsol;
     -t docker-alpine-base:latest &bsol;
-    -t docker-alpine-base:3.20-amd64 &bsol;
+    -t docker-alpine-base:3.21-amd64 &bsol;
     -f Dockerfile . &bsol;`"]
     obj_step23["`Download files from branch **docker/core**`"]
     obj_step24["`New Image: **alpine-base:latest**`"]
@@ -299,7 +387,7 @@ After the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpin
 Next, specify the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image which will be used as the foundation of the **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)** image:
 
 ```dockerfile
-FROM ghcr.io/Aetherinox/alpine-base:3.20-amd64
+FROM ghcr.io/Aetherinox/alpine-base:3.21-amd64
 ```
 
 After you have completed configuring the **[aetherinox/tvapp2](https://github.com/Aetherinox/tvapp2)** `Dockerfile`, you can now build the image. Remember to build an image for both `amd64` and `aarch64`.
@@ -313,8 +401,38 @@ For the argument `VERSION`; specify the current release of your app (**[aetherin
 ### amd64
 
 ```shell
-# Build tvapp2 amd64
-docker build --build-arg VERSION=1.0.0 --build-arg BUILDDATE=20250220 -t tvapp2:latest -t tvapp2:1.0.0 -t tvapp2:1.0.0-amd64 -f Dockerfile .
+# tvapp2 - amd64: using docker buildx
+docker buildx build \
+  --build-arg ARCH=amd64 \
+  --build-arg VERSION=1.0.0 \
+  --build-arg BUILDDATE=20250227 \
+  --tag aetherinox/tvapp2:latest \
+  --tag aetherinox/tvapp2:1.0.0-amd64 \
+  --file Dockerfile \
+  --platform linux/amd64 \
+  --attest type=provenance,disabled=true \
+  --attest type=sbom,disabled=true \
+  --output type=docker \
+  --no-cache \
+  --pull \
+  .
+
+# tvapp2 - amd64: using docker build
+docker build \
+  --network=host \
+  --build-arg ARCH=amd64 \
+  --build-arg VERSION=1.0.0 \
+  --build-arg BUILDDATE=20250227 \
+  --file Dockerfile \
+  --platform linux/amd64 \
+  --attest type=provenance,disabled=true \
+  --attest type=sbom,disabled=true \
+  --tag aetherinox/tvapp2:1.0.0-amd64 \
+  --builder default \
+  --output type=docker \
+  --no-cache \
+  --pull \
+  .
 ```
 
 <br />
@@ -322,8 +440,37 @@ docker build --build-arg VERSION=1.0.0 --build-arg BUILDDATE=20250220 -t tvapp2:
 ### arm64 / aarch64
 
 ```shell
-# Build tvapp2 arm64
-docker build --build-arg VERSION=1.0.0 --build-arg BUILDDATE=20250220 -t tvapp2:1.0.0-arm64 -f Dockerfile.aarch64 .
+# tvapp2 - arm64: using docker buildx
+docker buildx build \
+  --build-arg ARCH=arm64 \
+  --build-arg VERSION=1.0.0 \
+  --build-arg BUILDDATE=20250226 \
+  --tag aetherinox/tvapp2:1.0.0-arm64 \
+  --file Dockerfile \
+  --platform linux/arm64 \
+  --attest type=provenance,disabled=true \
+  --attest type=sbom,disabled=true \
+  --output type=docker \
+  --no-cache \
+  --pull \
+  .
+
+# tvapp2 - arm64: using docker build
+docker build \
+  --network=host \
+  --build-arg ARCH=arm64 \
+  --build-arg VERSION=1.0.0 \
+  --build-arg BUILDDATE=20250226 \
+  --file Dockerfile \
+  --platform linux/arm64 \
+  --attest type=provenance,disabled=true \
+  --attest type=sbom,disabled=true \
+  --tag aetherinox/tvapp2:1.0.0-arm64 \
+  --builder default \
+  --output type=docker \
+  --no-cache \
+  --pull \
+  .
 ```
 
 <br />
