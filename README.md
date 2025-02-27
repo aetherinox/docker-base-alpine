@@ -77,7 +77,7 @@ To build a docker image using this base and the actual app you want to release (
 
 <br />
 
-When you build this **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image, the `Dockerfile` and `Dockerfile.aarch64` files will request files from another branch we host, which is the **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)** branch.
+When you build this **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image, the `Dockerfile` will request files from another branch we host, which is the **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)** branch.
 
 ```bash
 ADD --chmod=755 "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/core/docker-images.${MODS_VERSION}" "/docker-images"
@@ -125,11 +125,11 @@ For the branches **[docker/alpine-base](https://github.com/Aetherinox/docker-bas
 <br />
 
 ```shell
-# Change ALL files
-find ./ -type f | grep -Ev '.git|*.jpg|*.jpeg|*.png' | xargs dos2unix --
+#Change ALL files
+find ./ -type f | grep -Ev '.git|*.jpg|*.jpeg|*.png' | sudo xargs dos2unix --
 
 # Change run / binaries
-find ./ -type f -name 'run' | xargs dos2unix --
+find ./ -type f -name 'run' | sudo xargs dos2unix --
 ```
 
 <br />
@@ -146,12 +146,13 @@ dos2unix with-contenv.v1
 <br />
 
 ### Set `+x / 0755` Permissions
+
 The files contained within this repo **MUST** have `chmod 755` /  `+x` executable permissions. If you are using our Github workflow sample **[deploy-docker-github.yml](https://github.com/Aetherinox/docker-base-alpine/blob/workflows/samples/deploy-docker-github.yml)**, this is done automatically. If you are building the images manually; you need to do this. Ensure those files have the correct permissions prior to building the Alpine base docker image.
 
 If you are building the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** or **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)** images, you must ensure the files in those branches have the proper permissions. All of the executable files are named `run`:
 
 ```shell
-find ./ -name 'run' -exec chmod +x {} \;
+find ./ -name 'run' -exec sudo chmod +x {} \;
 ```
 
 <br />
@@ -198,7 +199,7 @@ sudo chmod +x docker-images.v3 \
 In order to use the files in this repo `docker/alpine-base`, clone the branch:
 
 ```shell
-git clone -b docker/alpine-base https://github.com/Aetherinox/docker-base-alpine.git .
+git clone -b docker/alpine-base https://github.com/aetherinox/docker-base-alpine.git .
 ```
 
 <br />
@@ -320,8 +321,7 @@ flowchart TB
 subgraph GRAPH_TVAPP ["Build tvapp2:latest"]
     direction TB
     obj_step10["`&gt; git clone github.com/thebinaryninja/tvapp2.git`"]
-    obj_step11["`**Dockerfile
-     Dockerfile.aarch64**`"]
+    obj_step11["`Dockerfile`"]
     obj_step12["`&gt; docker build &bsol;
     --build-arg VERSION=1.0.0 &bsol;
     --build-arg BUILDDATE=20250220 &bsol;
@@ -342,8 +342,7 @@ style GRAPH_TVAPP text-align:center,stroke-width:1px,stroke:transparent,fill:tra
 subgraph GRAPH_ALPINE["Build alpine-base:latest Image"]
 direction TB
     obj_step20["`&gt; git clone -b docker/alpine-base github.com/Aetherinox/docker-base-alpine.git`"]
-    obj_step21["`**Dockerfile
-     Dockerfile.aarch64**`"]
+    obj_step21["`Dockerfile`"]
     obj_step22["`&gt; docker build &bsol;
     --build-arg VERSION=3.20 &bsol;
     --build-arg BUILDDATE=20250220 &bsol;
@@ -475,6 +474,7 @@ docker build \
 <br />
 
 ### Using docker buildx
+
 This section explains how to build your application's docker image using `docker buildx` instead of `docker build`. It is useful when generating your app's image for multiple platforms.
 
 <br />
@@ -504,8 +504,8 @@ docker buildx rm container
 <br />
 
 Next, create your new docker image. Two different commands are provided below:
-- Method to save docker image locally
-- Push docker image to registry
+- [Method to save docker image locally](#save-local-image)
+- [Push docker image to registry](#upload-to-registry)
 
 <br />
 <br />
@@ -514,6 +514,7 @@ Next, create your new docker image. Two different commands are provided below:
 The command below will save a local copy of your application's docker image, which can be immediately used, or seen using `docker ps`
 
 ```shell
+# tvapp2 - amd64: using docker buildx
 docker buildx build \
   --build-arg ARCH=amd64 \
   --build-arg VERSION=1.0.0 \
