@@ -822,31 +822,58 @@ This image spits out detailed information about its current progress. You can ei
 <br />
 
 ```shell
+ CustomInit   : No custom services found, skipping...
  Migrations   : Started
- Migrations   : 01-nginx-site-confs-default › Skipped
- Migrations   : Complete
+ Migrations   : No migrations found
+ SSL          : Using existing keys found in /config/keys
 ──────────────────────────────────────────────────────────────────────────────────────────
-                               Alpine by Aetherinox                               
+                                TVApp2 Docker Image
 ──────────────────────────────────────────────────────────────────────────────────────────
-  Get started with some of the links below:
+  The TvApp2 image allows you to fetch M3U playlist and EPG data for numerous
+  IPTV services online.
 
-        Official Repo           https://github.com/Aetherinox/docker-base-alpine
+  Once the files are fetched by the image, you can visit the self-hosted webpage,
+  copy the links to the M3U and EPG files; and add them to your favorite IPTV app
+  such as Jellyfin, Plex, or Emby.
+
+  For more information about this project; visit the links below. This app is
+  served on multiple repositories as backup. Use any of the repo links below:
+
+        TVApp2 Repo 1           https://github.com/TheBinaryNinja/tvapp2
+        TVApp2 Repo 2           https://git.binaryninja.net/BinaryNinja/tvapp2
+        Base Alpine Image       https://github.com/Aetherinox/docker-base-alpine
 
   If you are making this container available on a public-facing domain,
   please consider using Traefik and Authentik to protect this container from
-  outside access.
+  outside access. Your M3U and EPG files will be available for the public to
+  download and use.
 
-        User:Group              1000:1000
-        (Ports) HTTP/HTTPS      80/443
+        User:Group              911:911
+        Port(s)                 4124
+        Gateway                 172.26.0.1
+        Web Server              172.26.0.2:4124
+        App Folder              /usr/bin/app
+
 ──────────────────────────────────────────────────────────────────────────────────────────
-
- SSL          : Using existing keys found in /config/keys
- Loader       : Custom files found, loading them ...
+ Loader       : Plugins found, loading them ...
  Loader       : Executing ...
  Loader       : Checking tvapp2-plugins
- Loader       : tvapp2-plugins already installed in /config/www/plugins; skipping
- Loader       : plugins: Exited 0
+ Loader       : plugins: Ran Successfully with code [0]
  Core         : Completed loading container
+
+> tvapp2@1.0.0 start
+> node index.js
+
+Process locals
+[2:17:38 PM] Initializing server...
+Fetching https://git.binaryninja.net/binaryninja//tvapp2-externals/raw/branch/main/urls.txt
+[2:17:38 PM] Success: /usr/bin/app/urls.txt
+Fetching https://git.binaryninja.net/binaryninja//tvapp2-externals/raw/branch/main/formatted.dat
+[2:17:39 PM] Success: /usr/bin/app/formatted.dat
+Fetching https://git.binaryninja.net/binaryninja///XMLTV-EPG/raw/branch/main/xmltv.1.xml
+[2:17:45 PM] Success: /usr/bin/app/xmltv.1.xml
+[2:17:45 PM] Initialization complete.
+[2:17:45 PM] Server is running on port 4124
 ```
 
 <br />
