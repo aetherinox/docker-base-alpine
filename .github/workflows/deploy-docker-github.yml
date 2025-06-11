@@ -245,11 +245,11 @@ jobs:
                   NOW_DOCKER_TS="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
                   echo "NOW_DOCKER_TS=${NOW_DOCKER_TS}" >> $GITHUB_ENV
 
-                  HASH_SHA1="$(git rev-parse HEAD)"                                                 #  71fad013cfce9116ec62779e4a7e627fe4c33627
-                  echo "HASH_SHA1=${HASH_SHA1}" >> $GITHUB_ENV
+                  SHA1="$(git rev-parse HEAD)"                                                      #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "SHA1=${SHA1}" >> $GITHUB_ENV
 
-                  HASH_SHA1_GH="$(echo ${GITHUB_SHA})"                                              #  71fad013cfce9116ec62779e4a7e627fe4c33627
-                  echo "HASH_SHA1_GH=${HASH_SHA1_GH}" >> $GITHUB_ENV
+                  SHA1_GH="$(echo ${GITHUB_SHA})"                                                   #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "SHA1_GH=${SHA1_GH}" >> $GITHUB_ENV
 
                   PKG_VER_1DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
                   echo "PKG_VER_1DIGIT=${PKG_VER_1DIGIT}" >> $GITHUB_ENV
@@ -277,8 +277,10 @@ jobs:
                   echo " Repo Owner .......... #${{ github.repository_owner }}"
                   echo " Run ID .............. https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   echo " Triggered By ........ ${{ github.actor }}"
-                  echo " SHA 1 ............... ${GITHUB_SHA}"
-                  echo " SHA 2 ............... ${{ github.sha }}"
+                  echo " SHA 1 (GITHUB_SHA) .. ${GITHUB_SHA}"
+                  echo " SHA 2 (github.sha) .. ${{ github.sha }}"
+                  echo " SHA 3 (env.SHA1) .... ${SHA1}"
+                  echo " SHA 4 (env.SHA1_GH) . ${SHA1_GH}"
                   echo " Workspace ........... ${{ github.workspace }}"
                   echo " PWD ................. ${PWD}"
                   echo " Job Name ............ ${{ steps.context.outputs.job_name }}"
@@ -387,6 +389,7 @@ jobs:
             #   Release › Github › Start
             # #
 
+
             - name: >-
                   ✅ Start
               run: |
@@ -395,35 +398,35 @@ jobs:
                   echo " Starting Job ${{ steps.context.outputs.job_name }}"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
 
-                  year="$(date +'%Y')"
-                  echo "YEAR=${year}" >> $GITHUB_ENV
+                  YEAR="$(date +'%Y')"
+                  echo "YEAR=${YEAR}" >> $GITHUB_ENV
 
-                  now="$(date +'%m-%d-%Y %H:%M:%S')"                                                #  02-25-2025 12:49:48
-                  echo "NOW=${now}" >> $GITHUB_ENV
+                  NOW="$(date +'%m-%d-%Y %H:%M:%S')"                                                #  02-25-2025 12:49:48
+                  echo "NOW=${NOW}" >> $GITHUB_ENV
 
-                  now_short="$(date +'%m-%d-%Y')"                                                   #  02-25-2025
-                  echo "NOW_SHORT=${now_short}" >> $GITHUB_ENV
+                  NOW_SHORT="$(date +'%m-%d-%Y')"                                                   #  02-25-2025
+                  echo "NOW_SHORT=${NOW_SHORT}" >> $GITHUB_ENV
 
-                  now_long="$(date +'%m-%d-%Y %H:%M')"                                              #  02-25-2025 12:49
-                  echo "NOW_LONG=${now_long}" >> $GITHUB_ENV
+                  NOW_LONG="$(date +'%m-%d-%Y %H:%M')"                                              #  02-25-2025 12:49
+                  echo "NOW_LONG=${NOW_LONG}" >> $GITHUB_ENV
 
-                  now_docker="$(date +'%Y%m%d')"                                                    #  20250225
-                  echo "NOW_DOCKER=${now_docker}" >> $GITHUB_ENV
+                  NOW_DOCKER="$(date +'%Y%m%d')"                                                    #  20250225
+                  echo "NOW_DOCKER=${NOW_DOCKER}" >> $GITHUB_ENV
 
-                  now_docker_ts="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
-                  echo "NOW_DOCKER_TS=${now_docker}" >> $GITHUB_ENV
+                  NOW_DOCKER_TS="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
+                  echo "NOW_DOCKER_TS=${NOW_DOCKER_TS}" >> $GITHUB_ENV
 
-                  hash_sha1="$(git rev-parse HEAD)"                                                 #  71fad013cfce9116ec62779e4a7e627fe4c33627
-                  echo "HASH_SHA1=${hash_sha1}" >> $GITHUB_ENV
+                  SHA1="$(git rev-parse HEAD)"                                                      #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "SHA1=${SHA1}" >> $GITHUB_ENV
 
-                  hash_sha1_gh="$(echo ${GITHUB_SHA})"                                              #  71fad013cfce9116ec62779e4a7e627fe4c33627
-                  echo "HASH_SHA1_GH=${hash_sha1_gh}" >> $GITHUB_ENV
+                  SHA1_GH="$(echo ${GITHUB_SHA})"                                                   #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "SHA1_GH=${SHA1_GH}" >> $GITHUB_ENV
 
-                  pkg_ver_1digit="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
-                  echo "PKG_VER_1DIGIT=${pkg_ver_1digit}" >> $GITHUB_ENV
+                  PKG_VER_1DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
+                  echo "PKG_VER_1DIGIT=${PKG_VER_1DIGIT}" >> $GITHUB_ENV
 
-                  pkg_ver_2digit="$(echo ${{ env.IMAGE_VERSION }} | cut -f2 -d ":" | cut -c1-3)"    #  3.22 > 3.2
-                  echo "PKG_VER_2DIGIT=${pkg_ver_2digit}" >> $GITHUB_ENV
+                  PKG_VER_2DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -f2 -d ":" | cut -c1-3)"    #  3.22 > 3.2
+                  echo "PKG_VER_2DIGIT=${PKG_VER_2DIGIT}" >> $GITHUB_ENV
 
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
                   echo "‎"
@@ -445,8 +448,10 @@ jobs:
                   echo " Repo Owner .......... #${{ github.repository_owner }}"
                   echo " Run ID .............. https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   echo " Triggered By ........ ${{ github.actor }}"
-                  echo " SHA 1 ............... ${GITHUB_SHA}"
-                  echo " SHA 2 ............... ${{ github.sha }}"
+                  echo " SHA 1 (GITHUB_SHA) .. ${GITHUB_SHA}"
+                  echo " SHA 2 (github.sha) .. ${{ github.sha }}"
+                  echo " SHA 3 (env.SHA1) .... ${SHA1}"
+                  echo " SHA 4 (env.SHA1_GH) . ${SHA1_GH}"
                   echo " Workspace ........... ${{ github.workspace }}"
                   echo " PWD ................. ${PWD}"
                   echo " Job Name ............ ${{ steps.context.outputs.job_name }}"
@@ -628,7 +633,7 @@ jobs:
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
                       org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}"
                       org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
-                      org.alpine.image.build-sha1=${{ env.HASH_SHA1 }}
+                      org.alpine.image.build-sha1=${{ env.SHA1 }}
                   annotations: |
                       org.opencontainers.image.description=Alpine base image
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
@@ -641,7 +646,7 @@ jobs:
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
                       org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}"
                       org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
-                      org.alpine.image.build-sha1=${{ env.HASH_SHA1 }}
+                      org.alpine.image.build-sha1=${{ env.SHA1 }}
 
             # #
             #   Release › Github › Build and Push › Amd64
@@ -669,7 +674,7 @@ jobs:
                       RELEASE=${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}
                       VERSION=${{ env.IMAGE_VERSION }}
                       BUILDDATE=${{ env.NOW_DOCKER }}
-                      GIT_SHA1=${{ env.HASH_SHA1 }}
+                      GIT_SHA1=${{ env.SHA1 }}
                   annotations: |
                       org.opencontainers.image.description=Alpine base image
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
@@ -684,7 +689,7 @@ jobs:
                       org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}"
                       org.alpine.image.build-architecture=amd64
                       org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
-                      org.alpine.image.build-sha1=${{ env.HASH_SHA1 }}
+                      org.alpine.image.build-sha1=${{ env.SHA1 }}
 
             # #
             #   Release › Github › Export Digest › Amd64
@@ -740,7 +745,7 @@ jobs:
                       RELEASE=${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}
                       VERSION=${{ env.IMAGE_VERSION }}
                       BUILDDATE=${{ env.NOW_DOCKER }}
-                      GIT_SHA1=${{ env.HASH_SHA1 }}
+                      GIT_SHA1=${{ env.SHA1 }}
                   annotations: |-
                       org.opencontainers.image.description=Alpine base image
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
@@ -755,7 +760,7 @@ jobs:
                       org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}"
                       org.alpine.image.build-architecture=arm64
                       org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
-                      org.alpine.image.build-sha1=${{ env.HASH_SHA1 }}
+                      org.alpine.image.build-sha1=${{ env.SHA1 }}
 
             # #
             #   Release › Github › Export Digest › Arm64
@@ -823,7 +828,7 @@ jobs:
                   echo "env.NOW_DOCKER_TS ........................ ${{ env.NOW_DOCKER_TS }}"
                   echo "env.REGISTRY_REPO_ORG_AUTHOR_LC .......... ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}"
                   echo "env.REGISTRY_REPO_AUTHOR_LC .............. ${{ env.REGISTRY_REPO_AUTHOR_LC }}"
-                  echo "env.HASH_SHA1 ............................ ${{ env.HASH_SHA1 }}"
+                  echo "env.SHA1 ................................. ${{ env.SHA1 }}"
                   echo -e ""
                   echo "---- [ DOCKER IMAGES ] ---------------------------------------------------------------------------------"
                   echo "registry ................................. ${{ env.IMAGE_REGISTRY }} GHCR"
@@ -962,6 +967,7 @@ jobs:
             #   Cleanup › Tags › Start
             # #
 
+
             - name: >-
                   ✅ Start
               run: |
@@ -970,35 +976,35 @@ jobs:
                   echo " Starting Job ${{ steps.context.outputs.job_name }}"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
 
-                  year="$(date +'%Y')"
-                  echo "YEAR=${year}" >> $GITHUB_ENV
+                  YEAR="$(date +'%Y')"
+                  echo "YEAR=${YEAR}" >> $GITHUB_ENV
 
-                  now="$(date +'%m-%d-%Y %H:%M:%S')"                                                #  02-25-2025 12:49:48
-                  echo "NOW=${now}" >> $GITHUB_ENV
+                  NOW="$(date +'%m-%d-%Y %H:%M:%S')"                                                #  02-25-2025 12:49:48
+                  echo "NOW=${NOW}" >> $GITHUB_ENV
 
-                  now_short="$(date +'%m-%d-%Y')"                                                   #  02-25-2025
-                  echo "NOW_SHORT=${now_short}" >> $GITHUB_ENV
+                  NOW_SHORT="$(date +'%m-%d-%Y')"                                                   #  02-25-2025
+                  echo "NOW_SHORT=${NOW_SHORT}" >> $GITHUB_ENV
 
-                  now_long="$(date +'%m-%d-%Y %H:%M')"                                              #  02-25-2025 12:49
-                  echo "NOW_LONG=${now_long}" >> $GITHUB_ENV
+                  NOW_LONG="$(date +'%m-%d-%Y %H:%M')"                                              #  02-25-2025 12:49
+                  echo "NOW_LONG=${NOW_LONG}" >> $GITHUB_ENV
 
-                  now_docker="$(date +'%Y%m%d')"                                                    #  20250225
-                  echo "NOW_DOCKER=${now_docker}" >> $GITHUB_ENV
+                  NOW_DOCKER="$(date +'%Y%m%d')"                                                    #  20250225
+                  echo "NOW_DOCKER=${NOW_DOCKER}" >> $GITHUB_ENV
 
-                  now_docker_ts="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
-                  echo "NOW_DOCKER_TS=${now_docker}" >> $GITHUB_ENV
+                  NOW_DOCKER_TS="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
+                  echo "NOW_DOCKER_TS=${NOW_DOCKER_TS}" >> $GITHUB_ENV
 
-                  hash_sha1="$(git rev-parse HEAD)"                                                 #  71fad013cfce9116ec62779e4a7e627fe4c33627
-                  echo "HASH_SHA1=${hash_sha1}" >> $GITHUB_ENV
+                  SHA1="$(git rev-parse HEAD)"                                                      #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "SHA1=${SHA1}" >> $GITHUB_ENV
 
-                  hash_sha1_gh="$(echo ${GITHUB_SHA})"                                              #  71fad013cfce9116ec62779e4a7e627fe4c33627
-                  echo "HASH_SHA1_GH=${hash_sha1_gh}" >> $GITHUB_ENV
+                  SHA1_GH="$(echo ${GITHUB_SHA})"                                                   #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "SHA1_GH=${SHA1_GH}" >> $GITHUB_ENV
 
-                  pkg_ver_1digit="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
-                  echo "PKG_VER_1DIGIT=${pkg_ver_1digit}" >> $GITHUB_ENV
+                  PKG_VER_1DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
+                  echo "PKG_VER_1DIGIT=${PKG_VER_1DIGIT}" >> $GITHUB_ENV
 
-                  pkg_ver_2digit="$(echo ${{ env.IMAGE_VERSION }} | cut -f2 -d ":" | cut -c1-3)"    #  3.22 > 3.2
-                  echo "PKG_VER_2DIGIT=${pkg_ver_2digit}" >> $GITHUB_ENV
+                  PKG_VER_2DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -f2 -d ":" | cut -c1-3)"    #  3.22 > 3.2
+                  echo "PKG_VER_2DIGIT=${PKG_VER_2DIGIT}" >> $GITHUB_ENV
 
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
                   echo "‎"
@@ -1020,8 +1026,10 @@ jobs:
                   echo " Repo Owner .......... #${{ github.repository_owner }}"
                   echo " Run ID .............. https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   echo " Triggered By ........ ${{ github.actor }}"
-                  echo " SHA 1 ............... ${GITHUB_SHA}"
-                  echo " SHA 2 ............... ${{ github.sha }}"
+                  echo " SHA 1 (GITHUB_SHA) .. ${GITHUB_SHA}"
+                  echo " SHA 2 (github.sha) .. ${{ github.sha }}"
+                  echo " SHA 3 (env.SHA1) .... ${SHA1}"
+                  echo " SHA 4 (env.SHA1_GH) . ${SHA1_GH}"
                   echo " Workspace ........... ${{ github.workspace }}"
                   echo " PWD ................. ${PWD}"
                   echo " Job Name ............ ${{ steps.context.outputs.job_name }}"
