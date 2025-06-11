@@ -12,18 +12,13 @@ ARG ALPINE_VERSION="3.21.3"
 FROM alpine:${ALPINE_VERSION} AS rootfs-stage
 
 # #
-#   alpine › general
+#   alpine › args
 #
 #   ARCH            x86_64
 #                   aarch64
 # #
 
 ARG ARCH=x86_64
-
-# #
-#   alpine › args
-# #
-
 ARG REPO_AUTHOR="aetherinox"
 ARG REPO_NAME="docker-base-alpine"
 ARG S6_OVERLAY_VERSION="3.1.6.2"
@@ -135,42 +130,43 @@ ADD --chmod=755 "https://raw.githubusercontent.com/${REPO_AUTHOR}/${REPO_NAME}/d
 # #
 
 ENV PS1="$(whoami)@$(hostname):$(pwd)\\$ " \
-  HOME="/root" \
-  TERM="xterm" \
-  S6_CMD_WAIT_FOR_SERVICES_MAXTIME="0" \
-  S6_VERBOSITY=1 \
-  S6_STAGE2_HOOK=/docker-images \
-  VIRTUAL_ENV=/aetherxpy \
-  PATH="/aetherxpy/bin:$PATH"
+    HOME="/root" \
+    TERM="xterm" \
+    S6_CMD_WAIT_FOR_SERVICES_MAXTIME="0" \
+    S6_VERBOSITY=1 \
+    S6_STAGE2_HOOK=/docker-images \
+    VIRTUAL_ENV=/aetherxpy \
+    PATH="/aetherxpy/bin:$PATH"
 
 RUN \
-  echo "**** INSTALLING RUNTIME PACKAGES ****" && \
-  apk add --no-cache \
-    alpine-release \
-    bash \
-    nano \
-    ca-certificates \
-    catatonit \
-    coreutils \
-    curl \
-    findutils \
-    jq \
-    netcat-openbsd \
-    procps-ng \
-    shadow \
-    tzdata && \
-  echo "**** CREATE USER 'dockerx' AND GENERATE STRUCTURE ****" && \
-  groupmod -g 1000 users && \
-  useradd -u 911 -U -d /config -s /bin/false dockerx && \
-  usermod -G users dockerx && \
-  mkdir -p \
-    /app \
-    /config \
-    /defaults \
-    /aetherxpy && \
-  echo "**** CLEANUP ****" && \
-  rm -rf \
-    /tmp/*
+    echo "**** INSTALLING RUNTIME PACKAGES ****" && \
+    apk add --no-cache \
+        alpine-release \
+        bash \
+        nano \
+        ca-certificates \
+        catatonit \
+        coreutils \
+        curl \
+        findutils \
+        jq \
+        git \
+        netcat-openbsd \
+        procps-ng \
+        shadow \
+        tzdata && \
+    echo "**** CREATE USER 'dockerx' AND GENERATE STRUCTURE ****" && \
+    groupmod -g 1000 users && \
+    useradd -u 911 -U -d /config -s /bin/false dockerx && \
+    usermod -G users dockerx && \
+    mkdir -p \
+        /app \
+        /config \
+        /defaults \
+        /aetherxpy && \
+    echo "**** CLEANUP ****" && \
+    rm -rf \
+        /tmp/*
 
 # #
 #   scratch › add local files
