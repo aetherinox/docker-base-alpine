@@ -221,45 +221,43 @@ jobs:
               uses: actions/github-script@v7
               with:
                   script: |
-                      try
-                      {
-
-                          const cacheConf =
+                          try
                           {
-                              owner: context.repo.owner,
-                              repo: context.repo.repo,
-                              per_page: 100,
-                          };
-
-
-                          console.log( "Cleaning Cacher" )
-                          const caches = await github.rest.actions.getActionsCacheList( cacheConf )
-
-                          while( caches.data.actions_caches.length )
-                          {
-                              for ( const cache of caches.data.actions_caches )
+                              const cacheConf =
                               {
-                                  console.log( `Clearing cache id: ${cache.key} (${cache.id})` )
-                                  const res = await github.rest.actions.deleteActionsCacheById(
+                                  owner: context.repo.owner,
+                                  repo: context.repo.repo,
+                                  per_page: 100,
+                              };
+
+                              console.log( `Starting to clean cache` )
+                              const caches = await github.rest.actions.getActionsCacheList( cacheConf )
+
+                              while( caches.data.actions_caches.length )
+                              {
+                                  for ( const cache of caches.data.actions_caches )
                                   {
-                                      owner: context.repo.owner,
-                                      repo: context.repo.repo,
-                                      cache_id: cache.id,
-                                  });
-                                  console.log( `Cache item ${cache.key} (${cache.id}) cleared at ${new Date().toISOString()}` )
+                                      console.log( `⚠️ Clearing cache id: ${cache.key} (${cache.id})` )
+                                      const res = await github.rest.actions.deleteActionsCacheById(
+                                      {
+                                          owner: context.repo.owner,
+                                          repo: context.repo.repo,
+                                          cache_id: cache.id,
+                                      });
+                                      console.log( `✔️ Cache item ${cache.key} (${cache.id}) cleared at ${new Date().toISOString()}` )
+                                  }
+
+                                  caches = await github.rest.actions.getActionsCacheList(congif);
+                                  console.log( `Getting another ${caches.data.actions_caches.length} caches from github ...` );
                               }
 
-                              caches = await github.rest.actions.getActionsCacheList(congif);
-                              console.log(`Getting another ${caches.data.actions_caches.length} caches from github...`);
+                              console.log( `✔️ Finished cleaning the cache` );
                           }
-
-                          console.log( "Finished cleaning the cache" );
-                      }
-                      catch( e )
-                      {
-                          console.log( "The workflow had terminated with an error:", e )
-                          return;
-                      }
+                          catch( e )
+                          {
+                              console.log( `❌ The workflow has terminated with an error:`, e )
+                              return;
+                          }
 
             # #
             #   Cache › Clean › Get Weekly Commits
