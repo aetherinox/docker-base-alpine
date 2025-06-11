@@ -101,7 +101,7 @@ finalization (`cont-finish.d`) and their own services with dependencies between 
 To build a docker image using this base and the actual app you want to release, you need two different docker images:
 
 - **Step 1**: Build **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image **(this repo)**
-  - When being build, the alpine-base `📄 Dockerfile` will grab and install the files from the branch **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)**
+  - When being built, the alpine-base `📄 Dockerfile` will grab and install the files from the branch **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)**
 - **Step 2**: Build your app's docker image that will run on top of this alpine image
 - **Step 3**: Release the docker image built from **Step 2** to Github's **Ghcr.io** or **hub.docker.com**
 
