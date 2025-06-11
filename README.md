@@ -35,6 +35,8 @@ Normal users should not need to modify the files in this repository.
 <br />
 
 - [About](#about)
+  - [Features](#features)
+  - [Read First](#read-first)
 - [Building Image](#building-image)
   - [Before Building](#before-building)
     - [LF over CRLF](#lf-over-crlf)
@@ -70,11 +72,34 @@ Normal users should not need to modify the files in this repository.
 
 The files contained within this branch `docker/alpine-base` are utilized as a foundation. This base image only provides us with a docker image which has alpine linux, Nginx, a few critical packages, and the **[s6-overlay](https://github.com/just-containers/s6-overlay)** plugin.
 
-This branch `docker/alpine-base` does **NOT** contain any applications. It is only to be used as a base image which will be called when you build your docker app's `Dockerfile`.
+This branch `docker/alpine-base` does **NOT** contain any applications. It is only to be used as a base image which will be called when you build your docker app's `📄 Dockerfile`.
+
+<br />
+<br />
+
+### Features
+
+This docker image includes the following features:
+
+* Simple init process which allows the end-user to execute tasks like initialization (`cont-init.d`),
+finalization (`cont-finish.d`) and their own services with dependencies between them
+* s6-overlay integration provides proper `PID 1` functionality
+  * You'll never have zombie processes hanging around in your container, they are properly managed and cleaned up.
+* Multiple processes in a single container
+* Distributed as a small number of .tar.xz files depending on what exact functionality you need - to keep your image's number of layers small.
+* A whole set of utilities included in `s6` and `s6-portable-utils`. Includes handy and composable utilities which make life much easier.
+* Log rotating out-of-the-box through `logutil-service` which uses [`s6-log`](https://skarnet.org/software/s6/s6-log.html) under the hood.
+* Support for Docker's `USER` directive, to run your whole process tree as a specific user.
 
 <br />
 
-To build a docker image using this base and the actual app you want to release (TVApp2), you need two different docker images:
+### Read First
+
+<br />
+<br />
+
+To build a docker image using this base and the actual app you want to release, you need two different docker images:
+
 - **Step 1**: Build **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image **(this repo)**
   - When being build, the alpine-base `📄 Dockerfile` will grab and install the files from the branch **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)**
 - **Step 2**: Build your app's docker image that will run on top of this alpine image
@@ -225,7 +250,6 @@ sudo chmod +x docker-images.v3 \
 ### Build Images
 
 After completing the steps above; we will now build the [🔆 docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core) image.
-
 
 <br />
 
@@ -929,7 +953,7 @@ Once the base alpine image is built, you can now use it to build the actual dock
 
 ## Using Image
 
-To use your new docker alpine base image, you simply need to reference it in your project's `📄 Dockerfile`. Open your app's `Dockerfile`, and add:
+To use your new docker alpine base image, you simply need to reference it in your project's `📄 Dockerfile`. Open your app's `📄 Dockerfile`, and add:
 
 ```dockerfile
 ARG ARCH=amd64
@@ -959,7 +983,7 @@ The following are other things to take into consideration when creating the **[d
 
 ### Accessing Container Shell
 
-The TVApp2 docker image is built on Alpine Linux, but also includes the `📦 bash` package. Use one of the following to access the shell for this container:
+Any project docker image built using this base image contains Alpine Linux, but also includes the `📦 bash` package. Use one of the following to access the shell for this container:
 
 <br />
 
@@ -990,7 +1014,7 @@ docker exec -it alpine-base bash
 
 ### Custom Docker Image Scripts
 
-The `docker/alpine-base` and `TVApp2` images support the ability of adding custom scripts that will be ran when the container is started. To create / add a new custom script to the container, you need to create a new folder in the container source files `/root` folder
+The `docker/alpine-base` and any project docker images which use this alpine base image, support the ability of adding custom scripts that will be ran when the container is started. To create / add a new custom script to the container, you need to create a new folder in the container source files `/root` folder
 
 ```shell
 mkdir -p /root/custom-cont-init.d/
