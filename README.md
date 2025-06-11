@@ -26,27 +26,20 @@ This branch `docker/base-alpine` contains the base docker alpine image which is 
 <br />
 
 - [About](#about)
-- [Before Building](#before-building)
-  - [LF over CRLF](#lf-over-crlf)
-  - [Set `+x / 0755` Permissions](#set-x--0755-permissions)
-- [Build `docker/alpine-base` Image](#build-dockeralpine-base-image)
-  - [Build \& Push](#build--push)
-    - [Release: Stable](#release-stable)
-    - [Release: Development](#release-development)
-  - [Build Locally; then Push](#build-locally-then-push)
-    - [Release: Stable](#release-stable-1)
-    - [Release: Development](#release-development-1)
-- [Build `TvApp` Image](#build-tvapp-image)
-  - [amd64](#amd64)
-  - [arm64 / aarch64](#arm64--aarch64)
-  - [Using docker buildx](#using-docker-buildx)
-    - [Save Local Image](#save-local-image)
-    - [Upload to Registry](#upload-to-registry)
-  - [Upload to hub.docker.com / ghcr.io / local](#upload-to-hubdockercom--ghcrio--local)
-  - [Image Tags](#image-tags)
-- [Using TvApp Image](#using-tvapp-image)
-  - [docker run](#docker-run)
-  - [docker-compose.yml](#docker-composeyml)
+- [Building Image](#building-image)
+  - [Before Building](#before-building)
+    - [LF over CRLF](#lf-over-crlf)
+    - [Set `+x / 0755` Permissions](#set-x--0755-permissions)
+  - [Build Images](#build-images)
+    - [Build Single Architecture](#build-single-architecture)
+      - [amd64](#amd64)
+      - [arm64](#arm64)
+    - [Build All Architectures \& Manifest](#build-all-architectures--manifest)
+      - [Stable - amd64](#stable---amd64)
+      - [Stable - arm64](#stable---arm64)
+      - [Development - amd64](#development---amd64)
+      - [Development - arm64](#development---arm64)
+- [Using Image](#using-image)
 - [Extra Notes](#extra-notes)
   - [Custom Scripts](#custom-scripts)
   - [SSL Certificates](#ssl-certificates)
@@ -62,6 +55,7 @@ This branch `docker/base-alpine` contains the base docker alpine image which is 
 <br />
 
 ## About
+
 The files contained within this branch `docker/alpine-base` are utilized as a foundation. This base image only provides us with a docker image which has alpine linux, Nginx, a few critical packages, and the **[s6-overlay](https://github.com/just-containers/s6-overlay)** plugin.
 
 This branch `docker/alpine-base` does **NOT** contain any applications. For our example, we will use the application **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)**.
@@ -70,7 +64,7 @@ This branch `docker/alpine-base` does **NOT** contain any applications. For our 
 
 To build a docker image using this base and the actual app you want to release (TVApp2), you need two different docker images:
 - **Step 1**: Build **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image **(this repo)**
-  - When being build, the alpine-base `Dockerfile` will grab and install the files from the branch **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)**
+  - When being build, the alpine-base `📄 Dockerfile` will grab and install the files from the branch **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)**
 - **Step 2**: Build **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)** image
 - **Step 3**: Release the docker image built from **Step 2** to Github's **Ghcr.io** or **hub.docker.com**
 
@@ -81,7 +75,7 @@ To build a docker image using this base and the actual app you want to release (
 
 <br />
 
-When you build this **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image, the `Dockerfile` will request files from another branch we host, which is the **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)** branch.
+When you build this **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image, the `📄 Dockerfile` will request files from another branch we host, which is the **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)** branch.
 
 ```bash
 ADD --chmod=755 "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/core/docker-images.${MODS_VERSION}" "/docker-images"
@@ -101,9 +95,26 @@ For this reason, there are a few requirements you can read about below in the se
 
 <br >
 
-## Before Building
+## Building Image
 
-Prior to building the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)** docker images, you **must** ensure the following conditions are met. If the below tasks are not performed, your docker container will throw the following errors when started:
+These instructions outline how the alpine docker image is set up, and how to build your own docker image.
+
+<br />
+
+### Before Building
+
+Prior to building the  docker image, you **must** ensure the sections below are completed.
+
+- [LF over CRLF](#lf-over-crlf)
+- [Set +x / 0755 Permissions](#set-x--0755-permissions)
+
+<br />
+
+The **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)** docker images, you **must** ensure the following conditions are met. 
+
+<br />
+
+If the listed tasks above are not performed, your docker container will throw the following errors when started:
 
 - `Failed to open apk database: Permission denied`
 - `s6-rc: warning: unable to start service init-adduser: command exited 127`
@@ -113,27 +124,31 @@ Prior to building the **[docker/alpine-base](https://github.com/Aetherinox/docke
 
 <br />
 
-### LF over CRLF
+#### LF over CRLF
 
-You cannot utilize Windows' `Carriage Return Line Feed`. All files must be converted to Unix' `Line Feed`.  This can be done with **[Visual Studio Code](https://code.visualstudio.com/)**. OR; you can run the Linux terminal command `dos2unix` to convert these files.
+You cannot utilize Windows' `Carriage Return Line Feed`. All files must be converted to Unix' `Line Feed`.  This can be done with **[Visual Studio Code](https://code.visualstudio.com/)**. OR; you can run the Linux terminal command `🗔 dos2unix` to convert these files.
 
 For the branches **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)**, you can use the following recursive commands:
 
 <br />
 
 > [!CAUTION]
-> Be careful using the command to change **ALL** files. You should **NOT** change the files in your `.git` folder, otherwise you will corrupt your git indexes.
+> Be careful using the command to change **ALL** files. You should **NOT** change the files in your `📁 .git` folder, otherwise you will corrupt your git indexes.
 >
-> If you accidentally run dos2unix on your `.git` folder, do NOT push anything to git. Pull a new copy from the repo.
+> If you accidentally run `🗔 dos2unix` on your `📁 .git` folder, do NOT push anything to git. Pull a new copy from the repo or reset your local files back to the remote:
+> 
+> ```shell
+> git reset --hard origin/main
+> ```
 
 <br />
 
 ```shell
-#Change ALL files
-find ./ -type f | grep -Ev '.git|*.jpg|*.jpeg|*.png' | sudo xargs dos2unix --
+# Change ALL files
+find ./ -type f | grep -Ev '.git|*.jpg|*.jpeg|*.png' | xargs dos2unix --
 
 # Change run / binaries
-find ./ -type f -name 'run' | sudo xargs dos2unix --
+find ./ -type f -name 'run' | xargs dos2unix --
 ```
 
 <br />
@@ -149,7 +164,7 @@ dos2unix with-contenv.v1
 
 <br />
 
-### Set `+x / 0755` Permissions
+#### Set `+x / 0755` Permissions
 
 The files contained within this repo **MUST** have `chmod 755` /  `+x` executable permissions. If you are using our Github workflow sample **[deploy-docker-github.yml](https://github.com/Aetherinox/docker-base-alpine/blob/workflows/samples/deploy-docker-github.yml)**, this is done automatically. If you are building the images manually; you need to do this. Ensure those files have the correct permissions prior to building the Alpine base docker image.
 
@@ -161,7 +176,7 @@ find ./ -name 'run' -exec sudo chmod +x {} \;
 
 <br />
 
-If you want to set the permissions manually, run the following:
+<sub><sup>Optional - </sup></sub> If you want to set the permissions manually, run the following below. If you executed the `find` command above, you don't need to run the list of commands below:
 
 ```shell
 sudo chmod +x ./root/etc/s6-overlay/s6-rc.d/init-adduser/run \
@@ -193,31 +208,296 @@ sudo chmod +x docker-images.v3 \
 ```
 
 <br />
+<br />
 
----
+### Build Images
+
+After completing the steps above; we will now build the [🔆 docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core) image.
+
 
 <br />
 
-## Build `docker/alpine-base` Image
+Open the `📄 Dockerfile` and ensure you are pulling the correct Alpine base image. This code is located near the top of the `📄 Dockerfile`:
 
-In order to use the files in this repo `docker/alpine-base`, clone the branch:
+```dockerfile
+ARG ALPINE_VERSION="3.21.3"
+FROM alpine:${ALPINE_VERSION} AS rootfs-stage
 
-```shell
-git clone -b docker/alpine-base https://github.com/aetherinox/docker-base-alpine.git .
+ARG ARCH=x86_64
+ARG REPO_AUTHOR="aetherinox"
+ARG REPO_NAME="docker-base-alpine"
+ARG S6_OVERLAY_VERSION="3.1.6.2"
+ARG S6_OVERLAY_ARCH="${ARCH}"
 ```
 
 <br />
 
-Once cloned, you can now make whatever adjustments you deem fit to the docker image (updates, new packages, etc). After your edits are done, you will need to do the following:
-
-- Build two new docker images with different tags:
-  - `aetherinox/alpine-base:3.21-amd64`
-  - `aetherinox/alpine-base:3.21-arm64`
-- Merge the two docker images together to make a single docker image which contains both `amd64` and `arm64` by creating a new manifest and pushing the new manifest / image to the docker registry you want.
+> [!NOTE]
+> The `ARCH` argument supports two options; which you will specify by using the argument `--build-arg ARCH=x86_64` in your buildx command:
+> 
+> - `x86_64`
+> - `aarch64`
 
 <br />
 
-Since we are building a docker image for different architectures, we need to install `QEMU` which is an emulator. Open your terminal and run the following command:
+Next, select which type of image you want to build below.
+
+- [Build Single Architecture](#build-single-architecture)
+- [Build All Architectures & Manifest](#build-all-architectures--manifest)
+
+<br />
+<br />
+
+#### Build Single Architecture
+
+All of the needed Docker files already exist in the repository. To get started, clone the repo to a folder
+
+```shell
+mkdir docker-alpine && cd docker-alpine
+
+# to clone from our github website
+git clone https://github.com/Aetherinox/docker-base-alpine.git --branch docker/alpine-base .
+```
+
+<br />
+
+If you do not need to build both `amd64` and `arm64`, you can simply build one architecture. First, create a new buildx container:
+
+```shell
+docker buildx create --driver docker-container --name container --bootstrap --use
+```
+
+<br />
+
+<sub><sup>Optional - </sup></sub> If you first need to remove the provider container because you created it previously, run the command:
+
+```shell
+docker buildx rm container
+docker buildx create --driver docker-container --name container --bootstrap --use
+```
+
+<br />
+
+To list all buildx build containers, run:
+
+```shell
+docker buildx ls
+```
+
+<br />
+
+Before you can push the image, ensure you are signed into Docker CLI. Open your Linux terminal and see if you are already signed in:
+
+```shell
+docker info | grep Username
+```
+
+<br />
+
+If nothing is printed; then you are not signed in. Initiate the web login:
+
+```shell
+docker login
+```
+
+<br />
+
+Some text will appear on-screen, copy the code, open your browser, and go to https://login.docker.com/activate
+
+```console
+USING WEB BASED LOGIN
+To sign in with credentials on the command line, use 'docker login -u <username>'
+
+Your one-time device confirmation code is: XXXX-XXXX
+Press ENTER to open your browser or submit your device code here: https://login.docker.com/activate
+
+Waiting for authentication in the browser…
+```
+
+<br />
+
+Once finished in your browser, return to your Linux terminal, and it should bring you back to where you can type a command. You can now verify again if you are signed in:
+
+```shell
+docker info | grep Username
+```
+
+<br />
+
+You should see your name:
+
+```console
+ Username: aetherinox
+```
+
+<br />
+
+You are ready to build the alpine docker image, run the command for your platform:
+
+<br />
+
+##### amd64
+
+Creates the alpine `amd64` docker image:
+
+```shell
+# Build alpine amd64
+docker buildx build \
+  --build-arg ARCH=x86_64 \
+  --build-arg VERSION=3.21 \
+  --build-arg BUILDDATE=20260812 \
+  --build-arg RELEASE=stable \
+  --tag ghcr.io/aetherinox/alpine-base:latest \
+  --tag ghcr.io/aetherinox/alpine-base:3 \
+  --tag ghcr.io/aetherinox/alpine-base:3.2 \
+  --tag ghcr.io/aetherinox/alpine-base:3.21 \
+  --tag ghcr.io/aetherinox/alpine-base:3.21-amd64 \
+  --attest type=provenance,disabled=true \
+  --attest type=sbom,disabled=true \
+  --output type=docker \
+  --builder default \
+  --file Dockerfile \
+  --platform linux/amd64 \
+  --allow network.host \
+  --network host \
+  --no-cache \
+  --push \
+  .
+```
+
+<br />
+
+##### arm64
+
+Creates the alpine `arm64` docker image:
+
+```shell
+# Build alpine arm64
+docker buildx build \
+  --build-arg ARCH=aarch64 \
+  --build-arg VERSION=3.21 \
+  --build-arg BUILDDATE=20260812 \
+  --build-arg RELEASE=stable \
+  --tag ghcr.io/aetherinox/alpine-base:latest \
+  --tag ghcr.io/aetherinox/alpine-base:3 \
+  --tag ghcr.io/aetherinox/alpine-base:3.2 \
+  --tag ghcr.io/aetherinox/alpine-base:3.21 \
+  --tag ghcr.io/aetherinox/alpine-base:3.21-arm64 \
+  --attest type=sbom,disabled=true \
+  --output type=docker \
+  --builder default \
+  --file Dockerfile \
+  --platform linux/arm64 \
+  --allow network.host \
+  --network host \
+  --no-cache \
+  --push \
+  .
+```
+
+<br />
+
+> [!NOTE]
+> If you want to only build the alpine docker image locally; remove `--push`.
+
+<br />
+
+After building the image, you can now use the image either with `🗔 docker run` or a `📄 docker-compose.yml` file. These instructions are available by skipping down to the sections:
+
+- [🗔 Docker Run](#docker-run-1)
+- [📄 Docker Compose](#docker-compose-1)
+
+
+<br />
+<br />
+
+#### Build All Architectures & Manifest
+
+These instructions tell you how to build the `stable` and `development` releases for both the `amd64` and `arm64` architectures. Then you will combine all manifests into one release.
+
+All of the needed Docker files already exist in the repository. To get started, clone the repo to a folder
+
+```shell
+mkdir docker-alpine && cd docker-alpine
+
+# to clone from our github website
+git clone https://github.com/Aetherinox/docker-base-alpine.git --branch docker/alpine-base .
+```
+
+<br />
+
+First, create a new buildx container:
+
+```shell
+docker buildx create --driver docker-container --name container --bootstrap --use
+```
+
+<br />
+
+<sub><sup>Optional - </sup></sub> If you first need to remove the container because you created it previously, run the command:
+
+```shell
+docker buildx rm container
+docker buildx create --driver docker-container --name container --bootstrap --use
+```
+
+<br />
+
+To list all buildx build containers, run:
+
+```shell
+docker buildx ls
+```
+
+<br />
+
+Before you can push the image, ensure you are signed into Docker CLI. Open your Linux terminal and see if you are already signed in:
+
+```shell
+docker info | grep Username
+```
+
+<br />
+
+If nothing is printed; then you are not signed in. Initiate the web login:
+
+```shell
+docker login
+```
+
+<br />
+
+Some text will appear on-screen, copy the code, open your browser, and go to https://login.docker.com/activate
+
+```console
+USING WEB BASED LOGIN
+To sign in with credentials on the command line, use 'docker login -u <username>'
+
+Your one-time device confirmation code is: XXXX-XXXX
+Press ENTER to open your browser or submit your device code here: https://login.docker.com/activate
+
+Waiting for authentication in the browser…
+```
+
+<br />
+
+Once you are finished in your browser, you can return to your Linux terminal, and it should bring you back to where you can type a command. You can now verify again if you are signed in:
+
+```shell
+docker info | grep Username
+```
+
+<br />
+
+You should see your name:
+
+```console
+ Username: aetherinox
+```
+
+<br />
+
+Next, in order to build the `amd64` and `arm64` images on the same machine; you must install **QEMU** which is an emulator. Open your terminal and run the following command:
 
 ```shell
 docker run --privileged --rm tonistiigi/binfmt --install all
@@ -234,105 +514,58 @@ If you are building these docker images using Github workflow, you will also nee
 ```
 
 <br />
-<br />
 
-Before we build the images; keep note that in order to merge the two docker images `amd64` and `arm64` together, you must first push the docker images to a registry. We provide instructions on how to push directly to a registry, or building the images locally and then pushing. Select an option below:
+Once the emulator is installed; we will now build two images. When building these two images; we will ensure the `--tag` value is different for each one, by adding the architecture to the end. This ensures we don't overwrite one image with the newer one. We need to have two seperate docker images with two different tags.
 
-- [Build & Push](#build--push)
-- [Build Locally; then Push](#build-locally-then-push)
-
-<br />
-
-### Build & Push
-
-This option allows you to build each docker image for `amd64` and `arm64` and then directly push / upload the docker image to a registry. Open your terminal and run the commands below. These commands will use the argument `--push` which means that right after the image is built, it is pushed to a registry depending on what tag is used.
+- `--tag ghcr.io/aetherinox/alpine-base:3.21-amd64`
+- `--tag ghcr.io/aetherinox/alpine-base:3.21-arm64`
 
 <br />
 
-#### Release: Stable
+> [!NOTE]
+> The build commands below will push the docker image to Github's GHCR registry. If you wish to use another registry, edit the **--tag**:
+>
+> The `--tag <registry>` argument is what determines what registry your image will be pushed to. You can change this to any registry:
+> 
+> | Registry | Tag |
+> | --- | --- |
+> | Dockerhub | `--tag aetherinox/alpine-base:3.21-amd64`<br>`--tag aetherinox/alpine-base:3.21-arm64` |
+> | Github (GHCR) | `--tag ghcr.io/aetherinox/alpine-base:3.21-amd64`<br>`--tag ghcr.io/aetherinox/alpine-base:3.21-arm64` |
+> | Registry v2 | `--tag registry.domain.lan/aetherinox/alpine-base:3.21-amd64`<br>`--tag registry.domain.lan/aetherinox/alpine-base:3.21-arm64` |
+> | Gitea | `--tag git.binaryninja.net/aetherinox/alpine-base:3.21-amd64`<br>`--tag git.binaryninja.net/aetherinox/alpine-base:3.21-arm64` |
+
+<br />
+
+After we build these two images and push them to a registry online; merge them into a single docker image which contains both arcitectures.
+
+<br />
+
+> [!WARNING]
+> In order to merge the two architecture images into one; you **MUST** `--push` each of the two docker images to a registry first. You cannot modify the manifests locally.
+
+<br />
+
+##### Stable - amd64
+
+Creates the alpine **Stable** release `amd64` docker image:
 
 ```shell
-# alpine-base - Stable (amd64): using docker buildx
+# Build alpine amd64 - (stable release)
 docker buildx build \
-  --network host \
   --build-arg ARCH=x86_64 \
   --build-arg VERSION=3.21 \
-  --build-arg BUILDDATE=20250321 \
-  --file Dockerfile \
-  --platform linux/amd64 \
-  --attest type=provenance,disabled=true \
-  --attest type=sbom,disabled=true \
-  --output type=docker \
-  --no-cache \
+  --build-arg BUILDDATE=20260812 \
+  --build-arg RELEASE=stable \
   --tag ghcr.io/aetherinox/alpine-base:3.21-amd64 \
-  --pull \
-  --push \
-  .
-
-# alpine-base - Stable (arm64): using docker buildx
-docker buildx build \
-  --network host \
-  --build-arg ARCH=aarch64 \
-  --build-arg VERSION=3.21 \
-  --build-arg BUILDDATE=20250321 \
-  --file Dockerfile \
-  --platform linux/arm64 \
   --attest type=provenance,disabled=true \
   --attest type=sbom,disabled=true \
   --output type=docker \
-  --no-cache \
-  --tag ghcr.io/aetherinox/alpine-base:3.21-arm64 \
-  --pull \
-  --push \
-  .
-```
-
-<br />
-
-The `--tag <registry>` argument is what determines what registry your image will be pushed to. You can change this to any registry:
-
-| Registry | Tag |
-| --- | --- |
-| Dockerhub | `--tag aetherinox/alpine-base:3.21-amd64`<br>`--tag aetherinox/alpine-base:3.21-arm64` |
-| Github (GHCR) | `--tag ghcr.io/aetherinox/alpine-base:3.21-amd64`<br>`--tag ghcr.io/aetherinox/alpine-base:3.21-arm64` |
-| Registry v2 | `--tag registry.domain.lan/aetherinox/alpine-base:3.21-amd64`<br>`--tag registry.domain.lan/aetherinox/alpine-base:3.21-arm64` |
-| Gitea | `--tag gitea.domain.lan/aetherinox/alpine-base:3.21-amd64`<br>`--tag gitea.domain.lan/aetherinox/alpine-base:3.21-arm64` |
-
-<br />
-
-#### Release: Development
-
-```shell
-# alpine-base - Development (amd64): using docker buildx
-docker buildx build \
-  --network host \
-  --build-arg ARCH=x86_64 \
-  --build-arg VERSION=3.21 \
-  --build-arg BUILDDATE=20250321 \
+  --builder default \
   --file Dockerfile \
   --platform linux/amd64 \
-  --attest type=provenance,disabled=true \
-  --attest type=sbom,disabled=true \
-  --output type=docker \
-  --no-cache \
-  --tag ghcr.io/aetherinox/alpine-base:development-amd64 \
-  --pull \
-  --push \
-  .
-
-# alpine-base - Development (arm64): using docker buildx
-docker buildx build \
+  --allow network.host \
   --network host \
-  --build-arg ARCH=aarch64 \
-  --build-arg VERSION=3.21 \
-  --build-arg BUILDDATE=20250321 \
-  --file Dockerfile \
-  --platform linux/arm64 \
-  --attest type=provenance,disabled=true \
-  --attest type=sbom,disabled=true \
-  --output type=docker \
   --no-cache \
-  --tag ghcr.io/aetherinox/alpine-base:development-arm64 \
   --pull \
   --push \
   .
@@ -340,26 +573,117 @@ docker buildx build \
 
 <br />
 
-The `--tag <registry>` argument is what determines what registry your image will be pushed to. You can change this to any registry:
+##### Stable - arm64
 
-| Registry | Tag |
-| --- | --- |
-| Dockerhub | `--tag aetherinox/alpine-base:development-amd64`<br>`--tag aetherinox/alpine-base:development-arm64` |
-| Github (GHCR) | `--tag ghcr.io/aetherinox/alpine-base:development-amd64`<br>`--tag ghcr.io/aetherinox/alpine-base:development-arm64` |
-| Registry v2 | `--tag registry.domain.lan/aetherinox/alpine-base:development-amd64`<br>`--tag registry.domain.lan/aetherinox/alpine-base:development-arm64` |
-| Gitea | `--tag gitea.domain.lan/aetherinox/alpine-base:development-amd64`<br>`--tag gitea.domain.lan/aetherinox/alpine-base:development-arm64` |
+Creates the Alpine **Stable** release `arm64` docker image:
+
+```shell
+# Build alpine arm64 - (stable release)
+docker buildx build \
+  --build-arg ARCH=aarch64 \
+  --build-arg VERSION=3.21 \
+  --build-arg BUILDDATE=20260812 \
+  --build-arg RELEASE=stable \
+  --tag ghcr.io/aetherinox/alpine-base:3.21-arm64 \
+  --attest type=provenance,disabled=true \
+  --attest type=sbom,disabled=true \
+  --output type=docker \
+  --builder default \
+  --file Dockerfile \
+  --platform linux/arm64 \
+  --allow network.host \
+  --network host \
+  --no-cache \
+  --pull \
+  --push \
+  .
+```
 
 <br />
 
-After completing the `docker buildx` commands above; you should now have two new images. Each image should have its own separate docker tags which do not conflict. 
+##### Development - amd64
+
+Creates the Alpine **Development** release `amd64` docker image:
+
+```shell
+# Build alpine amd64 - (development release)
+docker buildx build \
+  --build-arg ARCH=x86_64 \
+  --build-arg VERSION=3.21 \
+  --build-arg BUILDDATE=20260812 \
+  --build-arg RELEASE=development \
+  --tag ghcr.io/aetherinox/alpine-base:development-amd64 \
+  --attest type=provenance,disabled=true \
+  --attest type=sbom,disabled=true \
+  --output type=docker \
+  --builder default \
+  --file Dockerfile \
+  --platform linux/amd64 \
+  --allow network.host \
+  --network host \
+  --no-cache \
+  --pull \
+  --push \
+  .
+```
 
 <br />
 
-<p align="center"><img style="width: 40%;text-align: center;" src="docs/readme/img/01.jpg"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images</sup></sub></p>
+##### Development - arm64
+
+Creates the Alpine **Development** release `arm64` docker image:
+
+```shell
+# Build alpine arm64 - (development release)
+docker buildx build \
+  --build-arg ARCH=aarch64 \
+  --build-arg VERSION=3.21 \
+  --build-arg BUILDDATE=20260812 \
+  --build-arg RELEASE=development \
+  --tag ghcr.io/aetherinox/alpine-base:development-arm64 \
+  --attest type=provenance,disabled=true \
+  --attest type=sbom,disabled=true \
+  --output type=docker \
+  --builder default \
+  --file Dockerfile \
+  --platform linux/arm64 \
+  --allow network.host \
+  --network host \
+  --no-cache \
+  --pull \
+  --push \
+  .
+```
 
 <br />
 
-Next, we need to take these two images, and merge them into one so that both architectures are available without having to push separate images.  You need to obtain the `SHA256` hash digest of the two different images. You can go to the registry where you uploaded the images and then copy them. Or you can run the following commands:
+After completing the `docker buildx` commands above; you should now have a few new images. Each image should have its own separate docker tags which do not conflict. If you decided to not build the **development** releases below; that is fine.
+
+<br />
+
+- `--tag ghcr.io/aetherinox/alpine-base:3.21-amd64`
+- `--tag ghcr.io/aetherinox/alpine-base:3.21-arm64`
+- `--tag ghcr.io/aetherinox/alpine-base:development-amd64`
+- `--tag ghcr.io/aetherinox/alpine-base:development-arm64`
+
+<br />
+
+Next, we need to take these two images, and merge them into one so that both architectures are available without having to push separate images. You need to obtain the SHA256 hash digest for the `amd64` and `arm64` images. You can go to the registry where you uploaded the images and then copy them. Or you can run the commands specified below depending on which release type you want:
+
+<br />
+<br />
+
+**Stable Release**
+
+If you are building the **stable release** images; you should see the following:
+
+<br />
+
+<p align="center"><img style="width: 80%;text-align: center;" src="docs/img/core/01.png"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images</sup></sub></p>
+
+<br />
+
+You can also get the hash digests by running the commands:
 
 ```shell
 $ docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.21-amd64
@@ -378,6 +702,37 @@ Digest:    sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75d
 <br />
 <br />
 
+**Development Release**
+
+If you are building the **development release** images; you should see the following:
+
+<br />
+
+<p align="center"><img style="width: 70%;text-align: center;" src="docs/img/core/04.png"><br><sub><sup><b>Registry v2:</b> Newly created <code>development-amd64</code> and <code>development-arm64</code> images</sup></sub></p>
+
+<br />
+
+You can also get the hash digests by running the commands:
+
+<br />
+
+```shell
+$ docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:development-amd64
+
+Name:      ghcr.io/aetherinox/alpine-base:development-amd64
+MediaType: application/vnd.docker.distribution.manifest.v2+json
+Digest:    sha256:8f36385a28c8f6eb7394d903c9a7a2765b06f94266b32628389ee9e3e3d7e69d
+
+$ docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:development-arm64
+
+Name:      ghcr.io/aetherinox/alpine-base:development-arm64
+MediaType: application/vnd.docker.distribution.manifest.v2+json
+Digest:    sha256:c719ccb034946e3f0625003f25026d001768794e38a1ba8aafc9146291d548c5
+```
+
+<br />
+<br />
+
 > [!WARNING]
 > **Wrong Digest Hashes**
 > 
@@ -390,11 +745,22 @@ Digest:    sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75d
 > 
 > ghcr.io/aetherinox/alpine-base   3.21-amd64        sha256:dea4cb91379dba289d8d3e8842d4fb7b7857faa7f3d02d5b9a043a1ee58e61d7   4 minutes ago   27.3MB
 > ```
+>
+> To get the correct sha256 digest, use:
+> - `docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.21-amd64`
+> - `docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.21-arm64`
+> - `docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:development-amd64`
+> - `docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:development-arm64`
+> 
 
 <br />
 <br />
 
-Once you have the correct `SHA256` hash digests; paste them into the command below.
+Once you have the correct `SHA256` hash digests; paste them into the command below. This command is where you can specify the real `--tag` that the public image will have. The previous tags were simply placeholders and no longer matter.
+
+<br />
+
+For the **stable** releases, use:
 
 ```shell
 # #
@@ -402,13 +768,26 @@ Once you have the correct `SHA256` hash digests; paste them into the command bel
 # #
 
 docker buildx imagetools create \
-  --tag ghcr.io/aetherinox/alpine-base:3.21 \
-  --tag ghcr.io/aetherinox/alpine-base:3.2 \
-  --tag ghcr.io/aetherinox/alpine-base:3 \
   --tag ghcr.io/aetherinox/alpine-base:latest \
-  sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda \
-  sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8
+  --tag ghcr.io/aetherinox/alpine-base:3 \
+  --tag ghcr.io/aetherinox/alpine-base:3.2 \
+  --tag ghcr.io/aetherinox/alpine-base:3.21 \
 
+  sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8 \
+  sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda
+
+[+] Building 0.2s (4/4) FINISHED                                                                                                                                                                                                      
+ => [internal] pushing ghcr.io/aetherinox/alpine-base:latest     0.2s
+ => [internal] pushing ghcr.io/aetherinox/alpine-base:3          0.2s
+ => [internal] pushing ghcr.io/aetherinox/alpine-base:3.2        0.2s
+ => [internal] pushing ghcr.io/aetherinox/alpine-base:3.21       0.2s
+```
+
+<br />
+
+For the **development** releases, use:
+
+```shell
 # #
 #    Image > Development
 # #
@@ -417,11 +796,19 @@ docker buildx imagetools create \
   --tag ghcr.io/aetherinox/alpine-base:development \
   sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda \
   sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8
+
+[+] Building 0.1s (1/1) FINISHED
+ => [internal] pushing ghcr.io/aetherinox/alpine-base:development   0.1s
 ```
 
 <br />
 
-Alternatively, you could use the `manifest create` command; as an example, you can merge multiple architecture images together into a single image. The top line with `aetherinox/alpine-base:latest` can be any name. However, all images after `--amend` MUST be already existing images uploaded to the registry.
+> [!NOTE]
+> Compared to the **stable** release which has 4 tags; the **development** release only has one tag.
+
+<br />
+
+Alternatively, you could use the `🗔 manifest create` command; as an example, you can merge multiple architecture images together into a single image. The top line with `🔖 aetherinox/alpine-base:latest` can be any name. However, all images after `--amend` MUST be already existing images uploaded to the registry.
 
 ```shell
 docker manifest create ghcr.io/aetherinox/alpine-base:latest \
@@ -444,8 +831,8 @@ docker manifest create ghcr.io/aetherinox/alpine-base:latest \
 
 # Example 2 (using sha256 hash)
 docker manifest create ghcr.io/aetherinox/alpine-base:latest \
-    --amend ghcr.io/aetherinox/alpine-base@sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda \
-    --amend ghcr.io/aetherinox/alpine-base@sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8
+    --amend ghcr.io/aetherinox/alpine-base@sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8 \
+    --amend ghcr.io/aetherinox/alpine-base@sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda
 
 # Push manifest changes to registry
 docker manifest push ghcr.io/aetherinox/alpine-base:latest
@@ -455,237 +842,14 @@ docker manifest push ghcr.io/aetherinox/alpine-base:latest
 
 If you go back to your registry; you should now see multiple new entries, all with different tags. Two of the images are your old `amd64` and `arm64` images, and then you should have your official one with the four tags specified above. You can delete the two original images if you do not want them.
 
-<br />
-
-<p align="center"><img style="width: 40%;text-align: center;" src="docs/readme/img/02.jpg"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images, and merged containers with both architectures</sup></sub></p>
+<p align="center"><img style="width: 80%;text-align: center;" src="docs/img/core/02.png"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images, and merged containers with both architectures</sup></sub></p>
 
 <br />
 <br />
 
-### Build Locally; then Push
+If you are pushing to Github's GHCR; the interface will look different, as Github merges all tags into a single listing, instead of Registry v2 listing each tag on its own:
 
-This option allows you to build each docker image for `amd64` and `arm64` and save them locally. Once the images are built; they will **not** be automatically pushed to a registry. These commands will **remove** the argument `--push` which means that right after the image is built, nothing will be pushed to a registry; only that it will be saved locally.
-
-<br />
-
-#### Release: Stable
-
-```shell
-# alpine-base - Stable (amd64): using docker buildx
-docker buildx build \
-  --network host \
-  --build-arg ARCH=x86_64 \
-  --build-arg VERSION=3.21 \
-  --build-arg BUILDDATE=20250321 \
-  --file Dockerfile \
-  --platform linux/amd64 \
-  --attest type=provenance,disabled=true \
-  --attest type=sbom,disabled=true \
-  --output type=docker \
-  --no-cache \
-  --tag ghcr.io/aetherinox/alpine-base:3.21-amd64 \
-  --pull \
-  .
-
-# alpine-base - Stable (arm64): using docker buildx
-docker buildx build \
-  --network host \
-  --build-arg ARCH=aarch64 \
-  --build-arg VERSION=3.21 \
-  --build-arg BUILDDATE=20250321 \
-  --file Dockerfile \
-  --platform linux/arm64 \
-  --attest type=provenance,disabled=true \
-  --attest type=sbom,disabled=true \
-  --output type=docker \
-  --no-cache \
-  --tag ghcr.io/aetherinox/alpine-base:3.21-arm64 \
-  --pull \
-  .
-```
-
-<br />
-
-The `--tag <registry>` argument is what determines what registry your image will be pushed to. You can change this to any registry:
-
-| Registry | Tag |
-| --- | --- |
-| Dockerhub | `--tag aetherinox/alpine-base:3.21-amd64`<br>`--tag aetherinox/alpine-base:3.21-arm64` |
-| Github (GHCR) | `--tag ghcr.io/aetherinox/alpine-base:3.21-amd64`<br>`--tag ghcr.io/aetherinox/alpine-base:3.21-arm64` |
-| Registry v2 | `--tag registry.domain.lan/aetherinox/alpine-base:3.21-amd64`<br>`--tag registry.domain.lan/aetherinox/alpine-base:3.21-arm64` |
-| Gitea | `--tag gitea.domain.lan/aetherinox/alpine-base:3.21-amd64`<br>`--tag gitea.domain.lan/aetherinox/alpine-base:3.21-arm64` |
-
-<br />
-
-#### Release: Development
-
-```shell
-# alpine-base - Development (amd64): using docker buildx
-docker buildx build \
-  --network host \
-  --build-arg ARCH=x86_64 \
-  --build-arg VERSION=3.21 \
-  --build-arg BUILDDATE=20250321 \
-  --file Dockerfile \
-  --platform linux/amd64 \
-  --attest type=provenance,disabled=true \
-  --attest type=sbom,disabled=true \
-  --output type=docker \
-  --no-cache \
-  --tag ghcr.io/aetherinox/alpine-base:development-amd64 \
-  --pull \
-  --push \
-  .
-
-# alpine-base - Development (arm64): using docker buildx
-docker buildx build \
-  --network host \
-  --build-arg ARCH=aarch64 \
-  --build-arg VERSION=3.21 \
-  --build-arg BUILDDATE=20250321 \
-  --file Dockerfile \
-  --platform linux/arm64 \
-  --attest type=provenance,disabled=true \
-  --attest type=sbom,disabled=true \
-  --output type=docker \
-  --no-cache \
-  --tag ghcr.io/aetherinox/alpine-base:development-arm64 \
-  --pull \
-  --push \
-  .
-```
-
-<br />
-
-The `--tag <registry>` argument is what determines what registry your image will be pushed to. You can change this to any registry:
-
-| Registry | Tag |
-| --- | --- |
-| Dockerhub | `--tag aetherinox/alpine-base:development-amd64`<br>`--tag aetherinox/alpine-base:development-arm64` |
-| Github (GHCR) | `--tag ghcr.io/aetherinox/alpine-base:development-amd64`<br>`--tag ghcr.io/aetherinox/alpine-base:development-arm64` |
-| Registry v2 | `--tag registry.domain.lan/aetherinox/alpine-base:development-amd64`<br>`--tag registry.domain.lan/aetherinox/alpine-base:development-arm64` |
-| Gitea | `--tag gitea.domain.lan/aetherinox/alpine-base:development-amd64`<br>`--tag gitea.domain.lan/aetherinox/alpine-base:development-arm64` |
-
-<br />
-
-After completing the `docker buildx` commands above; you should now have two new images. Each image should have its own separate docker tags which do not conflict. Next, we need to take these two images, and merge them into one so that both architectures are available without having to push separate images. 
-
-The issue is that you cannot merge these two images into one until you upload the images to a registry. If you did not specify a registry in your tag; then you will need to first add a tag to each of the two images, The following command will find any image with the tag `alpine-base:3.21-***64` and add a new tag with a specified registry called `ghcr.io/aetherinox/alpine-base:3.21-***64`
-
-```shell
-docker image tag alpine-base:3.21-amd64 ghcr.io/aetherinox/alpine-base:3.21-amd64
-docker image tag alpine-base:3.21-arm64 ghcr.io/aetherinox/alpine-base:3.21-arm64
-```
-
-<br />
-
-Once the tag is added, upload the image to the registry
-```shell
-docker image push ghcr.io/aetherinox/alpine-base:3.21-amd64
-docker image push ghcr.io/aetherinox/alpine-base:3.21-arm64
-```
-
-<br />
-
-You need to obtain the `SHA256` hash digest of the two different images. You can go to the registry where you uploaded the images and then copy them. Or you can run the following commands:
-
-```shell
-$ docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.21-amd64
-
-Name:      ghcr.io/aetherinox/alpine-base:3.21-amd64
-MediaType: application/vnd.docker.distribution.manifest.v2+json
-Digest:    sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8
-
-$ docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.21-arm64
-
-Name:      ghcr.io/aetherinox/alpine-base:3.21-arm64
-MediaType: application/vnd.docker.distribution.manifest.v2+json
-Digest:    sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda
-```
-
-<br />
-<br />
-
-> [!WARNING]
-> **Wrong Digest Hashes**
-> 
-> Be warned that when you push docker images to your docker registry; the `SHA256` hash digest will be different than what you have locally. If you use the following command; these digests will be **incorrect**:
-> 
-> ```shell
-> $ docker images --all --no-trunc | grep aetherinox
-> 
-> ghcr.io/aetherinox/alpine-base   3.21-arm64        sha256:bb425429e98ab467fd91474701da2e5c0a7cb4a5f218a710d950eb0ff595486c   3 minutes ago   38.8MB
-> 
-> ghcr.io/aetherinox/alpine-base   3.21-amd64        sha256:dea4cb91379dba289d8d3e8842d4fb7b7857faa7f3d02d5b9a043a1ee58e61d7   4 minutes ago   27.3MB
-> ```
-
-<br />
-<br />
-
-Once you have the correct `SHA256` hash digests; paste them into the command below.
-
-```shell
-# #
-#    Image > Stable
-# #
-
-docker buildx imagetools create \
-  --tag ghcr.io/aetherinox/alpine-base:3.21 \
-  --tag ghcr.io/aetherinox/alpine-base:3.2 \
-  --tag ghcr.io/aetherinox/alpine-base:3 \
-  --tag ghcr.io/aetherinox/alpine-base:latest \
-  sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda \
-  sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8
-
-# #
-#    Image > Development
-# #
-
-docker buildx imagetools create \
-  --tag ghcr.io/aetherinox/alpine-base:development \
-  sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda \
-  sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8
-```
-
-<br />
-
-Alternatively, you could use the `manifest create` command; as an example, you can merge multiple architecture images together into a single image. The top line with `aetherinox/alpine-base:latest` can be any name. However, all images after `--amend` MUST be already existing images uploaded to the registry.
-
-```shell
-docker manifest create ghcr.io/aetherinox/alpine-base:latest \
-    --amend ghcr.io/aetherinox/alpine-base:latest-amd64 \
-    --amend ghcr.io/aetherinox/alpine-base:latest-arm32v7 \
-    --amend ghcr.io/aetherinox/alpine-base:latest-arm64v8
-
-docker manifest push ghcr.io/aetherinox/alpine-base:latest
-```
-
-<br />
-
-In this example, we take the existing two files we created earlier, and merge them into one. You can either specify the image by `SHA256 digest`, or tag:
-
-```shell
-# Example 1 (using tag)
-docker manifest create ghcr.io/aetherinox/alpine-base:latest \
-    --amend ghcr.io/aetherinox/alpine-base:3.21-amd64 \
-    --amend ghcr.io/aetherinox/alpine-base:3.21-arm64
-
-# Example 2 (using sha256 hash)
-docker manifest create ghcr.io/aetherinox/alpine-base:latest \
-    --amend ghcr.io/aetherinox/alpine-base@sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda \
-    --amend ghcr.io/aetherinox/alpine-base@sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8
-
-# Push manifest changes to registry
-docker manifest push ghcr.io/aetherinox/alpine-base:latest
-```
-
-<br />
-
-If you go back to your registry; you should now see multiple new entries, all with different tags. Two of the images are your old `amd64` and `arm64` images, and then you should have your official one with the four tags specified above. You can delete the two original images if you do not want them.
-
-<br />
-
-<p align="center"><img style="width: 40%;text-align: center;" src="docs/readme/img/02.jpg"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images, and merged containers with both architectures</sup></sub></p>
+<p align="center"><img style="width: 80%;text-align: center;" src="docs/img/core/03.png"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images, and merged containers with both architectures</sup></sub></p>
 
 <br />
 
@@ -743,7 +907,8 @@ GRAPH_ALPINE --> obj_step20 --> obj_step21 --> obj_step22 --> obj_step23 --> obj
 
 <br />
 
-Once the base alpine image is built, you can now build the actual docker version of your app (such as **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)**.
+Once the base alpine image is built, you can now use it to build the actual docker version of your app, in our example, we are building **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2).
+
 
 <br />
 
@@ -751,338 +916,23 @@ Once the base alpine image is built, you can now build the actual docker version
 
 <br />
 
-## Build `TvApp` Image
+## Using Image
 
-After the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image is built, you can now use that docker image as a base to build the **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)** image. Navigate to the repo and open the file:
-
-- `Dockerfile`
-
-<br />
-
-Next, specify the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image which will be used as the foundation of the **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)** image:
+To use your new docker alpine image, you simply need to reference it in your project's `📄 Dockerfile`. In our example, we will use the `📄 Dockerfile` from the project **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2).
 
 ```dockerfile
 ARG ARCH=amd64
-FROM --platform=linux/${ARCH} ghcr.io/aetherinox/alpine-base:3.21
+ARG ALPINE_VERSION=3.21
+FROM --platform=linux/${ARCH} ghcr.io/aetherinox/alpine-base:${ALPINE_VERSION}
 ```
 
 <br />
 
-After you have completed configuring the **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)** `Dockerfile`, you can now build the image. Remember to build an image for both `amd64` and `aarch64`.
+In the Dockerfile code above, you will see that we are pulling from `ghcr.io/aetherinox/alpine-base:${ALPINE_VERSION}`; where `${ALPINE_VERSION}` gets replaced with the version of alpine we wish to use. At the time of writing this, it is `3.21`.
 
 <br />
 
-For the argument `VERSION`; specify the current release of your app (**[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)**) which will be contained within the docker image. It should be in the format of `YYYYMMDD`:
-
-<br />
-
-### amd64
-
-```shell
-# tvapp2 - amd64: using docker buildx
-docker buildx build \
-  --build-arg ARCH=amd64 \
-  --build-arg VERSION=1.0.0 \
-  --build-arg BUILDDATE=20250227 \
-  --tag thebinaryninja/tvapp2:latest \
-  --tag thebinaryninja/tvapp2:1.0.0-amd64 \
-  --file Dockerfile \
-  --platform linux/amd64 \
-  --attest type=provenance,disabled=true \
-  --attest type=sbom,disabled=true \
-  --output type=docker \
-  --no-cache \
-  --pull \
-  .
-
-# tvapp2 - amd64: using docker build
-docker build \
-  --network=host \
-  --build-arg ARCH=amd64 \
-  --build-arg VERSION=1.0.0 \
-  --build-arg BUILDDATE=20250227 \
-  --tag thebinaryninja/tvapp2:1.0.0-amd64 \
-  --file Dockerfile \
-  --platform linux/amd64 \
-  --attest type=provenance,disabled=true \
-  --attest type=sbom,disabled=true \
-  --builder default \
-  --output type=docker \
-  --no-cache \
-  --pull \
-  .
-```
-
-<br />
-
-### arm64 / aarch64
-
-```shell
-# tvapp2 - arm64: using docker buildx
-docker buildx build \
-  --build-arg ARCH=arm64 \
-  --build-arg VERSION=1.0.0 \
-  --build-arg BUILDDATE=20250228 \
-  --tag thebinaryninja/tvapp2:1.0.0-arm64 \
-  --file Dockerfile \
-  --platform linux/arm64 \
-  --attest type=provenance,disabled=true \
-  --attest type=sbom,disabled=true \
-  --output type=docker \
-  --no-cache \
-  --pull \
-  .
-
-# tvapp2 - arm64: using docker build
-docker build \
-  --network=host \
-  --build-arg ARCH=arm64 \
-  --build-arg VERSION=1.0.0 \
-  --build-arg BUILDDATE=20250228 \
-  --tag thebinaryninja/tvapp2:1.0.0-arm64 \
-  --file Dockerfile \
-  --platform linux/arm64 \
-  --attest type=provenance,disabled=true \
-  --attest type=sbom,disabled=true \
-  --builder default \
-  --output type=docker \
-  --no-cache \
-  --pull \
-  .
-```
-
-<br />
-
-### Using docker buildx
-
-This section explains how to build your application's docker image using `docker buildx` instead of `docker build`. It is useful when generating your app's image for multiple platforms.
-
-<br />
-
-All of the needed Docker files already exist in the repository. To get started, clone the repo to a folder
-
-```shell
-mkdir docker-alpine-base && cd docker-alpine-base
-git clone https://github.com/Aetherinox/docker-base-alpine.git ./
-```
-
-<br />
-
-Once the image files are downloaded, create a new container for **buildx**
-
-```shell
-docker buildx create --driver docker-container --name container --bootstrap --use
-```
-
-<br />
-
-<sup><sub>**Optional** -- </sub></sup>  If you first need to remove the container because you created it previously, run the command:
-
-```shell
-docker buildx rm container
-```
-
-<br />
-
-Next, create your new docker image. Two different commands are provided below:
-- [Method to save docker image locally](#save-local-image)
-- [Push docker image to registry](#upload-to-registry)
-
-<br />
-<br />
-
-#### Save Local Image
-The command below will save a local copy of your application's docker image, which can be immediately used, or seen using `docker ps`
-
-```shell
-# tvapp2 - amd64: using docker buildx
-docker buildx build \
-  --build-arg ARCH=amd64 \
-  --build-arg VERSION=1.0.0 \
-  --build-arg BUILDDATE=20250228 \
-  --tag tvapp2:latest \
-  --tag tvapp2:1.0.0 \
-  --platform=linux/amd64 \
-  --output type=docker \
-  --no-cache \
-  --pull \
-  .
-```
-
-<br />
-<br />
-
-#### Upload to Registry
-The command below will push your application's new docker image to a registry. Before you can push the image, ensure you are signed into Docker CLI. Open your Linux terminal and see if you are already signed in:
-
-```shell
-docker info | grep Username
-```
-
-<br />
-
-If nothing is printed; then you are not signed in. Initiate the web login:
-
-```shell
-docker login
-```
-
-<br />
-
-Some text will appear on-screen, copy the code, open your browser, and go to https://login.docker.com/activate
-
-```console
-USING WEB BASED LOGIN
-To sign in with credentials on the command line, use 'docker login -u <username>'
-
-Your one-time device confirmation code is: XXXX-XXXX
-Press ENTER to open your browser or submit your device code here: https://login.docker.com/activate
-
-Waiting for authentication in the browser…
-```
-
-<br />
-
-Once you are finished in your browser, you can return to your Linux terminal, and it should bring you back to where you can type a command. You can now verify again if you are signed in:
-
-```shell
-docker info | grep Username
-```
-
-<br />
-
-You should see:
-
-```console
- Username: YourUsername
-```
-
-<br />
-
-Now you are ready to build your application's docker image, run the command:
-
-```shell
-docker buildx build \
-  --network=host \
-  --build-arg ARCH=amd64 \
-  --build-arg VERSION=1.0.0 \
-  --build-arg BUILDDATE=20250228 \
-  --tag thebinaryninja/tvapp2:latest \
-  --tag thebinaryninja/tvapp2:1.0.0-amd64 \
-  --platform=linux/amd64 \
-  --provenance=true \
-  --sbom=true \
-  --builder=container \
-  --no-cache \
-  --pull \
-  --push \
-  .
-```
-
-<br />
-<br />
-
-### Upload to hub.docker.com / ghcr.io / local
-After you have your **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)** image built, you can either upload the image to a public repository such as:
-
-- hub.docker.com (Docker Hub)
-- ghcr.io (Github)
-
-After it is uploaded, you can use the `docker run` command, or create a `docker-compose.yml`, and call the docker image to be used.  This is discussed in the section **[Using TVApp2 Image](#using-tvapp-image)** below.
-
-<br />
-<br />
-
-### Image Tags
-When building your images with the commands provided above, ensure you create two sets of tags:
-
-| Architecture | Dockerfile | Tags | --build-arg |
-| --- | --- | --- | --- |
-| `amd64` | `Dockerfile` | `tvapp2:latest` <br /> `tvapp2:1.0.0` <br /> `tvapp2:1.0.0-amd64` | `--build-arg ARCH=amd64` |
-| `arm64` | `Dockerfile` | `tvapp2:1.0.0-arm64` | `--build-arg ARCH=arm64` |
-
-
-<br />
-
-the `amd64` arch will be the primary image since that arcitecture is the most commonly used.
-
-<br />
-
----
-
-<br />
-
-## Using TvApp Image
-
-To use the new **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)** image, you can either call it with the `docker run` command, or create a new `docker-compose.yml` and specify the image:
-
-<br />
-
-### docker run
-
-If you want to use your new program docker image in the `docker run` command, execute the following:
-
-```shell
-docker run -d \
-  --name tvapp2 \
-  --restart=unless-stopped \
-  -p 4124:4124 \
-  -v ${PWD}/tvapp2:/config ghcr.io/thebinaryninja/tvapp2:latest
-```
-
-<br />
-
-### docker-compose.yml
-
-If you'd much rather use a `docker-compose.yml` file and call your application image that way, create a new folder somewhere:
-
-```shell
-mkdir -p /home/docker/tvapp2
-```
-
-Then create a new `docker-compose.yml` file and add the following:
-
-```shell
-sudo nano /home/docker/tvapp2/docker-compose.yml
-```
-
-```yml
-services:
-    tvapp2:
-        container_name: tvapp2
-        image: ghcr.io/thebinaryninja/tvapp2:latest                 # Image: Github
-      # image: thebinaryninja/tvapp2:latest                         # Image: Dockerhub
-      # image: git.binaryninja.net/binaryninja/tvapp2:latest        # Image: Gitea
-      # image: tvapp2:latest                                        # Image: Locally built
-        restart: unless-stopped
-        volumes:
-            - /etc/timezone:/etc/timezone:ro
-            - /etc/localtime:/etc/localtime:ro
-            - /var/run/docker.sock:/var/run/docker.sock
-            - ./config:/config
-            - ./app:/usr/bin/app
-        environment:
-            - TZ=Etc/UTC
-            - DIR_RUN=/usr/bin/app
-```
-
-<br />
-
-Once the `docker-compose.yml` is set up, you can now start your application container:
-
-```shell
-cd /home/docker/tvapp2/
-docker compose up -d
-```
-
-<br />
-
-Your app (such as TvApp) should now be running as a container. You can access it by opening your browser and going to:
-
-```shell
-http://container-ip:4124
-https://container-ip:4124
-```
+After you reference the alpine image, you can then write the remaining parts of your project's Dockerfile. Once you are ready to build, then build the image, and the alpine base you created an image for earlier will be used as the foundation for whatever project you lay over top of it.
 
 <br />
 
