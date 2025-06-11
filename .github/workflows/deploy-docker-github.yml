@@ -75,6 +75,27 @@ on:
                 type:           string
 
             # #
+            #   Image Registry
+            #
+            #   Options:
+            #       - github
+            #       - dockerhub
+            #       - gitea
+            #       - local
+            # #
+
+            IMAGE_REGISTRY:
+                description:    '📕 Image Registry'
+                required:       true
+                default:        'Github'
+                type:           choice
+                options:
+                    - Dockerhub
+                    - Gitea
+                    - Github
+                    - Local
+
+            # #
             #   Image Author
             #
             #   used in github image path
@@ -138,6 +159,7 @@ env:
     IMAGE_VERSION:              ${{ github.event.inputs.IMAGE_VERSION || '3.22' }}
     IMAGE_GHCR_AUTHOR:          ${{ github.event.inputs.IMAGE_GHCR_AUTHOR || 'Aetherinox' }}
     IMAGE_GHCR_USERNAME:        ${{ github.event.inputs.IMAGE_GHCR_USERNAME || 'Aetherinox' }}
+    IMAGE_REGISTRY:             ${{ github.event.inputs.IMAGE_REGISTRY || 'Github' }}
     BOT_NAME_1:                 EuropaServ
     BOT_NAME_DEPENDABOT:        dependabot[bot]
 
@@ -316,17 +338,16 @@ jobs:
         steps:
 
             # #
-            #   Release › Checkout
+            #   Release › Github › Checkout
             # #
 
             - name: '☑️ Checkout'
-              id: task_initialize_checkout
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
 
             # #
-            #   Initialize › Job Information
+            #   Release › Github › Job Information
             # #
 
             - name: >-
@@ -335,7 +356,7 @@ jobs:
               id: 'context'
 
             # #
-            #   Initialize › Start
+            #   Release › Github › Start
             # #
 
             - name: >-
@@ -435,7 +456,6 @@ jobs:
             # #
 
             - name: '📦 Install Dependencies'
-              id: task_release_gh_dependencies
               run:
                   sudo apt-get install -qq dos2unix
 
@@ -444,7 +464,6 @@ jobs:
             # #
 
             - name: '🔐 Apply dos2unix'
-              id: task_release_gh_dos2unix
               run: |
                   echo "⚠️⚠️⚠️ Running DOS2UNIX ⚠️⚠️⚠️"
                   find ./ \( -path "./.git" -o -path "./docs" -o -path "./.github" -o -path "*.png" -o -path "*.jpg" \) -prune -o -name '*' -print | xargs dos2unix --
@@ -455,7 +474,6 @@ jobs:
             # #
 
             - name: '#️⃣ Manage Permissions'
-              id: task_release_gh_permissions
               run: |
                   find ./ -name 'run' -exec chmod 755 {} \;
                   WRONG_PERM=$(find ./  -path "./.git" -prune -o \( -name "run" -o -name "finish" -o -name "check" \) -not -perm -u=x,g=x,o=x -print)
@@ -474,7 +492,6 @@ jobs:
             # #
 
             - name: '⚙️ Set up QEMU'
-              id: task_release_gh_qemu
               uses: docker/setup-qemu-action@v3
 
             # #
@@ -482,7 +499,6 @@ jobs:
             # #
 
             - name: '⚙️ Setup Buildx'
-              id: task_release_gh_buildx
               uses: docker/setup-buildx-action@v3
               with:
                   version: latest
@@ -493,7 +509,6 @@ jobs:
             # #
 
             - name: '⚙️ Login to Github'
-              id: task_release_gh_registry
               uses: docker/login-action@v3
               with:
                   registry: ghcr.io
@@ -570,7 +585,7 @@ jobs:
                       org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.opencontainers.image.ref.name=${{ github.ref_name }}
                       org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
-                      org.opencontainers.image.registry=github
+                      org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
                       org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
                       org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
                       org.alpine.image.build-sha1=${{ env.GITHUB_SHA1 }}
@@ -791,7 +806,6 @@ jobs:
             # #
 
             - name: '📦 Push Manifest'
-              id: task_release_gh_manifest
               uses: int128/docker-manifest-create-action@v2
               with:
                   push: ${{ !inputs.DRY_RUN }}
@@ -888,7 +902,7 @@ jobs:
         steps:
 
             # #
-            #   Release › Checkout
+            #   Cleanup › Checkout
             # #
 
             - name: '☑️ Checkout'
@@ -897,7 +911,7 @@ jobs:
                   fetch-depth: 0
 
             # #
-            #   Release › Job Information
+            #   Cleanup › Job Information
             # #
 
             - name: >-
@@ -906,7 +920,7 @@ jobs:
               id: 'context'
 
             # #
-            #   Release › Start
+            #   Cleanup › Start
             # #
 
             - name: >-
@@ -983,7 +997,7 @@ jobs:
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
 
             # #
-            #   Release › Cleanup › Clean Untagged Images
+            #   Cleanup › Clean Untagged Images
             # #
 
             - name: '🧹 Clean Untagged Images'
