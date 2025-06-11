@@ -122,12 +122,12 @@ LABEL org.opencontainers.image.architecture="${ARCH:-x86_64}"
 LABEL org.opencontainers.image.ref.name="main"
 LABEL org.opencontainers.image.registry="${REGISTRY:-local}"
 LABEL org.opencontainers.image.release="${RELEASE:-stable}"
-LABEL org.tvapp2.image.maintainers="${REPO_AUTHOR}"
-LABEL org.tvapp2.image.build-version="Version:- ${VERSION} Date:- ${BUILDDATE:-01012025}"
-LABEL org.tvapp2.image.build-version-alpine="${ALPINE_VERSION:-3.21}"
-LABEL org.tvapp2.image.build-architecture="${ARCH:-amd64}"
-LABEL org.tvapp2.image.build-release="${RELEASE:-stable}"
-LABEL org.tvapp2.image.build-sha1="${GIT_SHA1:-0000000000000000000000000000000000000000}"
+LABEL org.alpine.image.maintainers="${REPO_AUTHOR}"
+LABEL org.alpine.image.build-version="Version:- ${VERSION} Date:- ${BUILDDATE:-01012025}"
+LABEL org.alpine.image.build-version-alpine="${ALPINE_VERSION:-3.21}"
+LABEL org.alpine.image.build-architecture="${ARCH:-amd64}"
+LABEL org.alpine.image.build-release="${RELEASE:-stable}"
+LABEL org.alpine.image.build-sha1="${GIT_SHA1:-0000000000000000000000000000000000000000}"
 
 # #
 #   scratch › add cdn > core

@@ -4,14 +4,35 @@
 #   @url                https://github.com/Aetherinox
 #   @usage              deploys docker container to github and send message to discord
 #                       upload this workflow to both the `main` branch of the tvapp2 repository
-#   @secrets            secrets.ADMINSERV_GPG_KEY_ASC                               gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
-#                       secrets.ADMINSERV_GPG_PASSPHRASE                            gpg private key passphrase
-#                       secrets.SELF_DOCKERHUB_TOKEN                                github personal access token (classic) with package:write permission
-#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_BASEALPINE_RELEASES     Discord webhook to report releases from github to discord
+#
+#   @secrets            secrets.SELF_TOKEN                                          self github personal access token (fine-grained)
+#                       secrets.SELF_TOKEN_CL                                       self github personal access token (classic)
+#                       secrets.NPM_TOKEN                                           self npmjs access token
+#                       secrets.PYPI_API_TOKEN                                      self Pypi API token (production site) - https://pypi.org/
+#                       secrets.PYPI_API_TEST_TOKEN                                 self Pypi API token (test site) - https://test.pypi.org/
+#                       secrets.SELF_DOCKERHUB_TOKEN                                self Dockerhub token
+#                       secrets.ORG_BINARYNINJA_TOKEN                               org github personal access token (fine-grained)
+#                       secrets.ORG_BINARYNINJA_TOKEN_CL                            org github personal access token (classic)
+#                       secrets.ORG_BINARYNINJA_DOCKERHUB_TOKEN                     org dockerhub secret
+#                       secrets.ORG_BINARYNINJA_GITEA_TOKEN                         org gitea personal access token (classic) with package:write permission
+#                       secrets.BINARYSERV_GPG_KEY_ASC                              bot gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
+#                       secrets.BINARYSERV_GPG_PASSPHRASE                           bot gpg private key passphrase
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_TVAPP2_RELEASES         discord webhook to report release notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_TVAPP2_WORKFLOWS        discord webhook to report workflow notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_TVAPP2_UPDATES          discord webhook to report activity notifications from github to discord
+#
+#   @local              these workflows can be tested locally through the use of `act`
+#                           https://github.com/nektos/act
+#                       Extract act to folder
+#                       Add system env var with path to act.exe
+#                       Run the commands:
+#                           git pull https://github.com/username/repo
+#                           act -W .github/workflows/deploy-docker-github.yml -P ubuntu-latest=catthehacker/ubuntu:full-22.04
+#                           act -W .github/workflows/deploy-docker-github.yml -s TOKEN_CL=XXXXXXXXXX --pull=false
 # #
 
-name: "📦 Deploy › Docker › Github"
-run-name: "📦 Deploy › Docker › Github"
+name: '📦 Deploy › Docker › Github'
+run-name: '📦 Deploy › Docker › Github'
 
 # #
 #   Triggers
@@ -148,30 +169,105 @@ jobs:
         steps:
 
             # #
-            #   Release › Tags › Start
+            #   Release › Checkout
             # #
 
-            - name: '🏳️ Start'
-              id: task_release_tags_start
-              run: |
-                  echo "Creating Tag"
-
-            # #
-            #   Release › Tags › Checkout
-            # #
-
-            - name: '✅ Checkout'
-              id: task_release_tags_checkout
+            - name: '☑️ Checkout'
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
+
+            # #
+            #   Initialize › Job Information
+            # #
+
+            - name: >-
+                  🔄 Load Job
+              uses: qoomon/actions--context@v4
+              id: 'context'
+
+            # #
+            #   Initialize › Start
+            # #
+
+            - name: >-
+                  ✅ Start
+              run: |
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo " Starting Job ${{ steps.context.outputs.job_name }}"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+
+                  year="$(date +'%Y')"
+                  echo "YEAR=${year}" >> $GITHUB_ENV
+
+                  now="$(date +'%m-%d-%Y %H:%M:%S')"
+                  echo "NOW=${now}" >> $GITHUB_ENV
+
+                  now_short="$(date +'%m-%d-%Y')"
+                  echo "now_short=${now_short}" >> $GITHUB_ENV
+
+                  now_long="$(date +'%m-%d-%Y %H:%M')"
+                  echo "now_long=${now_long}" >> $GITHUB_ENV
+
+                  now_docker="$(date +'%Y%m%d')"
+                  echo "now_docker=${now_docker}" >> $GITHUB_ENV
+
+                  now_docker_ts="$(date -u +'%FT%T.%3NZ')"
+                  echo "now_docker_ts=${now_docker}" >> $GITHUB_ENV
+
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e
+                  sudo apt -qq update
+                  sudo apt -qq install tree
+                  echo -e
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e
+                  echo " Runner .............. ${{ runner.name }}"
+                  echo " Workflow ............ ${{ github.workflow }} (#${{ github.workflow_ref }})"
+                  echo " Run Number .......... #${{ github.run_number }}"
+                  echo " Ref ................. #${{ github.ref }}"
+                  echo " Ref Name ............ #${{ github.ref_name }}"
+                  echo " Event Name .......... #${{ github.event_name }}"
+                  echo " Repo ................ #${{ github.repository }}"
+                  echo " Repo Owner .......... #${{ github.repository_owner }}"
+                  echo " Run ID .............. https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  echo " Triggered By ........ ${{ github.actor }}"
+                  echo " SHA 1 ............... ${GITHUB_SHA}"
+                  echo " SHA 2 ............... ${{ github.sha }}"
+                  echo " Workspace ........... ${{ github.workspace }}"
+                  echo " PWD ................. ${PWD}"
+                  echo " Job Name ............ ${{ steps.context.outputs.job_name }}"
+                  echo " Job ID .............. ${{ steps.context.outputs.job_id }}"
+                  echo " Job URL ............. ${{ steps.context.outputs.job_url }}"
+                  echo " Run ID .............. ${{ steps.context.outputs.run_id }}"
+                  echo " Run Attempt ......... ${{ steps.context.outputs.run_attempt }}"
+                  echo " Run Number .......... ${{ steps.context.outputs.run_number }}"
+                  echo " Run URL ............. ${{ steps.context.outputs.run_url }}"
+                  echo " Run Env ............. ${{ steps.context.outputs.environment }}"
+                  echo " Run Env URL ......... ${{ steps.context.outputs.environment_url }}"
+                  echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
+                  echo " Run Deployment URL .. ${{ steps.context.outputs.deployment_url }}"
+                  echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
+                  echo " Run Runner Name ..... ${{ steps.context.outputs.runner_name }}"
+                  echo " Run Runner ID ....... ${{ steps.context.outputs.runner_id }}"
+                  echo " Year ................ ${year}"
+                  echo " Now ................. ${now}"
+                  echo " Now (Short) ......... ${now_short}"
+                  echo " Now (Long) .......... ${now_long}"
+                  echo " Now (Docker) ........ ${now_docker}"
+                  echo " Now (Docker TS) ..... ${now_docker_ts}"
+                  echo -e
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e
+                  tree -I node_modules -I .git
+                  echo -e
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
 
             # #
             #   Release › Tags › Fix Permissions
             # #
 
             - name: '#️⃣ Manage Permissions'
-              id: task_release_tags_permissions
               run: |
                   find ./ -name 'run' -exec chmod 755 {} \;
                   WRONG_PERM=$(find ./  -path "./.git" -prune -o \( -name "run" -o -name "finish" -o -name "check" \) -not -perm -u=x,g=x,o=x -print)
@@ -220,21 +316,100 @@ jobs:
         steps:
 
             # #
-            #   Release › Github › Start › Amd64
+            #   Release › Checkout
             # #
 
-            - name: '🏳️ Start'
-              id: task_release_gh_start
-              run: |
-                  echo "Starting Github docker release"
-
-            # #
-            #   Release › Github › Checkout › Amd64
-            # #
-
-            - name: '✅ Checkout'
-              id: task_release_gh_checkout
+            - name: '☑️ Checkout'
+              id: task_initialize_checkout
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            # #
+            #   Initialize › Job Information
+            # #
+
+            - name: >-
+                  🔄 Load Job
+              uses: qoomon/actions--context@v4
+              id: 'context'
+
+            # #
+            #   Initialize › Start
+            # #
+
+            - name: >-
+                  ✅ Start
+              run: |
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo " Starting Job ${{ steps.context.outputs.job_name }}"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+
+                  year="$(date +'%Y')"
+                  echo "YEAR=${year}" >> $GITHUB_ENV
+
+                  now="$(date +'%m-%d-%Y %H:%M:%S')"
+                  echo "NOW=${now}" >> $GITHUB_ENV
+
+                  now_short="$(date +'%m-%d-%Y')"
+                  echo "now_short=${now_short}" >> $GITHUB_ENV
+
+                  now_long="$(date +'%m-%d-%Y %H:%M')"
+                  echo "now_long=${now_long}" >> $GITHUB_ENV
+
+                  now_docker="$(date +'%Y%m%d')"
+                  echo "now_docker=${now_docker}" >> $GITHUB_ENV
+
+                  now_docker_ts="$(date -u +'%FT%T.%3NZ')"
+                  echo "now_docker_ts=${now_docker}" >> $GITHUB_ENV
+
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e
+                  sudo apt -qq update
+                  sudo apt -qq install tree
+                  echo -e
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e
+                  echo " Runner .............. ${{ runner.name }}"
+                  echo " Workflow ............ ${{ github.workflow }} (#${{ github.workflow_ref }})"
+                  echo " Run Number .......... #${{ github.run_number }}"
+                  echo " Ref ................. #${{ github.ref }}"
+                  echo " Ref Name ............ #${{ github.ref_name }}"
+                  echo " Event Name .......... #${{ github.event_name }}"
+                  echo " Repo ................ #${{ github.repository }}"
+                  echo " Repo Owner .......... #${{ github.repository_owner }}"
+                  echo " Run ID .............. https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  echo " Triggered By ........ ${{ github.actor }}"
+                  echo " SHA 1 ............... ${GITHUB_SHA}"
+                  echo " SHA 2 ............... ${{ github.sha }}"
+                  echo " Workspace ........... ${{ github.workspace }}"
+                  echo " PWD ................. ${PWD}"
+                  echo " Job Name ............ ${{ steps.context.outputs.job_name }}"
+                  echo " Job ID .............. ${{ steps.context.outputs.job_id }}"
+                  echo " Job URL ............. ${{ steps.context.outputs.job_url }}"
+                  echo " Run ID .............. ${{ steps.context.outputs.run_id }}"
+                  echo " Run Attempt ......... ${{ steps.context.outputs.run_attempt }}"
+                  echo " Run Number .......... ${{ steps.context.outputs.run_number }}"
+                  echo " Run URL ............. ${{ steps.context.outputs.run_url }}"
+                  echo " Run Env ............. ${{ steps.context.outputs.environment }}"
+                  echo " Run Env URL ......... ${{ steps.context.outputs.environment_url }}"
+                  echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
+                  echo " Run Deployment URL .. ${{ steps.context.outputs.deployment_url }}"
+                  echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
+                  echo " Run Runner Name ..... ${{ steps.context.outputs.runner_name }}"
+                  echo " Run Runner ID ....... ${{ steps.context.outputs.runner_id }}"
+                  echo " Year ................ ${year}"
+                  echo " Now ................. ${now}"
+                  echo " Now (Short) ......... ${now_short}"
+                  echo " Now (Long) .......... ${now_long}"
+                  echo " Now (Docker) ........ ${now_docker}"
+                  echo " Now (Docker TS) ..... ${now_docker_ts}"
+                  echo -e
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e
+                  tree -I node_modules -I .git
+                  echo -e
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
 
             # #
             #   Release › Github › Get Timestamp
@@ -253,6 +428,7 @@ jobs:
                   echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_ENV                                                                                          #  02-25-2025 12:49
                   echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV                                                                                          #  20250225
                   echo "NOW_DOCKER_TS=$(date -u +'%FT%T.%3NZ')" >> $GITHUB_ENV                                                                                      #  2025-02-25T12:50:11.569Z
+                  echo "GITHUB_SHA1=$(git rev-parse HEAD)" >> $GITHUB_ENV                                                                                           #  012cd0cc44c576c4a57b8a18d86793f244d1080a
 
             # #
             #   Release › Github › Install Dependencies
@@ -386,6 +562,7 @@ jobs:
                   flavor: |
                       latest=false
                   labels: |
+                      org.opencontainers.image.description=Alpine base image
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
                       org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
                       org.opencontainers.image.licenses=MIT
@@ -394,8 +571,11 @@ jobs:
                       org.opencontainers.image.ref.name=${{ github.ref_name }}
                       org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
                       org.opencontainers.image.registry=github
-                      org.tvapp2.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
+                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
+                      org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
+                      org.alpine.image.build-sha1=${{ env.GITHUB_SHA1 }}
                   annotations: |
+                      org.opencontainers.image.description=Alpine base image
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
                       org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
                       org.opencontainers.image.licenses=MIT
@@ -403,8 +583,10 @@ jobs:
                       org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.opencontainers.image.ref.name=${{ github.ref_name }}
                       org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
-                      org.opencontainers.image.registry=github
-                      org.tvapp2.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
+                      org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
+                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
+                      org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
+                      org.alpine.image.build-sha1=${{ env.GITHUB_SHA1 }}
 
             # #
             #   Release › Github › Build and Push › Amd64
@@ -416,23 +598,39 @@ jobs:
               if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
               with:
                   allow: |
-                    network.host
+                      network.host
                   network: host
                   context: .
                   file: Dockerfile
                   platforms: linux/amd64
+                  provenance: false
+                  sbom: false
                   push: ${{ github.event_name != 'pull_request' }}
                   labels: ${{ steps.task_release_gh_meta.outputs.labels }}
                   tags: |
                       ${{ steps.task_release_gh_meta.outputs.tags }}
-                  annotations: |
-                      ${{ steps.task_release_gh_meta.outputs.annotations }}
-                  provenance: false
-                  sbom: false
                   build-args: |-
                       ARCH=x86_64
+                      RELEASE=${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}
                       VERSION=${{ env.IMAGE_VERSION }}
                       BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
+                      GIT_SHA1=${{ env.GITHUB_SHA1 }}
+                      ALPINE_VERSION=${{ env.IMAGE_ALPINE_VERSION }}
+                  annotations: |
+                      org.opencontainers.image.description=Alpine base image
+                      org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
+                      org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
+                      org.opencontainers.image.licenses=MIT
+                      org.opencontainers.image.architecture=amd64
+                      org.opencontainers.image.revision=${{ github.sha }}
+                      org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
+                      org.opencontainers.image.ref.name=${{ github.ref_name }}
+                      org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
+                      org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
+                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
+                      org.alpine.image.build-architecture=amd64
+                      org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
+                      org.alpine.image.build-sha1=${{ env.GITHUB_SHA1 }}
 
             # #
             #   Release › Github › Export Digest › Amd64
@@ -472,23 +670,39 @@ jobs:
               if: ( github.event_name == 'workflow_dispatch' && inputs.DRY_RUN == false ) || ( github.event_name == 'push' )
               with:
                   allow: |
-                    network.host
+                      network.host
                   network: host
                   context: .
                   file: Dockerfile
                   platforms: linux/arm64
+                  provenance: false
+                  sbom: false
                   push: ${{ github.event_name != 'pull_request' }}
                   labels: ${{ steps.task_release_gh_meta.outputs.labels }}
                   tags: |
                       ${{ steps.task_release_gh_meta.outputs.tags }}
-                  annotations: |
-                      ${{ steps.task_release_gh_meta.outputs.annotations }}
-                  provenance: false
-                  sbom: false
                   build-args: |-
                       ARCH=aarch64
+                      RELEASE=${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}
                       VERSION=${{ env.IMAGE_VERSION }}
                       BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
+                      GIT_SHA1=${{ env.GITHUB_SHA1 }}
+                      ALPINE_VERSION=${{ env.IMAGE_ALPINE_VERSION }}
+                  annotations: |-
+                      org.opencontainers.image.description=Alpine base image
+                      org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
+                      org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
+                      org.opencontainers.image.licenses=MIT
+                      org.opencontainers.image.architecture=arm64
+                      org.opencontainers.image.revision=${{ github.sha }}
+                      org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
+                      org.opencontainers.image.ref.name=${{ github.ref_name }}
+                      org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
+                      org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
+                      org.tvapp2.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
+                      org.tvapp2.image.build-architecture=arm64
+                      org.tvapp2.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
+                      org.tvapp2.image.build-sha1=${{ env.GITHUB_SHA1 }}
 
             # #
             #   Release › Github › Export Digest › Arm64
@@ -519,6 +733,62 @@ jobs:
                   retention-days: 10
 
             # #
+            #   Release › Github › Checkpoint
+            # #
+
+            - name: '⚠️ Checkpoint'
+              run: |
+                  echo ""
+                  echo "---- [ GITHUB ] ----------------------------------------------------------------------------------------"
+                  echo "github.actor.............................. ${{ github.actor }}"
+                  echo "github.ref ............................... ${{ github.ref }}"
+                  echo "github.ref_name .......................... ${{ github.ref_name }}"
+                  echo "github.event_name ........................ ${{ github.event_name }}"
+                  echo "github.repository_owner .................. ${{ github.repository_owner }}"
+                  echo "github.repository ........................ ${{ github.repository }}"
+                  echo "github.sha ............................... ${{ github.sha }}"
+                  echo -e ""
+                  echo "---- [ INPUTS ] ----------------------------------------------------------------------------------------"
+                  echo "inputs.IMAGE_NAME ........................ ${{ inputs.IMAGE_NAME }}"
+                  echo "inputs.IMAGE_VERSION ..................... ${{ inputs.IMAGE_VERSION }}"
+                  echo "inputs.IMAGE_GHCR_AUTHOR ................. ${{ inputs.IMAGE_GHCR_AUTHOR }}"
+                  echo "inputs.IMAGE_GHCR_USERNAME ............... ${{ inputs.IMAGE_GHCR_USERNAME }}"
+                  echo "inputs.DEV_RELEASE ....................... ${{ inputs.DEV_RELEASE }}"
+                  echo "inputs.DRY_RUN ........................... ${{ inputs.DRY_RUN }}"
+                  echo -e ""
+                  echo "---- [ ENV ] -------------------------------------------------------------------------------------------"
+                  echo "env.IMAGE_NAME ........................... ${{ env.IMAGE_NAME }}"
+                  echo "env.IMAGE_VERSION ........................ ${{ env.IMAGE_VERSION }}"
+                  echo "env.IMAGE_VERSION_1DIGIT ................. ${{ env.IMAGE_VERSION_1DIGIT }}"
+                  echo "env.IMAGE_VERSION_2DIGIT ................. ${{ env.IMAGE_VERSION_2DIGIT }}"
+                  echo "env.IMAGE_GHCR_AUTHOR .................... ${{ env.IMAGE_GHCR_AUTHOR }}"
+                  echo "env.IMAGE_GHCR_USERNAME .................. ${{ env.IMAGE_GHCR_USERNAME }}"
+                  echo "env.NOW .................................. ${{ env.NOW }}"
+                  echo "env.NOW_SHORT ............................ ${{ env.NOW_SHORT }}"
+                  echo "env.NOW_LONG ............................. ${{ env.NOW_LONG }}"
+                  echo "env.NOW_DOCKER_LABEL ..................... ${{ env.NOW_DOCKER_LABEL }}"
+                  echo "env.NOW_DOCKER_TS ........................ ${{ env.NOW_DOCKER_TS }}"
+                  echo "env.REGISTRY_REPO_ORG_AUTHOR_LC .......... ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}"
+                  echo "env.REGISTRY_REPO_AUTHOR_LC .............. ${{ env.REGISTRY_REPO_AUTHOR_LC }}"
+                  echo "env.DOCKER_SHA ........................... ${{ env.DOCKER_SHA }}"
+                  echo "env.GITHUB_SHA1 .......................... ${{ env.GITHUB_SHA1 }}"
+                  echo -e ""
+                  echo "---- [ DOCKER IMAGES ] ---------------------------------------------------------------------------------"
+                  echo "registry ................................. Github GHCR"
+                  echo "tags ..................................... ${{ steps.task_release_gh_meta.outputs.tags }}"
+                  echo "labels ................................... ${{ steps.task_release_gh_meta.outputs.labels }}"
+                  echo "digest ................................... ${{ steps.task_release_gh_push_amd64.outputs.digest }}"
+                  echo -e ""
+                  echo "(release) tags ........................... ${{ steps.task_release_gh_meta.outputs.tags }}"
+                  echo "(release) labels ......................... ${{ steps.task_release_gh_meta.outputs.labels }}"
+                  echo -e ""
+                  echo "---- [ DOCKER DIGESTS ] --------------------------------------------------------------------------------"
+                  echo "docker image id (amd64) .................. ${{ steps.task_release_gh_push_amd64.outputs.imageid }}"
+                  echo "docker digest (amd64) .................... ${{ steps.task_release_gh_push_amd64.outputs.digest }}"
+                  echo "docker image id (arm64) .................. ${{ steps.task_release_gh_push_arm64.outputs.imageid }}"
+                  echo "docker digest (arm64) .................... ${{ steps.task_release_gh_push_arm64.outputs.digest }}"
+
+            # #
             #   Release › Github › Push Manifest
             # #
 
@@ -534,62 +804,6 @@ jobs:
                       ghcr.io/${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}@${{ steps.task_release_gh_push_arm64.outputs.digest }}
                   index-annotations: |
                       ${{ steps.task_release_gh_meta.outputs.labels }}
-
-            # #
-            #   Release › Github › Checkpoint
-            # #
-
-            - name: '⚠️ Checkpoint'
-              id: task_release_gh_checkpoint
-              run: |
-                  echo ""
-                  echo "[ GITHUB ] ---------------------------------------------------------------------------------------------"
-                  echo "github.actor.............................. ${{ github.actor }}"
-                  echo "github.ref ............................... ${{ github.ref }}"
-                  echo "github.ref_name .......................... ${{ github.ref_name }}"
-                  echo "github.event_name ........................ ${{ github.event_name }}"
-                  echo "github.repository_owner .................. ${{ github.repository_owner }}"
-                  echo "github.repository ........................ ${{ github.repository }}"
-                  echo ""
-                  echo "[ INPUTS ] ---------------------------------------------------------------------------------------------"
-                  echo "inputs.IMAGE_NAME ........................ ${{ inputs.IMAGE_NAME }}"
-                  echo "inputs.IMAGE_VERSION ..................... ${{ inputs.IMAGE_VERSION }}"
-                  echo "inputs.IMAGE_GHCR_AUTHOR ................. ${{ inputs.IMAGE_GHCR_AUTHOR }}"
-                  echo "inputs.IMAGE_GHCR_USERNAME ............... ${{ inputs.IMAGE_GHCR_USERNAME }}"
-                  echo "inputs.DEV_RELEASE ....................... ${{ inputs.DEV_RELEASE }}"
-                  echo "inputs.DRY_RUN ........................... ${{ inputs.DRY_RUN }}"
-                  echo ""
-                  echo "[ ENV ] ------------------------------------------------------------------------------------------------"
-                  echo "env.IMAGE_NAME ........................... ${{ env.IMAGE_NAME }}"
-                  echo "env.IMAGE_VERSION ........................ ${{ env.IMAGE_VERSION }}"
-                  echo "env.IMAGE_VERSION_1DIGIT ................. ${{ env.IMAGE_VERSION_1DIGIT }}"
-                  echo "env.IMAGE_VERSION_2DIGIT ................. ${{ env.IMAGE_VERSION_2DIGIT }}"
-                  echo "env.IMAGE_GHCR_AUTHOR .................... ${{ env.IMAGE_GHCR_AUTHOR }}"
-                  echo "env.IMAGE_GHCR_USERNAME .................. ${{ env.IMAGE_GHCR_USERNAME }}"
-                  echo "env.NOW .................................. ${{ env.NOW }}"
-                  echo "env.NOW_SHORT ............................ ${{ env.NOW_SHORT }}"
-                  echo "env.NOW_LONG ............................. ${{ env.NOW_LONG }}"
-                  echo "env.NOW_DOCKER_LABEL ..................... ${{ env.NOW_DOCKER_LABEL }}"
-                  echo "env.NOW_DOCKER_TS ........................ ${{ env.NOW_DOCKER_TS }}"
-                  echo "env.DOCKER_IMAGE ......................... ${{ env.DOCKER_IMAGE }}"
-                  echo "env.REGISTRY_REPO_ORG_AUTHOR_LC .......... ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}"
-                  echo "env.REGISTRY_REPO_AUTHOR_LC .............. ${{ env.REGISTRY_REPO_AUTHOR_LC }}"
-                  echo "env.DOCKER_SHA ........................... ${{ env.DOCKER_SHA }}"
-                  echo ""
-                  echo "[ DOCKER IMAGES ] --------------------------------------------------------------------------------------"
-                  echo "registry ................................. Github GHCR"
-                  echo "tags ..................................... ${{ steps.task_release_gh_meta.outputs.tags }}"
-                  echo "labels ................................... ${{ steps.task_release_gh_meta.outputs.labels }}"
-                  echo "digest ................................... ${{ steps.task_release_gh_push_amd64.outputs.digest }}"
-                  echo ""
-                  echo "(release) tags ........................... ${{ steps.task_release_gh_meta.outputs.tags }}"
-                  echo "(release) labels ......................... ${{ steps.task_release_gh_meta.outputs.labels }}"
-                  echo ""
-                  echo "[ DOCKER DIGESTS ] -------------------------------------------------------------------------------------"
-                  echo "docker image id (amd64) .................. ${{ steps.task_release_gh_push_amd64.outputs.imageid }}"
-                  echo "docker digest (amd64) .................... ${{ steps.task_release_gh_push_amd64.outputs.digest }}"
-                  echo "docker image id (arm64) .................. ${{ steps.task_release_gh_push_arm64.outputs.imageid }}"
-                  echo "docker digest (arm64) .................... ${{ steps.task_release_gh_push_arm64.outputs.digest }}"
 
             # #
             #   Release › Github › Get Weekly Commits
@@ -676,23 +890,99 @@ jobs:
         steps:
 
             # #
-            #   Release › Cleanup
+            #   Release › Checkout
             # #
 
-            - name: '🏳️ Start'
-              id: task_cleanup_start
-              run: |
-                  echo "Cleaning up untagged docker images"
-
-            # #
-            #   Release › Cleanup › Checkout
-            # #
-
-            - name: '✅ Checkout'
-              id: task_cleanup_checkout
+            - name: '☑️ Checkout'
               uses: actions/checkout@v4
               with:
-                fetch-depth: 0
+                  fetch-depth: 0
+
+            # #
+            #   Release › Job Information
+            # #
+
+            - name: >-
+                  🔄 Load Job
+              uses: qoomon/actions--context@v4
+              id: 'context'
+
+            # #
+            #   Release › Start
+            # #
+
+            - name: >-
+                  ✅ Start
+              run: |
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo " Starting Job ${{ steps.context.outputs.job_name }}"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+
+                  year="$(date +'%Y')"
+                  echo "YEAR=${year}" >> $GITHUB_ENV
+
+                  now="$(date +'%m-%d-%Y %H:%M:%S')"
+                  echo "NOW=${now}" >> $GITHUB_ENV
+
+                  now_short="$(date +'%m-%d-%Y')"
+                  echo "now_short=${now_short}" >> $GITHUB_ENV
+
+                  now_long="$(date +'%m-%d-%Y %H:%M')"
+                  echo "now_long=${now_long}" >> $GITHUB_ENV
+
+                  now_docker="$(date +'%Y%m%d')"
+                  echo "now_docker=${now_docker}" >> $GITHUB_ENV
+
+                  now_docker_ts="$(date -u +'%FT%T.%3NZ')"
+                  echo "now_docker_ts=${now_docker}" >> $GITHUB_ENV
+
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e
+                  sudo apt -qq update
+                  sudo apt -qq install tree
+                  echo -e
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e
+                  echo " Runner .............. ${{ runner.name }}"
+                  echo " Workflow ............ ${{ github.workflow }} (#${{ github.workflow_ref }})"
+                  echo " Run Number .......... #${{ github.run_number }}"
+                  echo " Ref ................. #${{ github.ref }}"
+                  echo " Ref Name ............ #${{ github.ref_name }}"
+                  echo " Event Name .......... #${{ github.event_name }}"
+                  echo " Repo ................ #${{ github.repository }}"
+                  echo " Repo Owner .......... #${{ github.repository_owner }}"
+                  echo " Run ID .............. https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  echo " Triggered By ........ ${{ github.actor }}"
+                  echo " SHA 1 ............... ${GITHUB_SHA}"
+                  echo " SHA 2 ............... ${{ github.sha }}"
+                  echo " Workspace ........... ${{ github.workspace }}"
+                  echo " PWD ................. ${PWD}"
+                  echo " Job Name ............ ${{ steps.context.outputs.job_name }}"
+                  echo " Job ID .............. ${{ steps.context.outputs.job_id }}"
+                  echo " Job URL ............. ${{ steps.context.outputs.job_url }}"
+                  echo " Run ID .............. ${{ steps.context.outputs.run_id }}"
+                  echo " Run Attempt ......... ${{ steps.context.outputs.run_attempt }}"
+                  echo " Run Number .......... ${{ steps.context.outputs.run_number }}"
+                  echo " Run URL ............. ${{ steps.context.outputs.run_url }}"
+                  echo " Run Env ............. ${{ steps.context.outputs.environment }}"
+                  echo " Run Env URL ......... ${{ steps.context.outputs.environment_url }}"
+                  echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
+                  echo " Run Deployment URL .. ${{ steps.context.outputs.deployment_url }}"
+                  echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
+                  echo " Run Runner Name ..... ${{ steps.context.outputs.runner_name }}"
+                  echo " Run Runner ID ....... ${{ steps.context.outputs.runner_id }}"
+                  echo " Year ................ ${year}"
+                  echo " Now ................. ${now}"
+                  echo " Now (Short) ......... ${now_short}"
+                  echo " Now (Long) .......... ${now_long}"
+                  echo " Now (Docker) ........ ${now_docker}"
+                  echo " Now (Docker TS) ..... ${now_docker_ts}"
+                  echo -e
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e
+                  tree -I node_modules -I .git
+                  echo -e
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
 
             # #
             #   Release › Cleanup › Clean Untagged Images
