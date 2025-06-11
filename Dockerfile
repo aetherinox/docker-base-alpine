@@ -8,7 +8,7 @@
 #   @repo           https://github.com/aetherinox/docker-base-alpine
 # #
 
-ARG VERSION="3.21"
+ARG VERSION=3.22
 FROM alpine:${VERSION} AS rootfs-stage
 
 # #
@@ -19,10 +19,10 @@ FROM alpine:${VERSION} AS rootfs-stage
 # #
 
 ARG ARCH=x86_64
-ARG VERSION=3.21
+ARG VERSION=3.22
 ARG REPO_AUTHOR="aetherinox"
 ARG REPO_NAME="docker-base-alpine"
-ARG S6_OVERLAY_VERSION="3.1.6.2"
+ARG S6_OVERLAY_VERSION="3.2.1.0"
 ARG S6_OVERLAY_ARCH="${ARCH}"
 
 # #
