@@ -198,7 +198,7 @@ jobs:
         steps:
 
             # #
-            #   Release › Checkout
+            #   Release › Tags › Checkout
             # #
 
             - name: '☑️ Checkout'
@@ -207,7 +207,7 @@ jobs:
                   fetch-depth: 0
 
             # #
-            #   Initialize › Job Information
+            #   Release › Tags › Job Information
             # #
 
             - name: >-
@@ -216,12 +216,13 @@ jobs:
               id: 'context'
 
             # #
-            #   Initialize › Start
+            #   Release › Tags › Start
             # #
 
             - name: >-
                   ✅ Start
               run: |
+                  echo "‎"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
                   echo " Starting Job ${{ steps.context.outputs.job_name }}"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
@@ -229,28 +230,43 @@ jobs:
                   year="$(date +'%Y')"
                   echo "YEAR=${year}" >> $GITHUB_ENV
 
-                  now="$(date +'%m-%d-%Y %H:%M:%S')"
+                  now="$(date +'%m-%d-%Y %H:%M:%S')"                                                #  02-25-2025 12:49:48
                   echo "NOW=${now}" >> $GITHUB_ENV
 
-                  now_short="$(date +'%m-%d-%Y')"
-                  echo "now_short=${now_short}" >> $GITHUB_ENV
+                  now_short="$(date +'%m-%d-%Y')"                                                   #  02-25-2025
+                  echo "NOW_SHORT=${now_short}" >> $GITHUB_ENV
 
-                  now_long="$(date +'%m-%d-%Y %H:%M')"
-                  echo "now_long=${now_long}" >> $GITHUB_ENV
+                  now_long="$(date +'%m-%d-%Y %H:%M')"                                              #  02-25-2025 12:49
+                  echo "NOW_LONG=${now_long}" >> $GITHUB_ENV
 
-                  now_docker="$(date +'%Y%m%d')"
-                  echo "now_docker=${now_docker}" >> $GITHUB_ENV
+                  now_docker="$(date +'%Y%m%d')"                                                    #  20250225
+                  echo "NOW_DOCKER=${now_docker}" >> $GITHUB_ENV
 
-                  now_docker_ts="$(date -u +'%FT%T.%3NZ')"
-                  echo "now_docker_ts=${now_docker}" >> $GITHUB_ENV
+                  now_docker_ts="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
+                  echo "NOW_DOCKER_TS=${now_docker}" >> $GITHUB_ENV
+
+                  hash_sha1="$(git rev-parse HEAD)"                                                 #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "HASH_SHA1=${hash_sha1}" >> $GITHUB_ENV
+
+                  hash_sha1_gh="$(echo ${GITHUB_SHA})"                                              #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "HASH_SHA1_GH=${hash_sha1_gh}" >> $GITHUB_ENV
+
+                  pkg_ver_1digit="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
+                  echo "PKG_VER_1DIGIT=${pkg_ver_1digit}" >> $GITHUB_ENV
+
+                  pkg_ver_2digit="$(echo ${{ env.IMAGE_VERSION }} | cut -f2 -d ":" | cut -c1-3)"    #  3.22 > 3.2
+                  echo "PKG_VER_2DIGIT=${pkg_ver_2digit}" >> $GITHUB_ENV
 
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   sudo apt -qq update
                   sudo apt -qq install tree
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   echo " Runner .............. ${{ runner.name }}"
                   echo " Workflow ............ ${{ github.workflow }} (#${{ github.workflow_ref }})"
                   echo " Run Number .......... #${{ github.run_number }}"
@@ -279,18 +295,23 @@ jobs:
                   echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
                   echo " Run Runner Name ..... ${{ steps.context.outputs.runner_name }}"
                   echo " Run Runner ID ....... ${{ steps.context.outputs.runner_id }}"
-                  echo " Year ................ ${year}"
-                  echo " Now ................. ${now}"
-                  echo " Now (Short) ......... ${now_short}"
-                  echo " Now (Long) .......... ${now_long}"
-                  echo " Now (Docker) ........ ${now_docker}"
-                  echo " Now (Docker TS) ..... ${now_docker_ts}"
-                  echo -e
+                  echo " Year ................ ${YEAR}"
+                  echo " Now ................. ${NOW}"
+                  echo " Now (Short) ......... ${NOW_SHORT}"
+                  echo " Now (Long) .......... ${NOW_LONG}"
+                  echo " Now (Docker) ........ ${NOW_DOCKER}"
+                  echo " Now (Docker TS) ..... ${NOW_DOCKER_TS}"
+                  echo "‎"
+                  echo "‎"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   tree -I node_modules -I .git
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
 
             # #
             #   Release › Tags › Fix Permissions
@@ -369,6 +390,7 @@ jobs:
             - name: >-
                   ✅ Start
               run: |
+                  echo "‎"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
                   echo " Starting Job ${{ steps.context.outputs.job_name }}"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
@@ -376,28 +398,43 @@ jobs:
                   year="$(date +'%Y')"
                   echo "YEAR=${year}" >> $GITHUB_ENV
 
-                  now="$(date +'%m-%d-%Y %H:%M:%S')"
+                  now="$(date +'%m-%d-%Y %H:%M:%S')"                                                #  02-25-2025 12:49:48
                   echo "NOW=${now}" >> $GITHUB_ENV
 
-                  now_short="$(date +'%m-%d-%Y')"
-                  echo "now_short=${now_short}" >> $GITHUB_ENV
+                  now_short="$(date +'%m-%d-%Y')"                                                   #  02-25-2025
+                  echo "NOW_SHORT=${now_short}" >> $GITHUB_ENV
 
-                  now_long="$(date +'%m-%d-%Y %H:%M')"
-                  echo "now_long=${now_long}" >> $GITHUB_ENV
+                  now_long="$(date +'%m-%d-%Y %H:%M')"                                              #  02-25-2025 12:49
+                  echo "NOW_LONG=${now_long}" >> $GITHUB_ENV
 
-                  now_docker="$(date +'%Y%m%d')"
-                  echo "now_docker=${now_docker}" >> $GITHUB_ENV
+                  now_docker="$(date +'%Y%m%d')"                                                    #  20250225
+                  echo "NOW_DOCKER=${now_docker}" >> $GITHUB_ENV
 
-                  now_docker_ts="$(date -u +'%FT%T.%3NZ')"
-                  echo "now_docker_ts=${now_docker}" >> $GITHUB_ENV
+                  now_docker_ts="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
+                  echo "NOW_DOCKER_TS=${now_docker}" >> $GITHUB_ENV
+
+                  hash_sha1="$(git rev-parse HEAD)"                                                 #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "HASH_SHA1=${hash_sha1}" >> $GITHUB_ENV
+
+                  hash_sha1_gh="$(echo ${GITHUB_SHA})"                                              #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "HASH_SHA1_GH=${hash_sha1_gh}" >> $GITHUB_ENV
+
+                  pkg_ver_1digit="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
+                  echo "PKG_VER_1DIGIT=${pkg_ver_1digit}" >> $GITHUB_ENV
+
+                  pkg_ver_2digit="$(echo ${{ env.IMAGE_VERSION }} | cut -f2 -d ":" | cut -c1-3)"    #  3.22 > 3.2
+                  echo "PKG_VER_2DIGIT=${pkg_ver_2digit}" >> $GITHUB_ENV
 
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   sudo apt -qq update
                   sudo apt -qq install tree
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   echo " Runner .............. ${{ runner.name }}"
                   echo " Workflow ............ ${{ github.workflow }} (#${{ github.workflow_ref }})"
                   echo " Run Number .......... #${{ github.run_number }}"
@@ -426,18 +463,23 @@ jobs:
                   echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
                   echo " Run Runner Name ..... ${{ steps.context.outputs.runner_name }}"
                   echo " Run Runner ID ....... ${{ steps.context.outputs.runner_id }}"
-                  echo " Year ................ ${year}"
-                  echo " Now ................. ${now}"
-                  echo " Now (Short) ......... ${now_short}"
-                  echo " Now (Long) .......... ${now_long}"
-                  echo " Now (Docker) ........ ${now_docker}"
-                  echo " Now (Docker TS) ..... ${now_docker_ts}"
-                  echo -e
+                  echo " Year ................ ${YEAR}"
+                  echo " Now ................. ${NOW}"
+                  echo " Now (Short) ......... ${NOW_SHORT}"
+                  echo " Now (Long) .......... ${NOW_LONG}"
+                  echo " Now (Docker) ........ ${NOW_DOCKER}"
+                  echo " Now (Docker TS) ..... ${NOW_DOCKER_TS}"
+                  echo "‎"
+                  echo "‎"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   tree -I node_modules -I .git
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
 
             # #
             #   Release › Github › Get Timestamp
@@ -446,17 +488,8 @@ jobs:
             - name: '🕛 Get Timestamp'
               id: task_release_set_timestamp
               run: |
-                  echo "IMAGE_VERSION_1DIGIT=`echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1`" >> ${GITHUB_ENV}                                                   #  3
-                  echo "IMAGE_VERSION_2DIGIT=`echo ${{ env.IMAGE_VERSION }} | cut --complement -c4`" >> ${GITHUB_ENV}                                               #  3.2
                   echo "REGISTRY_REPO_ORG_AUTHOR_LC=`echo ${{ env.IMAGE_GHCR_AUTHOR }}/${{ env.IMAGE_NAME }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}        #  aetherinox/docker-base-alpine
                   echo "REGISTRY_REPO_AUTHOR_LC=`echo ${{ env.IMAGE_GHCR_AUTHOR }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}                                  #  aetherinox
-                  echo "DOCKER_SHA=${GITHUB_SHA}" >> $GITHUB_ENV                                                                                                    #  71fad013cfce9116ec62779e4a7e627fe4c33627
-                  echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV                                                                                            #  02-25-2025 12:49:48
-                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_ENV                                                                                               #  02-25-2025
-                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_ENV                                                                                          #  02-25-2025 12:49
-                  echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV                                                                                          #  20250225
-                  echo "NOW_DOCKER_TS=$(date -u +'%FT%T.%3NZ')" >> $GITHUB_ENV                                                                                      #  2025-02-25T12:50:11.569Z
-                  echo "GITHUB_SHA1=$(git rev-parse HEAD)" >> $GITHUB_ENV                                                                                           #  012cd0cc44c576c4a57b8a18d86793f244d1080a
 
             # #
             #   Release › Github › Install Dependencies
@@ -571,10 +604,10 @@ jobs:
                       type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=450,prefix=,suffix=,value=${{ env.IMAGE_VERSION }}
 
                       #  tag            add 1.0               ( dispatch only + no dev )
-                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=425,prefix=,suffix=,value=${{ env.IMAGE_VERSION_2DIGIT }}
+                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=425,prefix=,suffix=,value=${{ env.PKG_VER_2DIGIT }}
 
                       #  tag            add 1                 ( dispatch only + no dev )
-                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=400,prefix=,suffix=,value=${{ env.IMAGE_VERSION_1DIGIT }}
+                      type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=400,prefix=,suffix=,value=${{ env.PKG_VER_1DIGIT }}
 
                       #  tag            add development       ( dispatch only + only dev )
                       type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == true }},priority=300,prefix=,suffix=,value=development
@@ -593,9 +626,9 @@ jobs:
                       org.opencontainers.image.ref.name=${{ github.ref_name }}
                       org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
-                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
+                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}"
                       org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
-                      org.alpine.image.build-sha1=${{ env.GITHUB_SHA1 }}
+                      org.alpine.image.build-sha1=${{ env.HASH_SHA1 }}
                   annotations: |
                       org.opencontainers.image.description=Alpine base image
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
@@ -606,9 +639,9 @@ jobs:
                       org.opencontainers.image.ref.name=${{ github.ref_name }}
                       org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
-                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
+                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}"
                       org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
-                      org.alpine.image.build-sha1=${{ env.GITHUB_SHA1 }}
+                      org.alpine.image.build-sha1=${{ env.HASH_SHA1 }}
 
             # #
             #   Release › Github › Build and Push › Amd64
@@ -635,8 +668,8 @@ jobs:
                       ARCH=x86_64
                       RELEASE=${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}
                       VERSION=${{ env.IMAGE_VERSION }}
-                      BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
-                      GIT_SHA1=${{ env.GITHUB_SHA1 }}
+                      BUILDDATE=${{ env.NOW_DOCKER }}
+                      GIT_SHA1=${{ env.HASH_SHA1 }}
                   annotations: |
                       org.opencontainers.image.description=Alpine base image
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
@@ -648,10 +681,10 @@ jobs:
                       org.opencontainers.image.ref.name=${{ github.ref_name }}
                       org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
-                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
+                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}"
                       org.alpine.image.build-architecture=amd64
                       org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
-                      org.alpine.image.build-sha1=${{ env.GITHUB_SHA1 }}
+                      org.alpine.image.build-sha1=${{ env.HASH_SHA1 }}
 
             # #
             #   Release › Github › Export Digest › Amd64
@@ -706,8 +739,8 @@ jobs:
                       ARCH=aarch64
                       RELEASE=${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}
                       VERSION=${{ env.IMAGE_VERSION }}
-                      BUILDDATE=${{ env.NOW_DOCKER_LABEL }}
-                      GIT_SHA1=${{ env.GITHUB_SHA1 }}
+                      BUILDDATE=${{ env.NOW_DOCKER }}
+                      GIT_SHA1=${{ env.HASH_SHA1 }}
                   annotations: |-
                       org.opencontainers.image.description=Alpine base image
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
@@ -719,10 +752,10 @@ jobs:
                       org.opencontainers.image.ref.name=${{ github.ref_name }}
                       org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
-                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
+                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}"
                       org.alpine.image.build-architecture=arm64
                       org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
-                      org.alpine.image.build-sha1=${{ env.GITHUB_SHA1 }}
+                      org.alpine.image.build-sha1=${{ env.HASH_SHA1 }}
 
             # #
             #   Release › Github › Export Digest › Arm64
@@ -779,19 +812,18 @@ jobs:
                   echo "---- [ ENV ] -------------------------------------------------------------------------------------------"
                   echo "env.IMAGE_NAME ........................... ${{ env.IMAGE_NAME }}"
                   echo "env.IMAGE_VERSION ........................ ${{ env.IMAGE_VERSION }}"
-                  echo "env.IMAGE_VERSION_1DIGIT ................. ${{ env.IMAGE_VERSION_1DIGIT }}"
-                  echo "env.IMAGE_VERSION_2DIGIT ................. ${{ env.IMAGE_VERSION_2DIGIT }}"
+                  echo "env.PKG_VER_1DIGIT ....................... ${{ env.PKG_VER_1DIGIT }}"
+                  echo "env.PKG_VER_2DIGIT ....................... ${{ env.PKG_VER_2DIGIT }}"
                   echo "env.IMAGE_GHCR_AUTHOR .................... ${{ env.IMAGE_GHCR_AUTHOR }}"
                   echo "env.IMAGE_GHCR_USERNAME .................. ${{ env.IMAGE_GHCR_USERNAME }}"
                   echo "env.NOW .................................. ${{ env.NOW }}"
                   echo "env.NOW_SHORT ............................ ${{ env.NOW_SHORT }}"
                   echo "env.NOW_LONG ............................. ${{ env.NOW_LONG }}"
-                  echo "env.NOW_DOCKER_LABEL ..................... ${{ env.NOW_DOCKER_LABEL }}"
+                  echo "env.NOW_DOCKER ........................... ${{ env.NOW_DOCKER }}"
                   echo "env.NOW_DOCKER_TS ........................ ${{ env.NOW_DOCKER_TS }}"
                   echo "env.REGISTRY_REPO_ORG_AUTHOR_LC .......... ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}"
                   echo "env.REGISTRY_REPO_AUTHOR_LC .............. ${{ env.REGISTRY_REPO_AUTHOR_LC }}"
-                  echo "env.DOCKER_SHA ........................... ${{ env.DOCKER_SHA }}"
-                  echo "env.GITHUB_SHA1 .......................... ${{ env.GITHUB_SHA1 }}"
+                  echo "env.HASH_SHA1 ............................ ${{ env.HASH_SHA1 }}"
                   echo -e ""
                   echo "---- [ DOCKER IMAGES ] ---------------------------------------------------------------------------------"
                   echo "registry ................................. ${{ env.IMAGE_REGISTRY }} GHCR"
@@ -909,7 +941,7 @@ jobs:
         steps:
 
             # #
-            #   Cleanup › Checkout
+            #   Cleanup › Tags › Checkout
             # #
 
             - name: '☑️ Checkout'
@@ -918,7 +950,7 @@ jobs:
                   fetch-depth: 0
 
             # #
-            #   Cleanup › Job Information
+            #   Cleanup › Tags › Job Information
             # #
 
             - name: >-
@@ -927,12 +959,13 @@ jobs:
               id: 'context'
 
             # #
-            #   Cleanup › Start
+            #   Cleanup › Tags › Start
             # #
 
             - name: >-
                   ✅ Start
               run: |
+                  echo "‎"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
                   echo " Starting Job ${{ steps.context.outputs.job_name }}"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
@@ -940,28 +973,43 @@ jobs:
                   year="$(date +'%Y')"
                   echo "YEAR=${year}" >> $GITHUB_ENV
 
-                  now="$(date +'%m-%d-%Y %H:%M:%S')"
+                  now="$(date +'%m-%d-%Y %H:%M:%S')"                                                #  02-25-2025 12:49:48
                   echo "NOW=${now}" >> $GITHUB_ENV
 
-                  now_short="$(date +'%m-%d-%Y')"
-                  echo "now_short=${now_short}" >> $GITHUB_ENV
+                  now_short="$(date +'%m-%d-%Y')"                                                   #  02-25-2025
+                  echo "NOW_SHORT=${now_short}" >> $GITHUB_ENV
 
-                  now_long="$(date +'%m-%d-%Y %H:%M')"
-                  echo "now_long=${now_long}" >> $GITHUB_ENV
+                  now_long="$(date +'%m-%d-%Y %H:%M')"                                              #  02-25-2025 12:49
+                  echo "NOW_LONG=${now_long}" >> $GITHUB_ENV
 
-                  now_docker="$(date +'%Y%m%d')"
-                  echo "now_docker=${now_docker}" >> $GITHUB_ENV
+                  now_docker="$(date +'%Y%m%d')"                                                    #  20250225
+                  echo "NOW_DOCKER=${now_docker}" >> $GITHUB_ENV
 
-                  now_docker_ts="$(date -u +'%FT%T.%3NZ')"
-                  echo "now_docker_ts=${now_docker}" >> $GITHUB_ENV
+                  now_docker_ts="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
+                  echo "NOW_DOCKER_TS=${now_docker}" >> $GITHUB_ENV
+
+                  hash_sha1="$(git rev-parse HEAD)"                                                 #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "HASH_SHA1=${hash_sha1}" >> $GITHUB_ENV
+
+                  hash_sha1_gh="$(echo ${GITHUB_SHA})"                                              #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "HASH_SHA1_GH=${hash_sha1_gh}" >> $GITHUB_ENV
+
+                  pkg_ver_1digit="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
+                  echo "PKG_VER_1DIGIT=${pkg_ver_1digit}" >> $GITHUB_ENV
+
+                  pkg_ver_2digit="$(echo ${{ env.IMAGE_VERSION }} | cut -f2 -d ":" | cut -c1-3)"    #  3.22 > 3.2
+                  echo "PKG_VER_2DIGIT=${pkg_ver_2digit}" >> $GITHUB_ENV
 
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   sudo apt -qq update
                   sudo apt -qq install tree
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   echo " Runner .............. ${{ runner.name }}"
                   echo " Workflow ............ ${{ github.workflow }} (#${{ github.workflow_ref }})"
                   echo " Run Number .......... #${{ github.run_number }}"
@@ -990,18 +1038,23 @@ jobs:
                   echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
                   echo " Run Runner Name ..... ${{ steps.context.outputs.runner_name }}"
                   echo " Run Runner ID ....... ${{ steps.context.outputs.runner_id }}"
-                  echo " Year ................ ${year}"
-                  echo " Now ................. ${now}"
-                  echo " Now (Short) ......... ${now_short}"
-                  echo " Now (Long) .......... ${now_long}"
-                  echo " Now (Docker) ........ ${now_docker}"
-                  echo " Now (Docker TS) ..... ${now_docker_ts}"
-                  echo -e
+                  echo " Year ................ ${YEAR}"
+                  echo " Now ................. ${NOW}"
+                  echo " Now (Short) ......... ${NOW_SHORT}"
+                  echo " Now (Long) .......... ${NOW_LONG}"
+                  echo " Now (Docker) ........ ${NOW_DOCKER}"
+                  echo " Now (Docker TS) ..... ${NOW_DOCKER_TS}"
+                  echo "‎"
+                  echo "‎"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   tree -I node_modules -I .git
-                  echo -e
+                  echo "‎"
+                  echo "‎"
                   echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
 
             # #
             #   Cleanup › Clean Untagged Images
