@@ -71,7 +71,7 @@ on:
             IMAGE_VERSION:
                 description:    '🏷️ Image Version'
                 required:       true
-                default:        '3.21'
+                default:        '3.22'
                 type:           string
 
             # #
@@ -135,7 +135,7 @@ on:
 
 env:
     IMAGE_NAME:                 ${{ github.event.inputs.IMAGE_NAME || 'alpine-base' }}
-    IMAGE_VERSION:              ${{ github.event.inputs.IMAGE_VERSION || '3.21' }}
+    IMAGE_VERSION:              ${{ github.event.inputs.IMAGE_VERSION || '3.22' }}
     IMAGE_GHCR_AUTHOR:          ${{ github.event.inputs.IMAGE_GHCR_AUTHOR || 'Aetherinox' }}
     IMAGE_GHCR_USERNAME:        ${{ github.event.inputs.IMAGE_GHCR_USERNAME || 'Aetherinox' }}
     BOT_NAME_1:                 EuropaServ
