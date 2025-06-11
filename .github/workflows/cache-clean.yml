@@ -2,10 +2,25 @@
 #   @type               github workflow
 #   @author             Aetherinox
 #   @url                https://github.com/Aetherinox
-#   @usage              cleans up the list of deployments in the environment history
-#                       edit the 'environment:' to determine which deployment to keep clean
-#                           - can be ran manually
-#
+#   @usage              cleans up the cache for a repository.
+#   
+#   
+#   You can view your current cached items by going to Github and going to the page:
+#       https://github.com/USERNAME/REPO/actions/caches
+#   
+#   Caches have branch scope restrictions in place, which means some caches have limited usage options. For more information
+#   on cache scope restrictions, see Restrictions for accessing a cache, earlier in this article. If caches limited to a specific
+#   branch are using a lot of storage quota, it may cause caches from the default branch to be created and deleted at a high frequency.
+#   
+#   For example, a repository could have many new pull requests opened, each with their own caches that are restricted to that branch.
+#   These caches could take up the majority of the cache storage for that repository. Once a repository has reached its maximum cache
+#   storage, the cache eviction policy will create space by deleting the caches in order of last access date, from oldest to most
+#   recent. In order to prevent cache thrashing when this happens, you can set up workflows to delete caches on a faster cadence than
+#   the cache eviction policy will. You can use the GitHub CLI to delete caches for specific branches.
+#   
+#   @reference          https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/caching-dependencies-to-speed-up-workflows#deleting-cache-entries
+#   
+#   
 #   @secrets            secrets.SELF_TOKEN                                          self github personal access token (fine-grained)
 #                       secrets.SELF_TOKEN_CL                                       self github personal access token (classic)
 #                       secrets.NPM_TOKEN                                           self npmjs access token
@@ -214,6 +229,21 @@ jobs:
 
             # #
             #   Cache › Clean › Start
+            #   
+            #   You can view your current cached items by going to Github and going to the page:
+            #       https://github.com/USERNAME/REPO/actions/caches
+            #   
+            #   Caches have branch scope restrictions in place, which means some caches have limited usage options. For more information
+            #   on cache scope restrictions, see Restrictions for accessing a cache, earlier in this article. If caches limited to a specific
+            #   branch are using a lot of storage quota, it may cause caches from the default branch to be created and deleted at a high frequency.
+            #   
+            #   For example, a repository could have many new pull requests opened, each with their own caches that are restricted to that branch.
+            #   These caches could take up the majority of the cache storage for that repository. Once a repository has reached its maximum cache
+            #   storage, the cache eviction policy will create space by deleting the caches in order of last access date, from oldest to most
+            #   recent. In order to prevent cache thrashing when this happens, you can set up workflows to delete caches on a faster cadence than
+            #   the cache eviction policy will. You can use the GitHub CLI to delete caches for specific branches.
+            #   
+            #   @reference      https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/caching-dependencies-to-speed-up-workflows#deleting-cache-entries
             # #
 
             - name: >-
@@ -230,7 +260,7 @@ jobs:
                                   per_page: ${{ env.NUM_PER_PAGE }},
                               };
 
-                              console.log( `Starting to clean cache; showing ${{ env.NUM_PER_PAGE }} cached items per page` )
+                              console.log( `✅ Starting to clean cache; showing ${{ env.NUM_PER_PAGE }} cached items per page` )
                               const caches = await github.rest.actions.getActionsCacheList( cacheConf )
 
                               while( caches.data.actions_caches.length )
