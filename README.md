@@ -86,7 +86,7 @@ Normal users should not need to modify the files in this repository.
 
 The files contained within this branch `docker/alpine-base` are utilized as a foundation. This base image only provides us with a docker image which has alpine linux, Nginx, a few critical packages, and the **[s6-overlay](https://github.com/just-containers/s6-overlay)** plugin.
 
-This branch `docker/alpine-base` does **NOT** contain any applications. It is only to be used as a base image which will be called when you build your docker app's `📄 Dockerfile`.
+This branch `docker/alpine-base` does **NOT** contain any applications. It is only to be used as a base image which will be called when you build your main app's `📄 Dockerfile`.
 
 <br />
 <br />
@@ -110,7 +110,7 @@ finalization (`cont-finish.d`) and their own services with dependencies between 
 
 ### S6 Overlay
 
-The S6 Overlay will be called at the start of the container lifecycle as the first process, `PID 1`. After some minor internal setup, it will run the services you declare, and once the services end or the container is signaled to terminate, it will run your ending scripts.
+The S6 Overlay is called at the start of the container lifecycle as the first process, `PID 1`. After some minor internal setup, it will run the services you declare, and once the services end or the container is signaled to terminate, it will run your ending scripts.
 
 All services can be `longrun` , `oneshot` or `bundle`, and are declared inside `etc/s6-overlay/s6-rc` with a descriptive name. The service definition is documented here, and [explained in detail over there](https://skarnet.org/software/s6/servicedir.html). In short, you use a bunch of empty files.
 
@@ -593,7 +593,7 @@ Once the emulator is installed; we will now build two images. When building thes
 > | Dockerhub | `--tag aetherinox/alpine-base:3.22-amd64`<br>`--tag aetherinox/alpine-base:3.22-arm64` |
 > | Github (GHCR) | `--tag ghcr.io/aetherinox/alpine-base:3.22-amd64`<br>`--tag ghcr.io/aetherinox/alpine-base:3.22-arm64` |
 > | Registry v2 | `--tag registry.domain.lan/aetherinox/alpine-base:3.22-amd64`<br>`--tag registry.domain.lan/aetherinox/alpine-base:3.22-arm64` |
-> | Gitea | `--tag git.binaryninja.net/aetherinox/alpine-base:3.22-amd64`<br>`--tag git.binaryninja.net/aetherinox/alpine-base:3.22-arm64` |
+> | Gitea | `--tag git.domain.lan/aetherinox/alpine-base:3.22-amd64`<br>`--tag git.domain.lan/aetherinox/alpine-base:3.22-arm64` |
 
 <br />
 
@@ -1408,7 +1408,7 @@ CMD ["node", "-v"]
 
 ### PID 1 or Leave
 
-In the world of Linux, the Process Identifier 1 (`PID 1`) is considered the **master** process, and there is no other parent process than itself. If this process terminates, then the computer shuts down because is understood there is no more work to be done. S6 overlay launches your application as PID 1. Once that app terminates, the docker container ceases to operate and it will throw a `FAILED` code.
+In the world of Linux, the Process Identifier 1 (`PID 1`) is considered the **master** process, and there is no other parent process than itself. If this process terminates, then the computer shuts down because is understood there is no more work to be done. S6 overlay launches within your docker container as PID 1. Once that app terminates, the docker container ceases to operate and it will throw a `FAILED` code.
 
 <br />
 <br />
@@ -1713,9 +1713,9 @@ You may opt to either use the generated self-signed certificate, or you can add 
 services:
     yourapp:
         container_name: yourapp
-        image: ghcr.io/thebinaryninja/yourapp:latest                # Image: Github
-      # image: thebinaryninja/yourapp:latest                        # Image: Dockerhub
-      # image: git.binaryninja.net/binaryninja/yourapp:latest       # Image: Gitea
+        image: ghcr.io/aetherinox/yourapp:latest                    # Image: Github
+      # image: aetherinox/yourapp:latest                            # Image: Dockerhub
+      # image: git.domain.lan/aetherinox/yourapp:latest             # Image: Gitea
       # image: yourapp:latest                                       # Image: Locally built
         restart: unless-stopped
         volumes:
