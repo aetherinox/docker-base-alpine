@@ -56,6 +56,7 @@ Normal users should not need to modify the files in this repository.
     - [ash](#ash)
     - [sh](#sh)
     - [bash](#bash)
+  - [Custom Services](#custom-services)
   - [Custom Docker Image Scripts](#custom-docker-image-scripts)
   - [SSL Certificates](#ssl-certificates)
   - [Logs](#logs)
@@ -895,7 +896,7 @@ The flow of the process is outlined below:
 %%{init: { 'themeVariables': { 'fontSize': '10px' }}}%%
 flowchart TB
 
-subgraph GRAPH_TVAPP ["Build yourapp:latest"]
+subgraph GRAPH_YOURAPP ["Build yourapp:latest"]
     direction TB
     obj_step10["`&gt; git clone github.com/aetherinox/yourapp.git`"]
     obj_step11["`Dockerfile`"]
@@ -914,7 +915,7 @@ subgraph GRAPH_TVAPP ["Build yourapp:latest"]
     style obj_step13 text-align:left,stroke-width:1px,stroke:#555
 end
 
-style GRAPH_TVAPP text-align:center,stroke-width:1px,stroke:transparent,fill:transparent
+style GRAPH_YOURAPP text-align:center,stroke-width:1px,stroke:transparent,fill:transparent
 
 subgraph GRAPH_ALPINE["Build alpine-base:latest Image"]
 direction TB
@@ -937,7 +938,7 @@ end
 
 style GRAPH_ALPINE text-align:center,stroke-width:1px,stroke:transparent,fill:transparent
 
-GRAPH_TVAPP --> obj_step10 --> obj_step11 --> obj_step12 --> obj_step13 --> obj_step14
+GRAPH_YOURAPP --> obj_step10 --> obj_step11 --> obj_step12 --> obj_step13 --> obj_step14
 GRAPH_ALPINE --> obj_step20 --> obj_step21 --> obj_step22 --> obj_step23 --> obj_step24
 ```
 
@@ -1008,6 +1009,241 @@ docker exec -it alpine-base sh
 ```shell
 docker exec -it alpine-base bash
 ```
+
+<br />
+<br />
+
+### Custom Services
+
+When creating your personal project's foundation, you can create a custom service which is ran once the docker image is brought up. Within your project's folder structure, create the following folder path:
+
+```shell
+mkdir -p /root/etc/services.d/yourapp/
+```
+
+<br />
+
+Now create a new run file:
+
+```shell
+sudo touch /root/etc/services.d/yourapp/run
+```
+
+<br />
+
+Open the newly created file and add your bash logic. The following is a very basic service script which finds our docker container IP addresses, assigns them to a variable, then installs a NPM project and then moved it to its final running path. You do not need to use this script, it is simply an example:
+
+```bash
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+# #
+#   defaults
+# #
+
+PUID=${PUID:-911}
+PGID=${PGID:-911}
+DIR_BUILD=${DIR_BUILD:-/usr/src/app}
+DIR_RUN=${DIR_RUN:-/usr/bin/app}
+
+# #
+#   define > colors
+#
+#   Use the color table at:
+#       - https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+# #
+
+declare -A c=(
+    [end]=$'\e[0m'
+    [white]=$'\e[97m'
+    [bold]=$'\e[1m'
+    [dim]=$'\e[2m'
+    [underline]=$'\e[4m'
+    [strike]=$'\e[9m'
+    [blink]=$'\e[5m'
+    [inverted]=$'\e[7m'
+    [hidden]=$'\e[8m'
+    [black]=$'\e[0;30m'
+    [redl]=$'\e[0;91m'
+    [redd]=$'\e[0;31m'
+    [magental]=$'\e[0;95m'
+    [magentad]=$'\e[0;35mm'
+    [bluel]=$'\e[0;94m'
+    [blued]=$'\e[0;34m'
+    [cyanl]=$'\e[0;96m'
+    [cyand]=$'\e[0;36m'
+    [greenl]=$'\e[0;92m'
+    [greend]=$'\e[0;32m'
+    [yellowl]=$'\e[0;93m'
+    [yellowd]=$'\e[0;33m'
+    [greyl]=$'\e[0;37m'
+    [greyd]=$'\e[0;90m'
+    [navy]=$'\e[38;5;62m'
+    [olive]=$'\e[38;5;144m'
+    [peach]=$'\e[38;5;210m'
+)
+
+# #
+#   unicode for emojis
+#       https://apps.timwhitlock.info/emoji/tables/unicode
+# #
+
+declare -A icon=(
+    ["symbolic link"]=$'\xF0\x9F\x94\x97' # 🔗
+    ["regular file"]=$'\xF0\x9F\x93\x84' # 📄
+    ["directory"]=$'\xF0\x9F\x93\x81' # 📁
+    ["regular empty file"]=$'\xe2\xad\x95' # ⭕
+    ["log"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["1"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["2"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["3"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["4"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["5"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["pem"]=$'\xF0\x9F\x94\x92' # 🔑
+    ["pub"]=$'\xF0\x9F\x94\x91' # 🔒
+    ["pfx"]=$'\xF0\x9F\x94\x92' # 🔑
+    ["p12"]=$'\xF0\x9F\x94\x92' # 🔑
+    ["key"]=$'\xF0\x9F\x94\x91' # 🔒
+    ["crt"]=$'\xF0\x9F\xAA\xAA ' # 🪪
+    ["gz"]=$'\xF0\x9F\x93\xA6' # 📦
+    ["zip"]=$'\xF0\x9F\x93\xA6' # 📦
+    ["gzip"]=$'\xF0\x9F\x93\xA6' # 📦
+    ["deb"]=$'\xF0\x9F\x93\xA6' # 📦
+    ["sh"]=$'\xF0\x9F\x97\x94' # 🗔
+)
+
+# #
+#   define > system
+# #
+
+sys_os_ver="1.0.0"
+sys_os_name="Unknown"
+
+# #
+#   s6 > store env variables
+# #
+
+printf '%-29s %-65s\n' "  ${c[bluel]}STATUS${c[end]}" "${c[end]}Fetching docker container and gateway addresses${c[end]}"
+
+# #
+#   get container ips
+# #
+
+ip_gateway=$(/sbin/ip route|awk '/default/ { print $3 }')
+ip_container=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+
+if [ -d "/var/run/s6/container_environment/" ]; then
+    printf "$ip_gateway" > /var/run/s6/container_environment/IP_GATEWAY
+    printf "$ip_container" > /var/run/s6/container_environment/IP_CONTAINER
+else
+    printf '%-29s %-65s\n' "  ${c[redl]}ERROR${c[end]}" "${c[end]}Cannot generate s6-overlay env files; folder ${c[redl]}/var/run/s6/container_environment/${c[end]} does not exist${c[end]}"
+    bHasError=true
+fi
+
+# #
+#   s6 > export env vars
+# #
+
+export IP_GATEWAY=$ip_gateway
+export IP_GATEWAY=$ip_container
+
+# #
+#   install and startup for YourApp
+# #
+
+printf '%-29s %-65s\n' "  ${c[bluel]}STATUS${c[end]}" "${c[end]}Copying ${c[bluel]}${DIR_BUILD}${c[end]} to ${c[bluel]}${DIR_RUN}${c[end]}"
+if [ -z "${DIR_BUILD}" ]; then
+    printf '%-29s %-65s\n' "  ${c[redl]}ERROR${c[end]}" "${c[end]}Cannot copy; env var ${c[redl]}\${DIR_BUILD}${c[end]} missing${c[end]}"
+    bHasError=true
+else
+    if [ -d "${DIR_BUILD}/" ]; then
+        cp -r ${DIR_BUILD}/* ${DIR_RUN}
+    else
+        printf '%-29s %-65s\n' "  ${c[redl]}ERROR${c[end]}" "${c[end]}Cannot copy folder ${c[redl]}${DIR_BUILD}${c[end]} to ${c[redl]}${DIR_RUN}${c[end]}; build folder ${c[redl]}${DIR_BUILD}${c[end]} does not exist${c[end]}"
+        bHasError=true
+    fi
+fi
+
+# #
+#   remove build directory
+# #
+
+printf '%-29s %-65s\n' "  ${c[bluel]}STATUS${c[end]}" "${c[end]}Remove ${c[bluel]}${DIR_BUILD}/${c[end]}"
+if [ -z "${DIR_BUILD}" ]; then
+    printf '%-29s %-65s\n' "  ${c[redl]}ERROR${c[end]}" "${c[end]}Cannot remove; env var ${c[redl]}\${DIR_BUILD}${c[end]} missing${c[end]}"
+else
+    if [ -d "${DIR_BUILD}" ]; then
+        rm -rf "${DIR_BUILD}/"
+    else
+        printf '%-29s %-65s\n' "  ${c[redl]}ERROR${c[end]}" "${c[end]}Cannot remove; build folder ${c[redl]}${DIR_BUILD}${c[end]} does not exist. Restart the container to re-initialize build folder.${c[end]}"
+    fi
+fi
+
+# #
+#   cd to BUILD_RUN directory
+# #
+
+printf '%-29s %-65s\n' "  ${c[bluel]}STATUS${c[end]}" "${c[end]}Changing to run directory ${c[bluel]}${DIR_RUN}/${c[end]}"
+if [ -z "${DIR_RUN}" ]; then
+    printf '%-29s %-65s\n' "  ${c[redl]}ERROR${c[end]}" "${c[end]}Cannot cd; env var ${c[redl]}\${DIR_RUN}${c[end]} missing${c[end]}"
+    bHasError=true
+else
+    if [ -d "${DIR_RUN}" ]; then
+        cd ${DIR_RUN}
+    else
+        printf '%-29s %-65s\n' "  ${c[redl]}ERROR${c[end]}" "${c[end]}Cannot cd; run folder ${c[redl]}${DIR_RUN}${c[end]} does not exist${c[end]}"
+        bHasError=true
+    fi
+fi
+
+# #
+#   install your app via npm
+# #
+
+printf '%-29s %-65s\n' "  ${c[bluel]}STATUS${c[end]}" "${c[end]}Running command ${c[bluel]}npm install --omit=dev${c[end]}"
+if ! command -v npm; then
+    printf '%-29s %-65s\n' "  ${c[redl]}ERROR${c[end]}" "${c[end]}Cannot install YourApp with npm because package ${c[redl]}npm${c[end]} not installed${c[end]}"
+    bHasError=true
+else
+    npm install --omit=dev
+
+    printf '%-29s %-65s\n' "  ${c[bluel]}STATUS${c[end]}" "${c[end]}Running command ${c[bluel]}npm start${c[end]}"
+    npm start
+fi
+
+# #
+#   finished run script
+# #
+
+printf '%-29s %-65s\n' "  ${c[greenl]}OK${c[end]}" "${c[end]}Finished initializing script${c[end]}"
+if [ "$bHasError" = true ] ; then
+    printf '%-29s %-65s\n' "" ""
+    printf '%-29s %-65s\n' "  ${c[redl]}ERROR${c[end]}" "${c[end]}Fatal errors were detected${c[end]}"
+    printf '%-29s %-65s\n' "  ${c[redl]}${c[end]}" "${c[end]}The run script detected that certain steps failed. This app may not${c[end]}"
+    printf '%-29s %-65s\n' "  ${c[redl]}${c[end]}" "${c[end]}work properly. Try restarting the container.${c[end]}"
+    printf '%-29s %-65s\n' "" ""
+fi
+```
+
+<br />
+
+Once you create this new service file, ensure the permissions are correct:
+
+```shell
+sudo chmod +x ./root/etc/services.d/yourapp/run
+```
+
+<br />
+
+Finally, make sure you are using the proper carriages. You cannot utilize Windows' `Carriage Return Line Feed`. All files must be converted to Unix' `Line Feed`.
+
+```shell
+dos2unix ./root/etc/services.d/yourapp/run
+```
+
+<br />
+
+When you start your project's docker image up, this service will be executed.
 
 <br />
 <br />
