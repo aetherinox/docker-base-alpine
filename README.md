@@ -355,7 +355,7 @@ After completing the `docker buildx` commands above; you should now have two new
 
 <br />
 
-<p align="center"><img style="width: 40%;text-align: center;" src="docs/readme/img/01.png"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images</sup></sub></p>
+<p align="center"><img style="width: 40%;text-align: center;" src="docs/readme/img/01.jpg"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images</sup></sub></p>
 
 <br />
 
@@ -457,7 +457,7 @@ If you go back to your registry; you should now see multiple new entries, all wi
 
 <br />
 
-<p align="center"><img style="width: 40%;text-align: center;" src="docs/readme/img/02.png"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images, and merged containers with both architectures</sup></sub></p>
+<p align="center"><img style="width: 40%;text-align: center;" src="docs/readme/img/02.jpg"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images, and merged containers with both architectures</sup></sub></p>
 
 <br />
 <br />
@@ -685,7 +685,7 @@ If you go back to your registry; you should now see multiple new entries, all wi
 
 <br />
 
-<p align="center"><img style="width: 40%;text-align: center;" src="docs/readme/img/02.png"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images, and merged containers with both architectures</sup></sub></p>
+<p align="center"><img style="width: 40%;text-align: center;" src="docs/readme/img/02.jpg"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images, and merged containers with both architectures</sup></sub></p>
 
 <br />
 
