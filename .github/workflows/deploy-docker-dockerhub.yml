@@ -13,15 +13,20 @@
 #                       secrets.PYPI_API_TOKEN                                      self Pypi API token (production site) - https://pypi.org/
 #                       secrets.PYPI_API_TEST_TOKEN                                 self Pypi API token (test site) - https://test.pypi.org/
 #                       secrets.SELF_DOCKERHUB_TOKEN                                self Dockerhub token
-#                       secrets.ORG_BINARYNINJA_TOKEN                               org github personal access token (fine-grained)
-#                       secrets.ORG_BINARYNINJA_TOKEN_CL                            org github personal access token (classic)
-#                       secrets.ORG_BINARYNINJA_DOCKERHUB_TOKEN                     org dockerhub secret
-#                       secrets.ORG_BINARYNINJA_GITEA_TOKEN                         org gitea personal access token (classic) with package:write permission
-#                       secrets.BINARYSERV_GPG_KEY_ASC                              bot gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
-#                       secrets.BINARYSERV_GPG_PASSPHRASE                           bot gpg private key passphrase
-#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_TVAPP2_RELEASES         discord webhook to report release notifications from github to discord
-#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_TVAPP2_WORKFLOWS        discord webhook to report workflow notifications from github to discord
-#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_TVAPP2_UPDATES          discord webhook to report activity notifications from github to discord
+#                       secrets.CODECOV_TOKEN                                       codecov upload token for nodejs projects
+#                       secrets.MAXMIND_GELITE_TOKEN                                maxmind API token
+#                       secrets.CF_ACCOUNT_ID                                       cloudflare account id
+#                       secrets.CF_ACCOUNT_TOKEN                                    cloudflare account token
+#                       secrets.ORG_TOKEN                                           org github personal access token (fine-grained)
+#                       secrets.ORG_TOKEN_CL                                        org github personal access token (classic)
+#                       secrets.ORG_DOCKERHUB_TOKEN                                 org dockerhub secret
+#                       secrets.ORG_GITEA_TOKEN                                     org gitea personal access token (classic) with package:write permission
+#                       secrets.BOT_GPG_KEY_ASC                                     bot gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
+#                       secrets.BOT_GPG_KEY_B64                                     bot gpg private key (binary) converted to base64
+#                       secrets.BOT_GPG_PASSPHRASE                                  bot gpg private key passphrase
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_RELEASES                discord webhook to report release notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_WORKFLOWS               discord webhook to report workflow notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_UPDATES                 discord webhook to report activity notifications from github to discord
 #
 #   @local              these workflows can be tested locally through the use of `act`
 #                           https://github.com/nektos/act
@@ -29,8 +34,8 @@
 #                       Add system env var with path to act.exe
 #                       Run the commands:
 #                           git pull https://github.com/username/repo
-#                           act -W .github/workflows/deploy-docker-github.yml -P ubuntu-latest=catthehacker/ubuntu:full-22.04
-#                           act -W .github/workflows/deploy-docker-github.yml -s TOKEN_CL=XXXXXXXXXX --pull=false
+#                           act -W .github/workflows/deploy-docker-dockerhub.yml -P ubuntu-latest=catthehacker/ubuntu:full-22.04
+#                           act -W .github/workflows/deploy-docker-dockerhub.yml -s TOKEN_CL=XXXXXXXXXX --pull=false
 # #
 
 name: '📦 Deploy › Docker › Dockerhub'
@@ -714,10 +719,10 @@ jobs:
                       org.opencontainers.image.ref.name=${{ github.ref_name }}
                       org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
-                      org.tvapp2.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
-                      org.tvapp2.image.build-architecture=arm64
-                      org.tvapp2.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
-                      org.tvapp2.image.build-sha1=${{ env.GITHUB_SHA1 }}
+                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER_LABEL }}"
+                      org.alpine.image.build-architecture=arm64
+                      org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
+                      org.alpine.image.build-sha1=${{ env.GITHUB_SHA1 }}
 
             # #
             #   Release › Dockerhub › Export Digest › Arm64
@@ -787,7 +792,7 @@ jobs:
                   echo "env.DOCKER_SHA ........................... ${{ env.DOCKER_SHA }}"
                   echo ""
                   echo "[ DOCKER IMAGES ] --------------------------------------------------------------------------------------"
-                  echo "registry ................................. Dockerhub"
+                  echo "registry ................................. ${{ env.IMAGE_REGISTRY }}"
                   echo "tags ..................................... ${{ steps.task_release_dh_meta.outputs.tags }}"
                   echo "labels ................................... ${{ steps.task_release_dh_meta.outputs.labels }}"
                   echo "digest ................................... ${{ steps.task_release_dh_push_amd64.outputs.digest }}"
@@ -843,10 +848,10 @@ jobs:
                   embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   embed-thumbnail-url: 'https://i.imgur.com/zDIzE8T.jpg'
                   embed-description: |
-                      ### 📦 ᲼Deploy (Dockerhub) ᲼${{ job.status == 'success' && '✅' || '❌' }}᲼ › `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}${{ inputs.DEV_RELEASE == true && '-development' || '' }}`
+                      ### 📦 ᲼Deploy (${{ env.IMAGE_REGISTRY }}) ᲼${{ job.status == 'success' && '✅' || '❌' }}᲼ › `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}${{ inputs.DEV_RELEASE == true && '-development' || '' }}`
                       ${{ inputs.DEV_RELEASE == true && '### ⚠️⚠️ Development / Pre-release ⚠️⚠️' || '' }}
 
-                      A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github to Dockerhub. The image is available at:
+                      A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github to ${{ env.IMAGE_REGISTRY }}. The image is available at:
                       - https://hub.docker.com/r/${{ env.IMAGE_DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
 
                       - Version: `${{ env.IMAGE_VERSION }}`
@@ -855,7 +860,7 @@ jobs:
                       - Pull (amd64): `docker pull ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}@${{ steps.task_release_dh_push_amd64.outputs.digest }}`
                       - Pull (arm64): `docker pull ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}@${{ steps.task_release_dh_push_arm64.outputs.digest }}`
                       - Dry Run: `${{ inputs.DRY_RUN }}`
-                      - Source: `Dockerhub` https://hub.docker.com/r/${{ env.IMAGE_DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+                      - Source: `${{ env.IMAGE_REGISTRY }}` https://hub.docker.com/r/${{ env.IMAGE_DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
                       - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}${{ inputs.DEV_RELEASE == true && '-development' || '' }}`
                       - Branch: `${{ github.ref_name }}`
                       - Workflow: `${{ github.workflow }} (#${{github.run_number}})`
