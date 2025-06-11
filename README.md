@@ -41,7 +41,11 @@ This branch `docker/base-alpine` contains the base docker alpine image which is 
       - [Development - arm64](#development---arm64)
 - [Using Image](#using-image)
 - [Extra Notes](#extra-notes)
-  - [Custom Scripts](#custom-scripts)
+  - [Accessing Container Shell](#accessing-container-shell)
+    - [ash](#ash)
+    - [sh](#sh)
+    - [bash](#bash)
+  - [Custom Docker Image Scripts](#custom-docker-image-scripts)
   - [SSL Certificates](#ssl-certificates)
   - [Access Shell / Bash](#access-shell--bash)
   - [Logs](#logs)
@@ -907,7 +911,7 @@ GRAPH_ALPINE --> obj_step20 --> obj_step21 --> obj_step22 --> obj_step23 --> obj
 
 <br />
 
-Once the base alpine image is built, you can now use it to build the actual docker version of your app, in our example, we are building **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2).
+Once the base alpine image is built, you can now use it to build the actual docker version of your app, in our example, we are building **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)**.
 
 
 <br />
@@ -918,7 +922,7 @@ Once the base alpine image is built, you can now use it to build the actual dock
 
 ## Using Image
 
-To use your new docker alpine image, you simply need to reference it in your project's `📄 Dockerfile`. In our example, we will use the `📄 Dockerfile` from the project **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2).
+To use your new docker alpine image, you simply need to reference it in your project's `📄 Dockerfile`. In our example, we will use the `📄 Dockerfile` from the project **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)**.
 
 ```dockerfile
 ARG ARCH=amd64
@@ -946,7 +950,38 @@ The following are other things to take into consideration when creating the **[d
 
 <br />
 
-### Custom Scripts
+### Accessing Container Shell
+
+The TVApp2 docker image is built on Alpine Linux, but also includes the `📦 bash` package. Use one of the following to access the shell for this container:
+
+<br />
+
+#### ash
+
+```shell
+docker exec -it tvapp2 ash
+```
+
+<br />
+
+#### sh
+
+```shell
+docker exec -it tvapp2 sh
+```
+
+<br />
+
+#### bash
+
+```shell
+docker exec -it tvapp2 bash
+```
+
+<br />
+<br />
+
+### Custom Docker Image Scripts
 
 The `docker/alpine-base` and `TVApp2` images support the ability of adding custom scripts that will be ran when the container is started. To create / add a new custom script to the container, you need to create a new folder in the container source files `/root` folder
 
