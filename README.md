@@ -4,9 +4,9 @@
 
 <br />
 
-This branch `docker/base-alpine` contains the base docker alpine image which is utilized as a base for creating other images such as **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)**. This alpine image is what you will derive your app's Dockerfile from.
+This branch `docker/base-alpine` contains the base docker alpine image which is utilized as a base for creating other images. This alpine image is what you will derive your app's Dockerfile from.
 
- Normal users should not need to modify the files in this repository.
+Normal users should not need to modify the files in this repository.
  
 </p>
 
@@ -16,6 +16,15 @@ This branch `docker/base-alpine` contains the base docker alpine image which is 
 
 <br />
 <br />
+
+<!-- prettier-ignore-start -->
+[![Version][dockerhub-version-img]][dockerhub-version-uri]
+[![Dockerhub Pulls][dockerhub-pulls-img]][dockerhub-pulls-uri]
+[![Github Pulls][github-pulls-img]][github-pulls-uri]
+[![Size][github-size-img]][github-size-img]
+[![Last Commit][github-commit-img]][github-commit-img]
+[![Contributors][contribs-all-img]](#contributors-)
+<!-- prettier-ignore-end -->
 
 </div>
 
@@ -47,7 +56,6 @@ This branch `docker/base-alpine` contains the base docker alpine image which is 
     - [bash](#bash)
   - [Custom Docker Image Scripts](#custom-docker-image-scripts)
   - [SSL Certificates](#ssl-certificates)
-  - [Access Shell / Bash](#access-shell--bash)
   - [Logs](#logs)
 
 
@@ -62,14 +70,14 @@ This branch `docker/base-alpine` contains the base docker alpine image which is 
 
 The files contained within this branch `docker/alpine-base` are utilized as a foundation. This base image only provides us with a docker image which has alpine linux, Nginx, a few critical packages, and the **[s6-overlay](https://github.com/just-containers/s6-overlay)** plugin.
 
-This branch `docker/alpine-base` does **NOT** contain any applications. For our example, we will use the application **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)**.
+This branch `docker/alpine-base` does **NOT** contain any applications. It is only to be used as a base image which will be called when you build your docker app's `Dockerfile`.
 
 <br />
 
 To build a docker image using this base and the actual app you want to release (TVApp2), you need two different docker images:
 - **Step 1**: Build **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image **(this repo)**
   - When being build, the alpine-base `📄 Dockerfile` will grab and install the files from the branch **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)**
-- **Step 2**: Build **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)** image
+- **Step 2**: Build your app's docker image that will run on top of this alpine image
 - **Step 3**: Release the docker image built from **Step 2** to Github's **Ghcr.io** or **hub.docker.com**
 
 <br />
@@ -114,7 +122,7 @@ Prior to building the  docker image, you **must** ensure the sections below are 
 
 <br />
 
-The **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)** docker images, you **must** ensure the following conditions are met. 
+You must ensure when you build this docker image **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)**, the following conditions must be met. 
 
 <br />
 
@@ -132,7 +140,7 @@ If the listed tasks above are not performed, your docker container will throw th
 
 You cannot utilize Windows' `Carriage Return Line Feed`. All files must be converted to Unix' `Line Feed`.  This can be done with **[Visual Studio Code](https://code.visualstudio.com/)**. OR; you can run the Linux terminal command `🗔 dos2unix` to convert these files.
 
-For the branches **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)**, you can use the following recursive commands:
+For the branches **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and your main app image, you can use the following recursive commands:
 
 <br />
 
@@ -172,7 +180,7 @@ dos2unix with-contenv.v1
 
 The files contained within this repo **MUST** have `chmod 755` /  `+x` executable permissions. If you are using our Github workflow sample **[deploy-docker-github.yml](https://github.com/Aetherinox/docker-base-alpine/blob/workflows/samples/deploy-docker-github.yml)**, this is done automatically. If you are building the images manually; you need to do this. Ensure those files have the correct permissions prior to building the Alpine base docker image.
 
-If you are building the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** or **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)** images, you must ensure the files in those branches have the proper permissions. All of the executable files are named `run`:
+If you are building the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** or your main application images, you must ensure the files in those branches have the proper permissions. All of the executable files are named `run`:
 
 ```shell
 find ./ -name 'run' -exec sudo chmod +x {} \;
@@ -863,18 +871,18 @@ The flow of the process is outlined below:
 %%{init: { 'themeVariables': { 'fontSize': '10px' }}}%%
 flowchart TB
 
-subgraph GRAPH_TVAPP ["Build tvapp2:latest"]
+subgraph GRAPH_TVAPP ["Build yourapp:latest"]
     direction TB
-    obj_step10["`&gt; git clone github.com/thebinaryninja/tvapp2.git`"]
+    obj_step10["`&gt; git clone github.com/aetherinox/yourapp.git`"]
     obj_step11["`Dockerfile`"]
     obj_step12["`&gt; docker build &bsol;
     --build-arg VERSION=1.0.0 &bsol;
     --build-arg BUILDDATE=20250220 &bsol;
-    -t tvapp2:latest &bsol;
-    -t tvapp2:1.0.0-amd64 &bsol;
+    -t yourapp:latest &bsol;
+    -t yourapp:1.0.0-amd64 &bsol;
     -f Dockerfile . &bsol;`"]
     obj_step13["`Download **alpine-base** from branch **docker/alpine-base**`"]
-    obj_step14["`New Image: **tvapp2:latest**`"]
+    obj_step14["`New Image: **yourapp:latest**`"]
 
     style obj_step10 text-align:center,stroke-width:1px,stroke:#555
     style obj_step11 text-align:left,stroke-width:1px,stroke:#555
@@ -911,8 +919,7 @@ GRAPH_ALPINE --> obj_step20 --> obj_step21 --> obj_step22 --> obj_step23 --> obj
 
 <br />
 
-Once the base alpine image is built, you can now use it to build the actual docker version of your app, in our example, we are building **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)**.
-
+Once the base alpine image is built, you can now use it to build the actual docker version of your app.
 
 <br />
 
@@ -922,7 +929,7 @@ Once the base alpine image is built, you can now use it to build the actual dock
 
 ## Using Image
 
-To use your new docker alpine image, you simply need to reference it in your project's `📄 Dockerfile`. In our example, we will use the `📄 Dockerfile` from the project **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)**.
+To use your new docker alpine base image, you simply need to reference it in your project's `📄 Dockerfile`. Open your app's `Dockerfile`, and add:
 
 ```dockerfile
 ARG ARCH=amd64
@@ -946,7 +953,7 @@ After you reference the alpine image, you can then write the remaining parts of 
 
 ## Extra Notes
 
-The following are other things to take into consideration when creating the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)** images:
+The following are other things to take into consideration when creating the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and your app docker image that will use this base image:
 
 <br />
 
@@ -959,7 +966,7 @@ The TVApp2 docker image is built on Alpine Linux, but also includes the `📦 ba
 #### ash
 
 ```shell
-docker exec -it tvapp2 ash
+docker exec -it alpine-base ash
 ```
 
 <br />
@@ -967,7 +974,7 @@ docker exec -it tvapp2 ash
 #### sh
 
 ```shell
-docker exec -it tvapp2 sh
+docker exec -it alpine-base sh
 ```
 
 <br />
@@ -975,7 +982,7 @@ docker exec -it tvapp2 sh
 #### bash
 
 ```shell
-docker exec -it tvapp2 bash
+docker exec -it alpine-base bash
 ```
 
 <br />
@@ -1012,7 +1019,7 @@ When you create the docker image, this new script will automatically be loaded. 
 
 ```yml
 services:
-    tvapp2:
+    yourapp:
         volumes:
             - ./config:/config
             - ./app:/usr/bin/app
@@ -1029,7 +1036,7 @@ services:
 
 <br />
 
-The **[thebinaryninja/tvapp2](https://github.com/thebinaryninja/tvapp2)** image already contains a custom script called `/root/custom-cont-init.d/plugins`. Do **NOT** edit this script. It is what automatically downloads the official application plugins and adds them to the container.
+Your main app docker image can contain a custom script called `/root/custom-cont-init.d/plugins`. Do **NOT** edit this script. It is what automatically downloads the official application plugins and adds them to the container.
 
 <br />
 <br />
@@ -1044,12 +1051,12 @@ You may opt to either use the generated self-signed certificate, or you can add 
 
 ```yml
 services:
-    tvapp2:
-        container_name: tvapp2
-        image: ghcr.io/thebinaryninja/tvapp2:latest                 # Image: Github
-      # image: thebinaryninja/tvapp2:latest                         # Image: Dockerhub
-      # image: git.binaryninja.net/binaryninja/tvapp2:latest        # Image: Gitea
-      # image: tvapp2:latest                                        # Image: Locally built
+    yourapp:
+        container_name: yourapp
+        image: ghcr.io/thebinaryninja/yourapp:latest                # Image: Github
+      # image: thebinaryninja/yourapp:latest                        # Image: Dockerhub
+      # image: git.binaryninja.net/binaryninja/yourapp:latest       # Image: Gitea
+      # image: yourapp:latest                                       # Image: Locally built
         restart: unless-stopped
         volumes:
             - ./config:/config
@@ -1058,7 +1065,7 @@ services:
 
 <br />
 
-Then navigate to the newly mounted folder and add your `📄 cert.crt` and `🔑 cert.key` files to the `📁 /tvapp2/keys/*` folder.
+Then navigate to the newly mounted folder and add your `📄 cert.crt` and `🔑 cert.key` files to the `📁 /yourapp/keys/*` folder.
 
 <br />
 
@@ -1071,76 +1078,9 @@ Then navigate to the newly mounted folder and add your `📄 cert.crt` and `🔑
 <br />
 <br />
 
-### Access Shell / Bash
-You can access the docker container's shell by running:
-
-```shell
-docker exec -it tvapp2 ash
-```
-
-<br />
-<br />
-
 ### Logs
 
-This image spits out detailed information about its current progress. You can either use `docker logs` or a 3rd party app such as [Portainer](https://portainer.io/) to view the logs.
-
-<br />
-
-```shell
- CustomInit   : No custom services found, skipping...
- Migrations   : Started
- Migrations   : No migrations found
- SSL          : Using existing keys found in /config/keys
-──────────────────────────────────────────────────────────────────────────────────────────
-                                TVApp2 Docker Image
-──────────────────────────────────────────────────────────────────────────────────────────
-  The TvApp2 image allows you to fetch M3U playlist and EPG data for numerous
-  IPTV services online.
-
-  Once the files are fetched by the image, you can visit the self-hosted webpage,
-  copy the links to the M3U and EPG files; and add them to your favorite IPTV app
-  such as Jellyfin, Plex, or Emby.
-
-  For more information about this project; visit the links below. This app is
-  served on multiple repositories as backup. Use any of the repo links below:
-
-        TVApp2 Repo 1           https://github.com/TheBinaryNinja/tvapp2
-        TVApp2 Repo 2           https://git.binaryninja.net/BinaryNinja/tvapp2
-        Base Alpine Image       https://github.com/Aetherinox/docker-base-alpine
-
-  If you are making this container available on a public-facing domain,
-  please consider using Traefik and Authentik to protect this container from
-  outside access. Your M3U and EPG files will be available for the public to
-  download and use.
-
-        User:Group              911:911
-        Port(s)                 4124
-        Gateway                 172.26.0.1
-        Web Server              172.26.0.2:4124
-        App Folder              /usr/bin/app
-
-──────────────────────────────────────────────────────────────────────────────────────────
- Loader       : Plugins found, loading them ...
- Loader       : Executing ...
- Loader       : Checking tvapp2-plugins
- Loader       : plugins: Ran Successfully with code [0]
- Core         : Completed loading container
-
-> tvapp2@1.0.0 start
-> node index.js
-
-Process locals
-[2:17:38 PM] Initializing server...
-Fetching https://git.binaryninja.net/binaryninja//tvapp2-externals/raw/branch/main/urls.txt
-[2:17:38 PM] Success: /usr/bin/app/urls.txt
-Fetching https://git.binaryninja.net/binaryninja//tvapp2-externals/raw/branch/main/formatted.dat
-[2:17:39 PM] Success: /usr/bin/app/formatted.dat
-Fetching https://git.binaryninja.net/binaryninja///XMLTV-EPG/raw/branch/main/xmltv.1.xml
-[2:17:45 PM] Success: /usr/bin/app/xmltv.1.xml
-[2:17:45 PM] Initialization complete.
-[2:17:45 PM] Server is running on port 4124
-```
+This base alpine image contains detailed logs which will output what the docker container is currently doing.
 
 <br />
 
@@ -1214,5 +1154,13 @@ Fetching https://git.binaryninja.net/binaryninja///XMLTV-EPG/raw/branch/main/xml
   [github-commit-uri]: https://github.com/Aetherinox/docker-base-alpine/commits/main/
 
 <!-- BADGE > DOCKER HUB > VERSION -->
-  [dockerhub-version-img]: https://img.shields.io/docker/v/Aetherinox/docker-base-alpine/latest?logo=docker&logoColor=FFFFFF&label=Docker%20Version&color=ba5225
-  [dockerhub-version-uri]: https://hub.docker.com/repository/docker/Aetherinox/docker-base-alpine/general
+  [dockerhub-version-img]: https://img.shields.io/docker/v/aetherinox/alpine-base/latest?logo=docker&logoColor=FFFFFF&label=Version&color=ba5225
+  [dockerhub-version-uri]: https://hub.docker.com/repository/docker/aetherinox/alpine-base/general
+
+<!-- BADGE > DOCKERHUB > PULLS -->
+  [dockerhub-pulls-img]: https://img.shields.io/docker/pulls/aetherinox/alpine-base?logo=docker&logoColor=FFFFFF&label=Pulls&color=376892
+  [dockerhub-pulls-uri]: https://hub.docker.com/repository/docker/aetherinox/alpine-base/general
+
+<!-- BADGE > GITHUB > PULLS -->
+  [github-pulls-img]: https://img.shields.io/badge/dynamic/json?url=https://ipitio.github.io/backage/Aetherinox/docker-base-alpine/alpine-base.json&query=%24.downloads&logo=github&style=flat&color=376892&label=Pulls
+  [github-pulls-uri]: https://github.com/Aetherinox/docker-base-alpine/pkgs/container/alpine-base
