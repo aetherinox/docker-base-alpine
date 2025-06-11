@@ -232,13 +232,13 @@ After completing the steps above; we will now build the [🔆 docker/alpine-base
 Open the `📄 Dockerfile` and ensure you are pulling the correct Alpine base image. This code is located near the top of the `📄 Dockerfile`:
 
 ```dockerfile
-ARG ALPINE_VERSION="3.21.3"
+ARG ALPINE_VERSION=3.22
 FROM alpine:${ALPINE_VERSION} AS rootfs-stage
 
 ARG ARCH=x86_64
 ARG REPO_AUTHOR="aetherinox"
 ARG REPO_NAME="docker-base-alpine"
-ARG S6_OVERLAY_VERSION="3.1.6.2"
+ARG S6_OVERLAY_VERSION="3.2.1.0"
 ARG S6_OVERLAY_ARCH="${ARCH}"
 ```
 
@@ -356,14 +356,14 @@ Creates the alpine `amd64` docker image:
 # Build alpine amd64
 docker buildx build \
   --build-arg ARCH=x86_64 \
-  --build-arg VERSION=3.21 \
+  --build-arg VERSION=3.22 \
   --build-arg BUILDDATE=20260812 \
   --build-arg RELEASE=stable \
   --tag ghcr.io/aetherinox/alpine-base:latest \
   --tag ghcr.io/aetherinox/alpine-base:3 \
   --tag ghcr.io/aetherinox/alpine-base:3.2 \
-  --tag ghcr.io/aetherinox/alpine-base:3.21 \
-  --tag ghcr.io/aetherinox/alpine-base:3.21-amd64 \
+  --tag ghcr.io/aetherinox/alpine-base:3.22 \
+  --tag ghcr.io/aetherinox/alpine-base:3.22-amd64 \
   --attest type=provenance,disabled=true \
   --attest type=sbom,disabled=true \
   --output type=docker \
@@ -387,14 +387,14 @@ Creates the alpine `arm64` docker image:
 # Build alpine arm64
 docker buildx build \
   --build-arg ARCH=aarch64 \
-  --build-arg VERSION=3.21 \
+  --build-arg VERSION=3.22 \
   --build-arg BUILDDATE=20260812 \
   --build-arg RELEASE=stable \
   --tag ghcr.io/aetherinox/alpine-base:latest \
   --tag ghcr.io/aetherinox/alpine-base:3 \
   --tag ghcr.io/aetherinox/alpine-base:3.2 \
-  --tag ghcr.io/aetherinox/alpine-base:3.21 \
-  --tag ghcr.io/aetherinox/alpine-base:3.21-arm64 \
+  --tag ghcr.io/aetherinox/alpine-base:3.22 \
+  --tag ghcr.io/aetherinox/alpine-base:3.22-arm64 \
   --attest type=sbom,disabled=true \
   --output type=docker \
   --builder default \
@@ -529,8 +529,8 @@ If you are building these docker images using Github workflow, you will also nee
 
 Once the emulator is installed; we will now build two images. When building these two images; we will ensure the `--tag` value is different for each one, by adding the architecture to the end. This ensures we don't overwrite one image with the newer one. We need to have two seperate docker images with two different tags.
 
-- `--tag ghcr.io/aetherinox/alpine-base:3.21-amd64`
-- `--tag ghcr.io/aetherinox/alpine-base:3.21-arm64`
+- `--tag ghcr.io/aetherinox/alpine-base:3.22-amd64`
+- `--tag ghcr.io/aetherinox/alpine-base:3.22-arm64`
 
 <br />
 
@@ -541,10 +541,10 @@ Once the emulator is installed; we will now build two images. When building thes
 > 
 > | Registry | Tag |
 > | --- | --- |
-> | Dockerhub | `--tag aetherinox/alpine-base:3.21-amd64`<br>`--tag aetherinox/alpine-base:3.21-arm64` |
-> | Github (GHCR) | `--tag ghcr.io/aetherinox/alpine-base:3.21-amd64`<br>`--tag ghcr.io/aetherinox/alpine-base:3.21-arm64` |
-> | Registry v2 | `--tag registry.domain.lan/aetherinox/alpine-base:3.21-amd64`<br>`--tag registry.domain.lan/aetherinox/alpine-base:3.21-arm64` |
-> | Gitea | `--tag git.binaryninja.net/aetherinox/alpine-base:3.21-amd64`<br>`--tag git.binaryninja.net/aetherinox/alpine-base:3.21-arm64` |
+> | Dockerhub | `--tag aetherinox/alpine-base:3.22-amd64`<br>`--tag aetherinox/alpine-base:3.22-arm64` |
+> | Github (GHCR) | `--tag ghcr.io/aetherinox/alpine-base:3.22-amd64`<br>`--tag ghcr.io/aetherinox/alpine-base:3.22-arm64` |
+> | Registry v2 | `--tag registry.domain.lan/aetherinox/alpine-base:3.22-amd64`<br>`--tag registry.domain.lan/aetherinox/alpine-base:3.22-arm64` |
+> | Gitea | `--tag git.binaryninja.net/aetherinox/alpine-base:3.22-amd64`<br>`--tag git.binaryninja.net/aetherinox/alpine-base:3.22-arm64` |
 
 <br />
 
@@ -565,10 +565,10 @@ Creates the alpine **Stable** release `amd64` docker image:
 # Build alpine amd64 - (stable release)
 docker buildx build \
   --build-arg ARCH=x86_64 \
-  --build-arg VERSION=3.21 \
+  --build-arg VERSION=3.22 \
   --build-arg BUILDDATE=20260812 \
   --build-arg RELEASE=stable \
-  --tag ghcr.io/aetherinox/alpine-base:3.21-amd64 \
+  --tag ghcr.io/aetherinox/alpine-base:3.22-amd64 \
   --attest type=provenance,disabled=true \
   --attest type=sbom,disabled=true \
   --output type=docker \
@@ -593,10 +593,10 @@ Creates the Alpine **Stable** release `arm64` docker image:
 # Build alpine arm64 - (stable release)
 docker buildx build \
   --build-arg ARCH=aarch64 \
-  --build-arg VERSION=3.21 \
+  --build-arg VERSION=3.22 \
   --build-arg BUILDDATE=20260812 \
   --build-arg RELEASE=stable \
-  --tag ghcr.io/aetherinox/alpine-base:3.21-arm64 \
+  --tag ghcr.io/aetherinox/alpine-base:3.22-arm64 \
   --attest type=provenance,disabled=true \
   --attest type=sbom,disabled=true \
   --output type=docker \
@@ -621,7 +621,7 @@ Creates the Alpine **Development** release `amd64` docker image:
 # Build alpine amd64 - (development release)
 docker buildx build \
   --build-arg ARCH=x86_64 \
-  --build-arg VERSION=3.21 \
+  --build-arg VERSION=3.22 \
   --build-arg BUILDDATE=20260812 \
   --build-arg RELEASE=development \
   --tag ghcr.io/aetherinox/alpine-base:development-amd64 \
@@ -649,7 +649,7 @@ Creates the Alpine **Development** release `arm64` docker image:
 # Build alpine arm64 - (development release)
 docker buildx build \
   --build-arg ARCH=aarch64 \
-  --build-arg VERSION=3.21 \
+  --build-arg VERSION=3.22 \
   --build-arg BUILDDATE=20260812 \
   --build-arg RELEASE=development \
   --tag ghcr.io/aetherinox/alpine-base:development-arm64 \
@@ -673,8 +673,8 @@ After completing the `docker buildx` commands above; you should now have a few n
 
 <br />
 
-- `--tag ghcr.io/aetherinox/alpine-base:3.21-amd64`
-- `--tag ghcr.io/aetherinox/alpine-base:3.21-arm64`
+- `--tag ghcr.io/aetherinox/alpine-base:3.22-amd64`
+- `--tag ghcr.io/aetherinox/alpine-base:3.22-arm64`
 - `--tag ghcr.io/aetherinox/alpine-base:development-amd64`
 - `--tag ghcr.io/aetherinox/alpine-base:development-arm64`
 
@@ -698,15 +698,15 @@ If you are building the **stable release** images; you should see the following:
 You can also get the hash digests by running the commands:
 
 ```shell
-$ docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.21-amd64
+$ docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.22-amd64
 
-Name:      ghcr.io/aetherinox/alpine-base:3.21-amd64
+Name:      ghcr.io/aetherinox/alpine-base:3.22-amd64
 MediaType: application/vnd.docker.distribution.manifest.v2+json
 Digest:    sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8
 
-$ docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.21-arm64
+$ docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.22-arm64
 
-Name:      ghcr.io/aetherinox/alpine-base:3.21-arm64
+Name:      ghcr.io/aetherinox/alpine-base:3.22-arm64
 MediaType: application/vnd.docker.distribution.manifest.v2+json
 Digest:    sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda
 ```
@@ -753,14 +753,14 @@ Digest:    sha256:c719ccb034946e3f0625003f25026d001768794e38a1ba8aafc9146291d548
 > ```shell
 > $ docker images --all --no-trunc | grep aetherinox
 > 
-> ghcr.io/aetherinox/alpine-base   3.21-arm64        sha256:bb425429e98ab467fd91474701da2e5c0a7cb4a5f218a710d950eb0ff595486c   3 minutes ago   38.8MB
+> ghcr.io/aetherinox/alpine-base   3.22-arm64        sha256:bb425429e98ab467fd91474701da2e5c0a7cb4a5f218a710d950eb0ff595486c   3 minutes ago   38.8MB
 > 
-> ghcr.io/aetherinox/alpine-base   3.21-amd64        sha256:dea4cb91379dba289d8d3e8842d4fb7b7857faa7f3d02d5b9a043a1ee58e61d7   4 minutes ago   27.3MB
+> ghcr.io/aetherinox/alpine-base   3.22-amd64        sha256:dea4cb91379dba289d8d3e8842d4fb7b7857faa7f3d02d5b9a043a1ee58e61d7   4 minutes ago   27.3MB
 > ```
 >
 > To get the correct sha256 digest, use:
-> - `docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.21-amd64`
-> - `docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.21-arm64`
+> - `docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.22-amd64`
+> - `docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.22-arm64`
 > - `docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:development-amd64`
 > - `docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:development-arm64`
 > 
@@ -783,7 +783,7 @@ docker buildx imagetools create \
   --tag ghcr.io/aetherinox/alpine-base:latest \
   --tag ghcr.io/aetherinox/alpine-base:3 \
   --tag ghcr.io/aetherinox/alpine-base:3.2 \
-  --tag ghcr.io/aetherinox/alpine-base:3.21 \
+  --tag ghcr.io/aetherinox/alpine-base:3.22 \
 
   sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8 \
   sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda
@@ -792,7 +792,7 @@ docker buildx imagetools create \
  => [internal] pushing ghcr.io/aetherinox/alpine-base:latest     0.2s
  => [internal] pushing ghcr.io/aetherinox/alpine-base:3          0.2s
  => [internal] pushing ghcr.io/aetherinox/alpine-base:3.2        0.2s
- => [internal] pushing ghcr.io/aetherinox/alpine-base:3.21       0.2s
+ => [internal] pushing ghcr.io/aetherinox/alpine-base:3.22       0.2s
 ```
 
 <br />
@@ -838,8 +838,8 @@ In this example, we take the existing two files we created earlier, and merge th
 ```shell
 # Example 1 (using tag)
 docker manifest create ghcr.io/aetherinox/alpine-base:latest \
-    --amend ghcr.io/aetherinox/alpine-base:3.21-amd64 \
-    --amend ghcr.io/aetherinox/alpine-base:3.21-arm64
+    --amend ghcr.io/aetherinox/alpine-base:3.22-amd64 \
+    --amend ghcr.io/aetherinox/alpine-base:3.22-arm64
 
 # Example 2 (using sha256 hash)
 docker manifest create ghcr.io/aetherinox/alpine-base:latest \
@@ -900,7 +900,7 @@ direction TB
     --build-arg VERSION=3.20 &bsol;
     --build-arg BUILDDATE=20250220 &bsol;
     -t docker-alpine-base:latest &bsol;
-    -t docker-alpine-base:3.21-amd64 &bsol;
+    -t docker-alpine-base:3.22-amd64 &bsol;
     -f Dockerfile . &bsol;`"]
     obj_step23["`Download files from branch **docker/core**`"]
     obj_step24["`New Image: **alpine-base:latest**`"]
@@ -933,13 +933,13 @@ To use your new docker alpine base image, you simply need to reference it in you
 
 ```dockerfile
 ARG ARCH=amd64
-ARG ALPINE_VERSION=3.21
+ARG ALPINE_VERSION=3.22
 FROM --platform=linux/${ARCH} ghcr.io/aetherinox/alpine-base:${ALPINE_VERSION}
 ```
 
 <br />
 
-In the Dockerfile code above, you will see that we are pulling from `ghcr.io/aetherinox/alpine-base:${ALPINE_VERSION}`; where `${ALPINE_VERSION}` gets replaced with the version of alpine we wish to use. At the time of writing this, it is `3.21`.
+In the Dockerfile code above, you will see that we are pulling from `ghcr.io/aetherinox/alpine-base:${ALPINE_VERSION}`; where `${ALPINE_VERSION}` gets replaced with the version of alpine we wish to use. At the time of writing this, it is `3.22`.
 
 <br />
 
