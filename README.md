@@ -85,7 +85,7 @@ Want to help but can't write code?
 
 <div align="center">
 
-![Alt](https://repobeats.axiom.co/api/embed/333b874e927372167a3791323c74b594d98a20c3.svg "Analytics image")
+![Alt](https://repobeats.axiom.co/api/embed/d224af41e7bec8839d41927a496d63742d5f2e9d.svg "Analytics image")
 
 </div>
 
