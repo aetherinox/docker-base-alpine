@@ -17,7 +17,7 @@ This branch `main` does not contain any files other than the `README.md`. You ne
 <br />
 
 <!-- prettier-ignore-start -->
-[![Version][dockerhub-version-img]][github-version-uri]
+[![Version][dockerhub-version-img]][dockerhub-version-uri]
 [![Dockerhub Pulls][dockerhub-pulls-img]][dockerhub-pulls-uri]
 [![Github Pulls][github-pulls-img]][github-pulls-uri]
 [![Size][github-size-img]][github-size-img]
@@ -187,11 +187,11 @@ Want to help but can't write code?
   [dockerhub-version-img]: https://img.shields.io/docker/v/aetherinox/alpine-base/latest?logo=docker&logoColor=FFFFFF&label=Version&color=ba5225
   [dockerhub-version-uri]: https://hub.docker.com/repository/docker/aetherinox/alpine-base/general
 
-<!-- BADGE > GITHUB > PULLS -->
+<!-- BADGE > DOCKERHUB > PULLS -->
   [dockerhub-pulls-img]: https://img.shields.io/docker/pulls/aetherinox/alpine-base?logo=docker&logoColor=FFFFFF&label=Pulls&color=376892
   [dockerhub-pulls-uri]: https://hub.docker.com/repository/docker/aetherinox/alpine-base/general
 
-
+<!-- BADGE > GITHUB > PULLS -->
   [github-pulls-img]: https://img.shields.io/badge/dynamic/json?url=https://ipitio.github.io/backage/Aetherinox/docker-base-alpine/alpine-base.json&query=%24.downloads&logo=github&style=flat&color=376892&label=Pulls
   [github-pulls-uri]: https://github.com/Aetherinox/docker-base-alpine/pkgs/container/alpine-base
 
