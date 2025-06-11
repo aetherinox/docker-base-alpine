@@ -8,8 +8,8 @@
 #   @repo           https://github.com/aetherinox/docker-base-alpine
 # #
 
-ARG ALPINE_VERSION="3.21.3"
-FROM alpine:${ALPINE_VERSION} AS rootfs-stage
+ARG VERSION="3.21.3"
+FROM alpine:${VERSION} AS rootfs-stage
 
 # #
 #   alpine › args
@@ -19,7 +19,7 @@ FROM alpine:${ALPINE_VERSION} AS rootfs-stage
 # #
 
 ARG ARCH=x86_64
-ARG ALPINE_VERSION=3.21
+ARG VERSION=3.21
 ARG REPO_AUTHOR="aetherinox"
 ARG REPO_NAME="docker-base-alpine"
 ARG S6_OVERLAY_VERSION="3.1.6.2"
@@ -30,7 +30,7 @@ ARG S6_OVERLAY_ARCH="${ARCH}"
 # #
 
 ENV ROOTFS=/root-out
-ENV ALPINE_VERSION=${ALPINE_VERSION}
+ENV VERSION=${VERSION}
 ENV ARCH=${ARCH}
 ENV MIRROR=http://dl-cdn.alpinelinux.org/alpine
 ENV PACKAGES=alpine-baselayout,\
@@ -55,8 +55,8 @@ RUN \
 RUN \
   mkdir -p "$ROOTFS/etc/apk" && \
   { \
-    echo "$MIRROR/v$ALPINE_VERSION/main"; \
-    echo "$MIRROR/v$ALPINE_VERSION/community"; \
+    echo "$MIRROR/v$VERSION/main"; \
+    echo "$MIRROR/v$VERSION/community"; \
   } > "$ROOTFS/etc/apk/repositories" && \
   apk --root "$ROOTFS" --no-cache --keys-dir /etc/apk/keys add --arch $ARCH --initdb ${PACKAGES//,/ } && \
   sed -i -e 's/^root::/root:!:/' /root-out/etc/shadow
@@ -98,7 +98,7 @@ ARG VERSION
 ARG BUILDDATE
 ARG GIT_SHA1=0000000000000000000000000000000000000000
 ARG REGISTRY=local
-ARG ALPINE_VERSION=3.21
+ARG VERSION=3.21
 ARG MODS_VERSION="v3"
 ARG PKG_INST_VERSION="v1"
 ARG AETHERXOWN_VERSION="v1"
@@ -124,7 +124,6 @@ LABEL org.opencontainers.image.registry="${REGISTRY:-local}"
 LABEL org.opencontainers.image.release="${RELEASE:-stable}"
 LABEL org.alpine.image.maintainers="${REPO_AUTHOR}"
 LABEL org.alpine.image.build-version="Version:- ${VERSION} Date:- ${BUILDDATE:-01012025}"
-LABEL org.alpine.image.build-version-alpine="${ALPINE_VERSION:-3.21}"
 LABEL org.alpine.image.build-architecture="${ARCH:-amd64}"
 LABEL org.alpine.image.build-release="${RELEASE:-stable}"
 LABEL org.alpine.image.build-sha1="${GIT_SHA1:-0000000000000000000000000000000000000000}"
