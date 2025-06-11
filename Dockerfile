@@ -8,7 +8,7 @@
 #   @repo           https://github.com/aetherinox/docker-base-alpine
 # #
 
-ARG ALPINE_VERSION=3.21.3
+ARG ALPINE_VERSION="3.21.3"
 FROM alpine:${ALPINE_VERSION} AS rootfs-stage
 
 # #
