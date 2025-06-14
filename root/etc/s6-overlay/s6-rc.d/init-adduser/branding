@@ -82,9 +82,25 @@ declare -A icon=(
 # #
 
 sys_os_ver="1.0.0"
-sys_os_name="Alpine"
+sys_os_name="Linux"
 sys_code="unknown"
 sys_arch="amd64"
+
+# #
+#   distro > alpine
+# #
+
+    if [ -e /etc/alpine-release ]; then
+        sys_os_name=Alpine
+        sys_os_ver=$(cat /etc/alpine-release)
+
+        if [[ -z "${sys_os_name// }" ]]; then
+            sys_os_name=$PRETTY_NAME
+        fi
+
+        if [[ -z "${sys_os_ver// }" ]]; then
+            sys_os_name=$VERSION_ID
+        fi
 
 # #
 #   define > distro
@@ -92,19 +108,19 @@ sys_arch="amd64"
 #       returns distro information.
 # #
 
-    if [ -f /etc/os-release ]; then
+    elif [ -f /etc/os-release ]; then
         . /etc/os-release
         sys_os_name=$NAME
         sys_os_ver=$VERSION
         sys_code=$VERSION_CODENAME
 
-# #
-#   distro > alpine
-# #
+        if [[ -z "${sys_os_name// }" ]]; then
+            sys_os_name=$PRETTY_NAME
+        fi
 
-    elif [ -e /etc/alpine-release ]; then
-        sys_os_name=Alpine
-        sys_os_ver=$(cat /etc/alpine-release)
+        if [[ -z "${sys_os_ver// }" ]]; then
+            sys_os_name=$VERSION_ID
+        fi
 
 # #
 #   distro > linuxbase.org
