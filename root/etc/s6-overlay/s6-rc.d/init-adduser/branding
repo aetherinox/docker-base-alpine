@@ -1,10 +1,208 @@
-──────────────────────────────────────────────────────────────────────────────────────────
-                              Alpine by Aetherinox                             
-──────────────────────────────────────────────────────────────────────────────────────────
-  Get started with some of the links below:
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
 
-        Official Repo           https://github.com/Aetherinox/docker-base-alpine
+# #
+#   defaults
+# #
 
-  If you are making this container available on a public-facing domain,
-  please consider using Traefik and Authentik to protect this container from
-  outside access.
+PUID=${PUID:-911}
+PGID=${PGID:-911}
+DIR_BUILD=${DIR_BUILD:-/usr/src/app}
+DIR_RUN=${DIR_RUN:-/usr/bin/app}
+bHasError=false
+
+# #
+#   define > colors
+#
+#   Use the color table at:
+#       - https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+# #
+
+declare -A c=(
+    [end]=$'\e[0m'
+    [white]=$'\e[97m'
+    [bold]=$'\e[1m'
+    [dim]=$'\e[2m'
+    [underline]=$'\e[4m'
+    [strike]=$'\e[9m'
+    [blink]=$'\e[5m'
+    [inverted]=$'\e[7m'
+    [hidden]=$'\e[8m'
+    [black]=$'\e[0;30m'
+    [redl]=$'\e[0;91m'
+    [redd]=$'\e[0;31m'
+    [magental]=$'\e[0;95m'
+    [magentad]=$'\e[0;35mm'
+    [bluel]=$'\e[0;94m'
+    [blued]=$'\e[0;34m'
+    [cyanl]=$'\e[0;96m'
+    [cyand]=$'\e[0;36m'
+    [greenl]=$'\e[0;92m'
+    [greend]=$'\e[0;32m'
+    [yellowl]=$'\e[0;93m'
+    [yellowd]=$'\e[0;33m'
+    [greyl]=$'\e[0;37m'
+    [greyd]=$'\e[0;90m'
+    [navy]=$'\e[38;5;62m'
+    [olive]=$'\e[38;5;144m'
+    [peach]=$'\e[38;5;210m'
+)
+
+# #
+#   unicode for emojis
+#       https://apps.timwhitlock.info/emoji/tables/unicode
+# #
+
+declare -A icon=(
+    ["symbolic link"]=$'\xF0\x9F\x94\x97' # 🔗
+    ["regular file"]=$'\xF0\x9F\x93\x84' # 📄
+    ["directory"]=$'\xF0\x9F\x93\x81' # 📁
+    ["regular empty file"]=$'\xe2\xad\x95' # ⭕
+    ["log"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["1"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["2"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["3"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["4"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["5"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["pem"]=$'\xF0\x9F\x94\x92' # 🔑
+    ["pub"]=$'\xF0\x9F\x94\x91' # 🔒
+    ["pfx"]=$'\xF0\x9F\x94\x92' # 🔑
+    ["p12"]=$'\xF0\x9F\x94\x92' # 🔑
+    ["key"]=$'\xF0\x9F\x94\x91' # 🔒
+    ["crt"]=$'\xF0\x9F\xAA\xAA ' # 🪪
+    ["gz"]=$'\xF0\x9F\x93\xA6' # 📦
+    ["zip"]=$'\xF0\x9F\x93\xA6' # 📦
+    ["gzip"]=$'\xF0\x9F\x93\xA6' # 📦
+    ["deb"]=$'\xF0\x9F\x93\xA6' # 📦
+    ["sh"]=$'\xF0\x9F\x97\x94' # 🗔
+)
+
+# #
+#   define > system
+# #
+
+sys_os_ver="1.0.0"
+sys_os_name="Ubuntu"
+sys_code="unknown"
+sys_arch="amd64"
+
+# #
+#   define > distro
+#       freedesktop.org and systemd
+#       returns distro information.
+# #
+
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        sys_os_name=$NAME
+        sys_os_ver=$VERSION
+        sys_code=$VERSION_CODENAME
+
+# #
+#   distro > alpine
+# #
+
+    elif [ -e /etc/alpine-release ]; then
+        sys_os_name=Alpine
+        sys_os_ver=$(cat /etc/alpine-release)
+
+# #
+#   distro > linuxbase.org
+# #
+
+    elif type lsb_release >/dev/null 2>&1; then
+        sys_os_name=$(lsb_release -si)
+        sys_os_ver=$(lsb_release -sr)
+
+# #
+#   distro > versions of Debian/Ubuntu without lsb_release cmd
+# #
+
+    elif [ -f /etc/lsb-release ]; then
+        . /etc/lsb-release
+        sys_os_name=$DISTRIB_ID
+        sys_os_ver=$DISTRIB_RELEASE
+
+# #
+#   distro > older Debian/Ubuntu/etc distros
+# #
+
+    elif [ -f /etc/debian_version ]; then
+        sys_os_name=Debian
+        sys_os_ver=$(cat /etc/debian_version)
+
+# #
+#   distro > fallback: uname, e.g. "Linux <version>", also works for BSD
+# #
+
+    else
+        sys_os_name=$(uname -s)
+        sys_os_ver=$(uname -r)
+    fi
+
+# #
+#   architecture
+# #
+
+if command -v dpkg>/dev/null 2>&1; then
+    sys_arch=$(dpkg --print-architecture)
+elif command -v uname >/dev/null 2>&1; then
+    sys_arch=$(uname -m)
+fi
+
+# #
+#   get container ips
+# #
+
+if ! command -v ip >/dev/null 2>&1; then
+    IP_GATEWAY="127.0.0.1"
+else
+    IP_GATEWAY=$(/sbin/ip route|awk '/default/ { print $3 }')
+fi
+
+if ! command -v ifconfig >/dev/null 2>&1; then
+    IP_CONTAINER="127.0.0.1"
+else
+    IP_CONTAINER=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+fi
+
+# #
+#   s6 > branding
+# #
+
+echo -e
+printf '%-1s\n' " ${c[greyd]}──────────────────────────────────────────────────────────────────────────────────────────${c[end]}"
+printf '%-1s\n' " ${c[greyd]}  ${c[greenl]}${sys_os_name} ${sys_os_ver} (${sys_arch})${c[end]}"
+printf '%-1s\n' " ${c[greyd]}──────────────────────────────────────────────────────────────────────────────────────────${c[end]}"
+echo -e
+printf '%-2s\n' " ${c[greyd]}  This docker image contains only the base operating system. You can call this base  ${c[end]}"
+printf '%-2s\n' " ${c[greyd]}  image within your ${c[bluel]}Dockerfile${c[greyd]} in order to use it as the foundation for your own docker ${c[end]}"
+printf '%-2s\n' " ${c[greyd]}  projects. This means that any packages available included in this docker image, will${c[end]}"
+printf '%-2s\n' " ${c[greyd]}  also be included within your finished product.  ${c[end]}"
+echo -e
+printf '%-2s\n' " ${c[greyd]}  To use this base image in your own project, open your ${c[bluel]}Dockerfile${c[greyd]} and define this image ${c[end]}"
+printf '%-2s\n' " ${c[greyd]}  as your ${c[bluel]}FROM${c[greyd]} instruction by specifying the ${c[bluel]}image:tag${c[greyd]} ${c[end]}"
+printf '%-6s %-30s %-65s\n' "" " ${c[greenl]}Example: ${c[end]}" "${c[bluel]}FROM${c[greyd]} --platform=linux/amd64 ghcr.io/aetherinox/ubuntu-base:latest  ${c[end]}"
+echo -e
+printf '%-2s\n' " ${c[greyd]}  For more information about this project; visit the links below.  ${c[end]}"
+printf '%-6s %-30s %-65s\n' "" " ${c[greenl]}Official Repo${c[end]}" "${c[end]}https://github.com/aetherinox/docker-base-ubuntu  ${c[end]}"
+echo -e
+printf '%-2s\n' " ${c[greyd]}  If you are using this base to host an application with sensitive information or data, consider  ${c[end]}"
+printf '%-2s\n' " ${c[greyd]}  using Traefik and Authentik to protect this container from outside access.  ${c[end]}"
+
+# #
+#   branding > system / container
+# #
+
+echo -e
+if [[ -z ${AETHERX_NON_ROOT_USER} ]]; then
+    printf '%-6s %-30s %-65s\n' "" " ${c[greenl]}Distro${c[end]}" "${c[end]}${sys_os_name} ${sys_os_ver}${c[end]}"
+    printf '%-6s %-30s %-65s\n' "" " ${c[greenl]}User:Group${c[end]}" "${c[end]}$(id -u dockerx):$(id -g dockerx)${c[end]}"
+else
+    printf '%-6s %-30s %-65s\n' "" " ${c[greenl]}User:Group${c[end]}" "${c[end]}$(stat /run -c %u):$(stat /run -c %g)${c[end]}"
+fi
+printf '%-6s %-30s %-65s\n' "" " ${c[greenl]}Gateway IP${c[end]}" "${c[end]}$(echo $IP_GATEWAY)${c[end]}"
+printf '%-6s %-30s %-65s\n' "" " ${c[greenl]}Container IP${c[end]}" "${c[end]}$(echo $IP_CONTAINER)${c[end]}"
+echo -e
+printf '%-1s\n' " ${c[greyd]}──────────────────────────────────────────────────────────────────────────────────────────${c[end]}"
+echo -e
