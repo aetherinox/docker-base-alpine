@@ -296,6 +296,52 @@ sudo chmod +x docker-images.v3 \
 <br />
 <br />
 
+#### Build arm64 on amd64
+
+Out-of-box, you cannot build an image for a different architecture than your system. If you are running **amd64**, and want to build the arm64 image; you must install `QEMU` as a docker container by running the command:
+
+```shell
+docker run --privileged --rm tonistiigi/binfmt --install all
+```
+
+<br />
+
+Once you have the above docker container running, you can now run the `docker buildx` command as normal:
+
+```shell
+# Build alpine arm64
+docker buildx build \
+  --build-arg ARCH=aarch64 \
+  --build-arg VERSION=3.22 \
+  --build-arg BUILDDATE=20260812 \
+  --build-arg RELEASE=stable \
+  --tag ghcr.io/aetherinox/alpine-base:latest \
+  --tag ghcr.io/aetherinox/alpine-base:3 \
+  --tag ghcr.io/aetherinox/alpine-base:3.2 \
+  --tag ghcr.io/aetherinox/alpine-base:3.22 \
+  --tag ghcr.io/aetherinox/alpine-base:3.22-arm64 \
+  --attest type=sbom,disabled=true \
+  --output type=docker \
+  --builder default \
+  --file Dockerfile \
+  --platform linux/arm64 \
+  --allow network.host \
+  --network host \
+  --no-cache \
+  --push \
+  .
+```
+
+<br />
+
+Make sure you change the following arguments over to `arm64`:
+
+- `--build-arg ARCH=aarch64 \`
+- `--platform linux/arm64 \`
+
+<br />
+<br />
+
 ### Build Images
 
 After completing the steps above; we will now build the [🔆 docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core) image.
