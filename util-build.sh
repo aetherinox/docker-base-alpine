@@ -120,6 +120,7 @@ image_builddate=$(date +'%Y%m%d')                                               
 image_version=3.22                                                                  # 3.22
 image_version_1digit=`echo ${image_version} | cut -d '.' -f1-1`                     # 3
 image_version_2digit=`echo ${image_version} | cut --complement -c4`                 # 3.2
+image_use_emulator=false
 
 # #
 #   Define › Checks
@@ -175,9 +176,9 @@ while [ $# -gt 0 ]; do
             image_network="${1#*=}"
             ;;
         -e|--emulator)
-            buildEnableQemu=true
+            image_use_emulator=true
 
-            if [ "${buildEnableQemu}" = true ]; then
+            if [ "${image_use_emulator}" = true ]; then
                 printf '%-29s %-65s\n' "  ${c[bluel]}${app_file_this}${c[end]}" "${c[greenl]}Starting emulator QEMU ${c[end]}"
                 docker run --privileged --rm tonistiigi/binfmt --install all
             fi
@@ -185,6 +186,7 @@ while [ $# -gt 0 ]; do
         -h|--help|/?)
             echo -e
             printf "  ${c[blue1]}${script_title}${c[end]}\n" 1>&2
+            echo -e
             printf "  ${c[grey2]}${script_about}${c[end]}\n" 1>&2
             printf "  ${c[grey1]}last update: $script_updated${c[end]} | ${c[grey1]}version: v$script_version${c[end]}\n" 1>&2
             printf "  ${c[fuchsia2]}$app_file_this${c[end]} ${c[grey1]}[${c[grey2]}-h${c[grey1]} | ${c[grey2]}--help${c[grey1]}] | ${c[grey2]}--name ${c[yellow1]}arg${c[grey1]} ${c[grey2]}--version ${c[yellow1]}arg${c[grey1]} ${c[grey2]}--arch ${c[yellow1]}arg${c[end]}" 1>&2
@@ -214,6 +216,7 @@ while [ $# -gt 0 ]; do
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}  ${c[grey1]} ${c[blue2]}      ${c[yellow1]}${c[end]}                          " "   ${c[fuchsia2]}$app_file_this${c[end]} ${c[grey1]}--author ${c[blue1]}${image_author} ${c[grey1]}--name ${c[blue1]}${image_name}${c[grey1]} ${c[grey1]}--version ${c[blue1]}${image_version}${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}  ${c[grey1]} ${c[blue2]}      ${c[yellow1]}${c[end]}                          " "   ${c[grey1]}docker tag: ${c[blue1]}image_author/image_name:image_version${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}  ${c[grey1]} ${c[blue2]}      ${c[yellow1]}${c[end]}                          " "   ${c[grey1]}docker tag: ${c[blue1]}$image_author/$image_name:$image_version${c[end]}" 1>&2
+            printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}  ${c[grey1]} ${c[blue2]}      ${c[yellow1]}${c[end]}                          " "   ${c[grey1]}docker tag: ${c[blue1]}ghcr.io/$image_author/$image_name:$image_version${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-n${c[grey1]},${c[blue2]}  --name ${c[yellow1]}<string>${c[end]}               " "specify docker image name; must be lowercase${c[end]} ${c[navy]}<default> ${c[peach]}$image_name${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-A${c[grey1]},${c[blue2]}  --arch ${c[yellow1]}<string>${c[end]}               " "architecture to build docker image for${c[end]} ${c[navy]}<default> ${c[peach]}$image_arch${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}  ${c[grey1]} ${c[blue2]}      ${c[yellow1]}${c[end]}                          " "   ${c[grey1]}pick any of the following options:" 1>&2
@@ -228,8 +231,9 @@ while [ $# -gt 0 ]; do
             printf '  %-5s %-30s %-40s\n' "    " "${c[blue2]}  ${c[grey1]} ${c[blue2]}      ${c[yellow1]}${c[end]}                          " "      - ${c[green1]}nightly${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-R${c[grey1]},${c[blue2]}  --registry ${c[yellow1]}<string>${c[end]}           " "registry you are releasing the image on ${c[end]} ${c[navy]}<default> ${c[peach]}$image_registry${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-N${c[grey1]},${c[blue2]}  --network ${c[yellow1]}<string>${c[end]}            " "network to use for docker buildx ${c[navy]}<default> ${c[peach]}$image_network${c[end]}" 1>&2
-            printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-e${c[grey1]},${c[blue2]}  --emulator ${c[yellow1]}${c[end]}                   " "start QEMU emulator before building docker image${c[end]}" 1>&2
-            printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-V${c[grey1]},${c[blue2]}  --VERSION ${c[yellow1]}${c[end]}                    " "current version of this app${c[end]}" 1>&2
+            printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-e${c[grey1]},${c[blue2]}  --emulator ${c[yellow1]}${c[end]}                   " "start QEMU emulator before building docker image ${c[navy]}<default> ${c[peach]}$image_use_emulator${c[end]}" 1>&2
+            echo -e
+            printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-V${c[grey1]},${c[blue2]}  --VERSION ${c[yellow1]}${c[end]}                    " "current version of ${c[blue1]}${script_title}${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-x${c[grey1]},${c[blue2]}  --dev ${c[yellow1]}${c[end]}                        " "developer mode; verbose logging${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-h${c[grey1]},${c[blue2]}  --help ${c[yellow1]}${c[end]}                       " "show this help menu${c[end]}" 1>&2
             echo -e
