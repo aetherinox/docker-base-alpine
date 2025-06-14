@@ -1,0 +1,52 @@
+# #
+#   Base › Alpine › Docker-compose.yml
+#
+#   Base docker image for Alpine
+#
+#   @url                  https://github.com/aetherinox/docker-base-alpine
+#
+#   @image:github         ghcr.io/aetherinox/alpine:latest
+#                         ghcr.io/aetherinox/alpine:3
+#                         ghcr.io/aetherinox/alpine:3.2
+#                         ghcr.io/aetherinox/alpine:3.22
+#
+#   @image:dockerhub      aetherinox/alpine:latest
+#                         aetherinox/alpine:3
+#                         aetherinox/alpine:3.2
+#                         aetherinox/alpine:3.22
+# #
+
+services:
+
+    # #
+    #   Service › Alpine
+    # #
+
+    base-alpine:
+        container_name: base-alpine
+        image: alpine:3.22
+        hostname: alpine
+        environment:
+            - TZ=Etc/UTC
+        volumes:
+            - /etc/timezone:/etc/timezone:ro
+            - /etc/localtime:/etc/localtime:ro
+            - /var/run/docker.sock:/var/run/docker.sock
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+        networks:
+            traefik:
+                ipv4_address: '172.18.75.2'
+
+# #
+#   Networks
+#
+#   docker network create --driver=bridge --subnet=172.18.0.0/16 --gateway=172.18.0.1 traefik
+# #
+
+networks:
+    traefik:
+        name: traefik
+        external: true
