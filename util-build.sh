@@ -349,7 +349,6 @@ printf '%-17s %-50s %-55s\n' "        ${c[grey2]} [ build # ]     " "${c[blue2]}
 printf '%-17s %-50s %-55s\n' "        ${c[grey2]} [ build-id ]    " "${c[blue2]}${image_build_ident}" "${c[end]}"
 printf '%-17s %-50s %-55s\n' "        ${c[grey2]} [ SHA1-long ]   " "${c[blue2]}${image_git_sha1_long}" "${c[end]}"
 printf '%-17s %-50s %-55s\n' "        ${c[grey2]} [ SHA1-short ]  " "${c[blue2]}${image_git_sha1_short}" "${c[end]}"
-
 echo -e
 
 # #
