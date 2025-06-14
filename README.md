@@ -227,6 +227,27 @@ dos2unix with-contenv.v1
 ```
 
 <br />
+
+You may pre-check if a file is using Windows CRLF or Linux LF by running the command `file <filename>` on the file:
+
+```shell
+file ./root//etc/s6-overlay/s6-rc.d/ci-service-check/type
+./root//etc/s6-overlay/s6-rc.d/ci-service-check/type: ASCII text
+```
+
+<br />
+
+You will get one of three messages listed below:
+
+1. ASCII text, with CRLF, LF line terminators
+2. ASCII text, with CRLF line terminators
+3. ASCII text
+
+<br />
+
+If you get messages `1` or `2`, then you need to run `dos2unix` on the file; otherwise when you bring the container up, you will get errors.
+
+<br />
 <br />
 
 #### Set `+x / 0755` Permissions
