@@ -82,7 +82,7 @@ declare -A icon=(
 # #
 
 sys_os_ver="1.0.0"
-sys_os_name="Ubuntu"
+sys_os_name="Alpine"
 sys_code="unknown"
 sys_arch="amd64"
 
@@ -182,10 +182,10 @@ printf '%-2s\n' " ${c[greyd]}  also be included within your finished product.  $
 echo -e
 printf '%-2s\n' " ${c[greyd]}  To use this base image in your own project, open your ${c[bluel]}Dockerfile${c[greyd]} and define this image ${c[end]}"
 printf '%-2s\n' " ${c[greyd]}  as your ${c[bluel]}FROM${c[greyd]} instruction by specifying the ${c[bluel]}image:tag${c[greyd]} ${c[end]}"
-printf '%-6s %-30s %-65s\n' "" " ${c[greenl]}Example: ${c[end]}" "${c[bluel]}FROM${c[greyd]} --platform=linux/amd64 ghcr.io/aetherinox/ubuntu-base:latest  ${c[end]}"
+printf '%-6s %-30s %-65s\n' "" " ${c[greenl]}Example: ${c[end]}" "${c[bluel]}FROM${c[greyd]} --platform=linux/amd64 ghcr.io/aetherinox/base-alpine:latest  ${c[end]}"
 echo -e
 printf '%-2s\n' " ${c[greyd]}  For more information about this project; visit the links below.  ${c[end]}"
-printf '%-6s %-30s %-65s\n' "" " ${c[greenl]}Official Repo${c[end]}" "${c[end]}https://github.com/aetherinox/docker-base-ubuntu  ${c[end]}"
+printf '%-6s %-30s %-65s\n' "" " ${c[greenl]}Official Repo${c[end]}" "${c[end]}https://github.com/aetherinox/docker-base-alpine  ${c[end]}"
 echo -e
 printf '%-2s\n' " ${c[greyd]}  If you are using this base to host an application with sensitive information or data, consider  ${c[end]}"
 printf '%-2s\n' " ${c[greyd]}  using Traefik and Authentik to protect this container from outside access.  ${c[end]}"
