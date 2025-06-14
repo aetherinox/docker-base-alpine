@@ -42,6 +42,7 @@ Normal users should not need to modify the files in this repository.
   - [Before Building](#before-building)
     - [LF over CRLF](#lf-over-crlf)
     - [Set `+x / 0755` Permissions](#set-x--0755-permissions)
+    - [Build arm64 on amd64](#build-arm64-on-amd64)
   - [Build Images](#build-images)
     - [Build Single Architecture](#build-single-architecture)
       - [amd64](#amd64)
@@ -84,9 +85,9 @@ Normal users should not need to modify the files in this repository.
 
 ## About
 
-The files contained within this branch `docker/alpine-base` are utilized as a foundation. This base image only provides us with a docker image which has alpine linux, Nginx, a few critical packages, and the **[s6-overlay](https://github.com/just-containers/s6-overlay)** plugin.
+The files contained within this branch `docker/base-alpine` are utilized as a foundation. This base image only provides us with a docker image which has alpine linux, Nginx, a few critical packages, and the **[s6-overlay](https://github.com/just-containers/s6-overlay)** plugin.
 
-This branch `docker/alpine-base` does **NOT** contain any applications. It is only to be used as a base image which will be called when you build your main app's `📄 Dockerfile`.
+This branch `docker/base-alpine` does **NOT** contain any applications. It is only to be used as a base image which will be called when you build your main app's `📄 Dockerfile`.
 
 <br />
 <br />
@@ -117,27 +118,25 @@ All services can be `longrun` , `oneshot` or `bundle`, and are declared inside `
 By S6 Overlay instructions, a service to create directores qualifies as a **oneshot**: it does something and then exits when it’s done. You have to define the type as oneshot, and include the `📄 up` file that points to the script or service to execute. The `📄 down` file, which is optional, can be used if the up script ends execution.
 
 <br />
+<br />
 
 ### Read First
 
-<br />
-<br />
-
 To build a docker image using this base and the actual app you want to release, you need two different docker images:
 
-- **Step 1**: Build **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image **(this repo)**
-  - When being built, the alpine-base `📄 Dockerfile` will grab and install the files from the branch **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)**
+- **Step 1**: Build **[docker/base-alpine](https://github.com/Aetherinox/docker-base-alpine/tree/docker/base-alpine)** image **(this repo)**
+  - When being built, the base-alpine `📄 Dockerfile` will grab and install the files from the branch **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)**
 - **Step 2**: Build your app's docker image that will run on top of this alpine image
 - **Step 3**: Release the docker image built from **Step 2** to Github's **Ghcr.io** or **hub.docker.com**
 
 <br />
 
 > [!WARNING]
-> You should NOT need to modify any of the files within this branch `docker/alpine-base` unless you absolutely know what you are doing.
+> You should NOT need to modify any of the files within this branch `docker/base-alpine` unless you absolutely know what you are doing.
 
 <br />
 
-When you build this **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image, the `📄 Dockerfile` will request files from another branch we host, which is the **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)** branch.
+When you build this **[docker/base-alpine](https://github.com/Aetherinox/docker-base-alpine/tree/docker/base-alpine)** image, the `📄 Dockerfile` will request files from another branch we host, which is the **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)** branch.
 
 ```bash
 ADD --chmod=755 "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/core/docker-images.${MODS_VERSION}" "/docker-images"
@@ -173,7 +172,7 @@ Prior to building the  docker image, you **must** ensure the sections below are 
 
 <br />
 
-You must ensure when you build this docker image **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)**, the following conditions must be met. 
+You must ensure when you build this docker image **[docker/base-alpine](https://github.com/Aetherinox/docker-base-alpine/tree/docker/base-alpine)**, the following conditions must be met. 
 
 <br />
 
@@ -192,7 +191,7 @@ If the listed tasks above are not performed, your docker container will throw th
 
 You cannot utilize Windows' `Carriage Return Line Feed`. All files must be converted to Unix' `Line Feed`.  This can be done with **[Visual Studio Code](https://code.visualstudio.com/)**. OR; you can run the Linux terminal command `🗔 dos2unix` to convert these files.
 
-For the branches **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and your main app image, you can use the following recursive commands:
+For the branches **[docker/base-alpine](https://github.com/Aetherinox/docker-base-alpine/tree/docker/base-alpine)** and your main app image, you can use the following recursive commands:
 
 <br />
 
@@ -254,7 +253,7 @@ If you get messages `1` or `2`, then you need to run `dos2unix` on the file; oth
 
 The files contained within this repo **MUST** have `chmod 755` /  `+x` executable permissions. If you are using our Github workflow sample **[deploy-docker-github.yml](https://github.com/Aetherinox/docker-base-alpine/blob/workflows/samples/deploy-docker-github.yml)**, this is done automatically. If you are building the images manually; you need to do this. Ensure those files have the correct permissions prior to building the Alpine base docker image.
 
-If you are building the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** or your main application images, you must ensure the files in those branches have the proper permissions. All of the executable files are named `run`:
+If you are building the **[docker/base-alpine](https://github.com/Aetherinox/docker-base-alpine/tree/docker/base-alpine)** or your main application images, you must ensure the files in those branches have the proper permissions. All of the executable files are named `run`:
 
 ```shell
 find ./ -name 'run' -print -exec sudo chmod +x {} \;
@@ -315,11 +314,11 @@ docker buildx build \
   --build-arg VERSION=3.22 \
   --build-arg BUILDDATE=20260812 \
   --build-arg RELEASE=stable \
-  --tag ghcr.io/aetherinox/alpine-base:latest \
-  --tag ghcr.io/aetherinox/alpine-base:3 \
-  --tag ghcr.io/aetherinox/alpine-base:3.2 \
-  --tag ghcr.io/aetherinox/alpine-base:3.22 \
-  --tag ghcr.io/aetherinox/alpine-base:3.22-arm64 \
+  --tag ghcr.io/aetherinox/base-alpine:latest \
+  --tag ghcr.io/aetherinox/base-alpine:3 \
+  --tag ghcr.io/aetherinox/base-alpine:3.2 \
+  --tag ghcr.io/aetherinox/base-alpine:3.22 \
+  --tag ghcr.io/aetherinox/base-alpine:3.22-arm64 \
   --attest type=sbom,disabled=true \
   --output type=docker \
   --builder default \
@@ -344,7 +343,7 @@ Make sure you change the following arguments over to `arm64`:
 
 ### Build Images
 
-After completing the steps above; we will now build the [🔆 docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core) image.
+After completing the steps above; we will now build the [🔆 docker/base-alpine](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core) image.
 
 <br />
 
@@ -387,7 +386,7 @@ All of the needed Docker files already exist in the repository. To get started, 
 mkdir docker-alpine && cd docker-alpine
 
 # to clone from our github website
-git clone https://github.com/Aetherinox/docker-base-alpine.git --branch docker/alpine-base .
+git clone https://github.com/Aetherinox/docker-base-alpine.git --branch docker/base-alpine .
 ```
 
 <br />
@@ -478,11 +477,11 @@ docker buildx build \
   --build-arg VERSION=3.22 \
   --build-arg BUILDDATE=20260812 \
   --build-arg RELEASE=stable \
-  --tag ghcr.io/aetherinox/alpine-base:latest \
-  --tag ghcr.io/aetherinox/alpine-base:3 \
-  --tag ghcr.io/aetherinox/alpine-base:3.2 \
-  --tag ghcr.io/aetherinox/alpine-base:3.22 \
-  --tag ghcr.io/aetherinox/alpine-base:3.22-amd64 \
+  --tag ghcr.io/aetherinox/base-alpine:latest \
+  --tag ghcr.io/aetherinox/base-alpine:3 \
+  --tag ghcr.io/aetherinox/base-alpine:3.2 \
+  --tag ghcr.io/aetherinox/base-alpine:3.22 \
+  --tag ghcr.io/aetherinox/base-alpine:3.22-amd64 \
   --attest type=provenance,disabled=true \
   --attest type=sbom,disabled=true \
   --output type=docker \
@@ -509,11 +508,11 @@ docker buildx build \
   --build-arg VERSION=3.22 \
   --build-arg BUILDDATE=20260812 \
   --build-arg RELEASE=stable \
-  --tag ghcr.io/aetherinox/alpine-base:latest \
-  --tag ghcr.io/aetherinox/alpine-base:3 \
-  --tag ghcr.io/aetherinox/alpine-base:3.2 \
-  --tag ghcr.io/aetherinox/alpine-base:3.22 \
-  --tag ghcr.io/aetherinox/alpine-base:3.22-arm64 \
+  --tag ghcr.io/aetherinox/base-alpine:latest \
+  --tag ghcr.io/aetherinox/base-alpine:3 \
+  --tag ghcr.io/aetherinox/base-alpine:3.2 \
+  --tag ghcr.io/aetherinox/base-alpine:3.22 \
+  --tag ghcr.io/aetherinox/base-alpine:3.22-arm64 \
   --attest type=sbom,disabled=true \
   --output type=docker \
   --builder default \
@@ -552,7 +551,7 @@ All of the needed Docker files already exist in the repository. To get started, 
 mkdir docker-alpine && cd docker-alpine
 
 # to clone from our github website
-git clone https://github.com/Aetherinox/docker-base-alpine.git --branch docker/alpine-base .
+git clone https://github.com/Aetherinox/docker-base-alpine.git --branch docker/base-alpine .
 ```
 
 <br />
@@ -648,8 +647,8 @@ If you are building these docker images using Github workflow, you will also nee
 
 Once the emulator is installed; we will now build two images. When building these two images; we will ensure the `--tag` value is different for each one, by adding the architecture to the end. This ensures we don't overwrite one image with the newer one. We need to have two seperate docker images with two different tags.
 
-- `--tag ghcr.io/aetherinox/alpine-base:3.22-amd64`
-- `--tag ghcr.io/aetherinox/alpine-base:3.22-arm64`
+- `--tag ghcr.io/aetherinox/base-alpine:3.22-amd64`
+- `--tag ghcr.io/aetherinox/base-alpine:3.22-arm64`
 
 <br />
 
@@ -660,10 +659,10 @@ Once the emulator is installed; we will now build two images. When building thes
 > 
 > | Registry | Tag |
 > | --- | --- |
-> | Dockerhub | `--tag aetherinox/alpine-base:3.22-amd64`<br>`--tag aetherinox/alpine-base:3.22-arm64` |
-> | Github (GHCR) | `--tag ghcr.io/aetherinox/alpine-base:3.22-amd64`<br>`--tag ghcr.io/aetherinox/alpine-base:3.22-arm64` |
-> | Registry v2 | `--tag registry.domain.lan/aetherinox/alpine-base:3.22-amd64`<br>`--tag registry.domain.lan/aetherinox/alpine-base:3.22-arm64` |
-> | Gitea | `--tag git.domain.lan/aetherinox/alpine-base:3.22-amd64`<br>`--tag git.domain.lan/aetherinox/alpine-base:3.22-arm64` |
+> | Dockerhub | `--tag aetherinox/base-alpine:3.22-amd64`<br>`--tag aetherinox/base-alpine:3.22-arm64` |
+> | Github (GHCR) | `--tag ghcr.io/aetherinox/base-alpine:3.22-amd64`<br>`--tag ghcr.io/aetherinox/base-alpine:3.22-arm64` |
+> | Registry v2 | `--tag registry.domain.lan/aetherinox/base-alpine:3.22-amd64`<br>`--tag registry.domain.lan/aetherinox/base-alpine:3.22-arm64` |
+> | Gitea | `--tag git.domain.lan/aetherinox/base-alpine:3.22-amd64`<br>`--tag git.domain.lan/aetherinox/base-alpine:3.22-arm64` |
 
 <br />
 
@@ -687,7 +686,7 @@ docker buildx build \
   --build-arg VERSION=3.22 \
   --build-arg BUILDDATE=20260812 \
   --build-arg RELEASE=stable \
-  --tag ghcr.io/aetherinox/alpine-base:3.22-amd64 \
+  --tag ghcr.io/aetherinox/base-alpine:3.22-amd64 \
   --attest type=provenance,disabled=true \
   --attest type=sbom,disabled=true \
   --output type=docker \
@@ -715,7 +714,7 @@ docker buildx build \
   --build-arg VERSION=3.22 \
   --build-arg BUILDDATE=20260812 \
   --build-arg RELEASE=stable \
-  --tag ghcr.io/aetherinox/alpine-base:3.22-arm64 \
+  --tag ghcr.io/aetherinox/base-alpine:3.22-arm64 \
   --attest type=provenance,disabled=true \
   --attest type=sbom,disabled=true \
   --output type=docker \
@@ -743,7 +742,7 @@ docker buildx build \
   --build-arg VERSION=3.22 \
   --build-arg BUILDDATE=20260812 \
   --build-arg RELEASE=development \
-  --tag ghcr.io/aetherinox/alpine-base:development-amd64 \
+  --tag ghcr.io/aetherinox/base-alpine:development-amd64 \
   --attest type=provenance,disabled=true \
   --attest type=sbom,disabled=true \
   --output type=docker \
@@ -771,7 +770,7 @@ docker buildx build \
   --build-arg VERSION=3.22 \
   --build-arg BUILDDATE=20260812 \
   --build-arg RELEASE=development \
-  --tag ghcr.io/aetherinox/alpine-base:development-arm64 \
+  --tag ghcr.io/aetherinox/base-alpine:development-arm64 \
   --attest type=provenance,disabled=true \
   --attest type=sbom,disabled=true \
   --output type=docker \
@@ -792,10 +791,10 @@ After completing the `docker buildx` commands above; you should now have a few n
 
 <br />
 
-- `--tag ghcr.io/aetherinox/alpine-base:3.22-amd64`
-- `--tag ghcr.io/aetherinox/alpine-base:3.22-arm64`
-- `--tag ghcr.io/aetherinox/alpine-base:development-amd64`
-- `--tag ghcr.io/aetherinox/alpine-base:development-arm64`
+- `--tag ghcr.io/aetherinox/base-alpine:3.22-amd64`
+- `--tag ghcr.io/aetherinox/base-alpine:3.22-arm64`
+- `--tag ghcr.io/aetherinox/base-alpine:development-amd64`
+- `--tag ghcr.io/aetherinox/base-alpine:development-arm64`
 
 <br />
 
@@ -817,15 +816,15 @@ If you are building the **stable release** images; you should see the following:
 You can also get the hash digests by running the commands:
 
 ```shell
-$ docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.22-amd64
+$ docker buildx imagetools inspect ghcr.io/aetherinox/base-alpine:3.22-amd64
 
-Name:      ghcr.io/aetherinox/alpine-base:3.22-amd64
+Name:      ghcr.io/aetherinox/base-alpine:3.22-amd64
 MediaType: application/vnd.docker.distribution.manifest.v2+json
 Digest:    sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8
 
-$ docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.22-arm64
+$ docker buildx imagetools inspect ghcr.io/aetherinox/base-alpine:3.22-arm64
 
-Name:      ghcr.io/aetherinox/alpine-base:3.22-arm64
+Name:      ghcr.io/aetherinox/base-alpine:3.22-arm64
 MediaType: application/vnd.docker.distribution.manifest.v2+json
 Digest:    sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda
 ```
@@ -848,15 +847,15 @@ You can also get the hash digests by running the commands:
 <br />
 
 ```shell
-$ docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:development-amd64
+$ docker buildx imagetools inspect ghcr.io/aetherinox/base-alpine:development-amd64
 
-Name:      ghcr.io/aetherinox/alpine-base:development-amd64
+Name:      ghcr.io/aetherinox/base-alpine:development-amd64
 MediaType: application/vnd.docker.distribution.manifest.v2+json
 Digest:    sha256:8f36385a28c8f6eb7394d903c9a7a2765b06f94266b32628389ee9e3e3d7e69d
 
-$ docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:development-arm64
+$ docker buildx imagetools inspect ghcr.io/aetherinox/base-alpine:development-arm64
 
-Name:      ghcr.io/aetherinox/alpine-base:development-arm64
+Name:      ghcr.io/aetherinox/base-alpine:development-arm64
 MediaType: application/vnd.docker.distribution.manifest.v2+json
 Digest:    sha256:c719ccb034946e3f0625003f25026d001768794e38a1ba8aafc9146291d548c5
 ```
@@ -872,16 +871,16 @@ Digest:    sha256:c719ccb034946e3f0625003f25026d001768794e38a1ba8aafc9146291d548
 > ```shell
 > $ docker images --all --no-trunc | grep aetherinox
 > 
-> ghcr.io/aetherinox/alpine-base   3.22-arm64        sha256:bb425429e98ab467fd91474701da2e5c0a7cb4a5f218a710d950eb0ff595486c   3 minutes ago   38.8MB
+> ghcr.io/aetherinox/base-alpine   3.22-arm64        sha256:bb425429e98ab467fd91474701da2e5c0a7cb4a5f218a710d950eb0ff595486c   3 minutes ago   38.8MB
 > 
-> ghcr.io/aetherinox/alpine-base   3.22-amd64        sha256:dea4cb91379dba289d8d3e8842d4fb7b7857faa7f3d02d5b9a043a1ee58e61d7   4 minutes ago   27.3MB
+> ghcr.io/aetherinox/base-alpine   3.22-amd64        sha256:dea4cb91379dba289d8d3e8842d4fb7b7857faa7f3d02d5b9a043a1ee58e61d7   4 minutes ago   27.3MB
 > ```
 >
 > To get the correct sha256 digest, use:
-> - `docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.22-amd64`
-> - `docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:3.22-arm64`
-> - `docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:development-amd64`
-> - `docker buildx imagetools inspect ghcr.io/aetherinox/alpine-base:development-arm64`
+> - `docker buildx imagetools inspect ghcr.io/aetherinox/base-alpine:3.22-amd64`
+> - `docker buildx imagetools inspect ghcr.io/aetherinox/base-alpine:3.22-arm64`
+> - `docker buildx imagetools inspect ghcr.io/aetherinox/base-alpine:development-amd64`
+> - `docker buildx imagetools inspect ghcr.io/aetherinox/base-alpine:development-arm64`
 > 
 
 <br />
@@ -899,19 +898,19 @@ For the **stable** releases, use:
 # #
 
 docker buildx imagetools create \
-  --tag ghcr.io/aetherinox/alpine-base:latest \
-  --tag ghcr.io/aetherinox/alpine-base:3 \
-  --tag ghcr.io/aetherinox/alpine-base:3.2 \
-  --tag ghcr.io/aetherinox/alpine-base:3.22 \
+  --tag ghcr.io/aetherinox/base-alpine:latest \
+  --tag ghcr.io/aetherinox/base-alpine:3 \
+  --tag ghcr.io/aetherinox/base-alpine:3.2 \
+  --tag ghcr.io/aetherinox/base-alpine:3.22 \
 
   sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8 \
   sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda
 
 [+] Building 0.2s (4/4) FINISHED                                                                                                                                                                                                      
- => [internal] pushing ghcr.io/aetherinox/alpine-base:latest     0.2s
- => [internal] pushing ghcr.io/aetherinox/alpine-base:3          0.2s
- => [internal] pushing ghcr.io/aetherinox/alpine-base:3.2        0.2s
- => [internal] pushing ghcr.io/aetherinox/alpine-base:3.22       0.2s
+ => [internal] pushing ghcr.io/aetherinox/base-alpine:latest     0.2s
+ => [internal] pushing ghcr.io/aetherinox/base-alpine:3          0.2s
+ => [internal] pushing ghcr.io/aetherinox/base-alpine:3.2        0.2s
+ => [internal] pushing ghcr.io/aetherinox/base-alpine:3.22       0.2s
 ```
 
 <br />
@@ -924,12 +923,12 @@ For the **development** releases, use:
 # #
 
 docker buildx imagetools create \
-  --tag ghcr.io/aetherinox/alpine-base:development \
+  --tag ghcr.io/aetherinox/base-alpine:development \
   sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda \
   sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8
 
 [+] Building 0.1s (1/1) FINISHED
- => [internal] pushing ghcr.io/aetherinox/alpine-base:development   0.1s
+ => [internal] pushing ghcr.io/aetherinox/base-alpine:development   0.1s
 ```
 
 <br />
@@ -939,15 +938,15 @@ docker buildx imagetools create \
 
 <br />
 
-Alternatively, you could use the `🗔 manifest create` command; as an example, you can merge multiple architecture images together into a single image. The top line with `🔖 aetherinox/alpine-base:latest` can be any name. However, all images after `--amend` MUST be already existing images uploaded to the registry.
+Alternatively, you could use the `🗔 manifest create` command; as an example, you can merge multiple architecture images together into a single image. The top line with `🔖 aetherinox/base-alpine:latest` can be any name. However, all images after `--amend` MUST be already existing images uploaded to the registry.
 
 ```shell
-docker manifest create ghcr.io/aetherinox/alpine-base:latest \
-    --amend ghcr.io/aetherinox/alpine-base:latest-amd64 \
-    --amend ghcr.io/aetherinox/alpine-base:latest-arm32v7 \
-    --amend ghcr.io/aetherinox/alpine-base:latest-arm64v8
+docker manifest create ghcr.io/aetherinox/base-alpine:latest \
+    --amend ghcr.io/aetherinox/base-alpine:latest-amd64 \
+    --amend ghcr.io/aetherinox/base-alpine:latest-arm32v7 \
+    --amend ghcr.io/aetherinox/base-alpine:latest-arm64v8
 
-docker manifest push ghcr.io/aetherinox/alpine-base:latest
+docker manifest push ghcr.io/aetherinox/base-alpine:latest
 ```
 
 <br />
@@ -956,17 +955,17 @@ In this example, we take the existing two files we created earlier, and merge th
 
 ```shell
 # Example 1 (using tag)
-docker manifest create ghcr.io/aetherinox/alpine-base:latest \
-    --amend ghcr.io/aetherinox/alpine-base:3.22-amd64 \
-    --amend ghcr.io/aetherinox/alpine-base:3.22-arm64
+docker manifest create ghcr.io/aetherinox/base-alpine:latest \
+    --amend ghcr.io/aetherinox/base-alpine:3.22-amd64 \
+    --amend ghcr.io/aetherinox/base-alpine:3.22-arm64
 
 # Example 2 (using sha256 hash)
-docker manifest create ghcr.io/aetherinox/alpine-base:latest \
-    --amend ghcr.io/aetherinox/alpine-base@sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8 \
-    --amend ghcr.io/aetherinox/alpine-base@sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda
+docker manifest create ghcr.io/aetherinox/base-alpine:latest \
+    --amend ghcr.io/aetherinox/base-alpine@sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8 \
+    --amend ghcr.io/aetherinox/base-alpine@sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda
 
 # Push manifest changes to registry
-docker manifest push ghcr.io/aetherinox/alpine-base:latest
+docker manifest push ghcr.io/aetherinox/base-alpine:latest
 ```
 
 <br />
@@ -1000,7 +999,7 @@ subgraph GRAPH_YOURAPP ["Build yourapp:latest"]
     -t yourapp:latest &bsol;
     -t yourapp:1.0.0-amd64 &bsol;
     -f Dockerfile . &bsol;`"]
-    obj_step13["`Download **alpine-base** from branch **docker/alpine-base**`"]
+    obj_step13["`Download **base-alpine** from branch **docker/base-alpine**`"]
     obj_step14["`New Image: **yourapp:latest**`"]
 
     style obj_step10 text-align:center,stroke-width:1px,stroke:#555
@@ -1011,18 +1010,18 @@ end
 
 style GRAPH_YOURAPP text-align:center,stroke-width:1px,stroke:transparent,fill:transparent
 
-subgraph GRAPH_ALPINE["Build alpine-base:latest Image"]
+subgraph GRAPH_ALPINE["Build base-alpine:latest Image"]
 direction TB
-    obj_step20["`&gt; git clone -b docker/alpine-base github.com/Aetherinox/docker-base-alpine.git`"]
+    obj_step20["`&gt; git clone -b docker/base-alpine github.com/Aetherinox/docker-base-alpine.git`"]
     obj_step21["`Dockerfile`"]
     obj_step22["`&gt; docker build &bsol;
     --build-arg VERSION=3.20 &bsol;
     --build-arg BUILDDATE=20250220 &bsol;
-    -t docker-alpine-base:latest &bsol;
-    -t docker-alpine-base:3.22-amd64 &bsol;
+    -t docker-base-alpine:latest &bsol;
+    -t docker-base-alpine:3.22-amd64 &bsol;
     -f Dockerfile . &bsol;`"]
     obj_step23["`Download files from branch **docker/core**`"]
-    obj_step24["`New Image: **alpine-base:latest**`"]
+    obj_step24["`New Image: **base-alpine:latest**`"]
 
     style obj_step20 text-align:center,stroke-width:1px,stroke:#555
     style obj_step21 text-align:left,stroke-width:1px,stroke:#555
@@ -1053,12 +1052,12 @@ To use your new docker alpine base image, you simply need to reference it in you
 ```dockerfile
 ARG ARCH=amd64
 ARG ALPINE_VERSION=3.22
-FROM --platform=linux/${ARCH} ghcr.io/aetherinox/alpine-base:${ALPINE_VERSION}
+FROM --platform=linux/${ARCH} ghcr.io/aetherinox/base-alpine:${ALPINE_VERSION}
 ```
 
 <br />
 
-In the Dockerfile code above, you will see that we are pulling from `ghcr.io/aetherinox/alpine-base:${ALPINE_VERSION}`; where `${ALPINE_VERSION}` gets replaced with the version of alpine we wish to use. At the time of writing this, it is `3.22`.
+In the Dockerfile code above, you will see that we are pulling from `ghcr.io/aetherinox/base-alpine:${ALPINE_VERSION}`; where `${ALPINE_VERSION}` gets replaced with the version of alpine we wish to use. At the time of writing this, it is `3.22`.
 
 <br />
 
@@ -1072,7 +1071,7 @@ After you reference the alpine image, you can then write the remaining parts of 
 
 ## Extra Notes
 
-The following are other things to take into consideration when creating the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** and your app docker image that will use this base image:
+The following are other things to take into consideration when creating the **[docker/base-alpine](https://github.com/Aetherinox/docker-base-alpine/tree/docker/base-alpine)** and your app docker image that will use this base image:
 
 <br />
 
@@ -1085,7 +1084,7 @@ Any project docker image built using this base image contains Alpine Linux, but 
 #### ash
 
 ```shell
-docker exec -it alpine-base ash
+docker exec -it base-alpine ash
 ```
 
 <br />
@@ -1093,7 +1092,7 @@ docker exec -it alpine-base ash
 #### sh
 
 ```shell
-docker exec -it alpine-base sh
+docker exec -it base-alpine sh
 ```
 
 <br />
@@ -1101,7 +1100,7 @@ docker exec -it alpine-base sh
 #### bash
 
 ```shell
-docker exec -it alpine-base bash
+docker exec -it base-alpine bash
 ```
 
 <br />
@@ -1720,7 +1719,7 @@ When you start your project's docker image up, this service will be executed.
 
 ### Custom Docker Image Scripts
 
-The `docker/alpine-base` and any project docker images which use this alpine base image, support the ability of adding custom scripts that will be ran when the container is started. To create / add a new custom script to the container, you need to create a new folder in the container source files `/root` folder
+The `docker/base-alpine` and any project docker images which use this alpine base image, support the ability of adding custom scripts that will be ran when the container is started. To create / add a new custom script to the container, you need to create a new folder in the container source files `/root` folder
 
 ```shell
 mkdir -p /root/custom-cont-init.d/
@@ -1884,13 +1883,13 @@ This base alpine image contains detailed logs which will output what the docker 
   [github-commit-uri]: https://github.com/Aetherinox/docker-base-alpine/commits/main/
 
 <!-- BADGE > DOCKER HUB > VERSION -->
-  [dockerhub-version-img]: https://img.shields.io/docker/v/aetherinox/alpine-base/latest?logo=docker&logoColor=FFFFFF&label=Version&color=ba5225
-  [dockerhub-version-uri]: https://hub.docker.com/repository/docker/aetherinox/alpine-base/general
+  [dockerhub-version-img]: https://img.shields.io/docker/v/aetherinox/base-alpine/latest?logo=docker&logoColor=FFFFFF&label=Version&color=ba5225
+  [dockerhub-version-uri]: https://hub.docker.com/repository/docker/aetherinox/base-alpine/general
 
 <!-- BADGE > DOCKERHUB > PULLS -->
-  [dockerhub-pulls-img]: https://img.shields.io/docker/pulls/aetherinox/alpine-base?logo=docker&logoColor=FFFFFF&label=Pulls&color=376892
-  [dockerhub-pulls-uri]: https://hub.docker.com/repository/docker/aetherinox/alpine-base/general
+  [dockerhub-pulls-img]: https://img.shields.io/docker/pulls/aetherinox/base-alpine?logo=docker&logoColor=FFFFFF&label=Pulls&color=376892
+  [dockerhub-pulls-uri]: https://hub.docker.com/repository/docker/aetherinox/base-alpine/general
 
 <!-- BADGE > GITHUB > PULLS -->
-  [github-pulls-img]: https://img.shields.io/badge/dynamic/json?url=https://ipitio.github.io/backage/Aetherinox/docker-base-alpine/alpine-base.json&query=%24.downloads&logo=github&style=flat&color=376892&label=Pulls
-  [github-pulls-uri]: https://github.com/Aetherinox/docker-base-alpine/pkgs/container/alpine-base
+  [github-pulls-img]: https://img.shields.io/badge/dynamic/json?url=https://ipitio.github.io/backage/Aetherinox/docker-base-alpine/base-alpine.json&query=%24.downloads&logo=github&style=flat&color=376892&label=Pulls
+  [github-pulls-uri]: https://github.com/Aetherinox/docker-base-alpine/pkgs/container/base-alpine
