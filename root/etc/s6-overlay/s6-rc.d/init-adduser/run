@@ -1,34 +1,32 @@
 #!/usr/bin/with-contenv bash
 # shellcheck shell=bash
 
-PUID=${PUID:-911}
-PGID=${PGID:-911}
+PUID=${PUID:-999}
+PGID=${PGID:-999}
+
+# #
+#   user information
+# #
 
 if [[ -z ${AETHERX_READ_ONLY_FS} ]] && [[ -z ${AETHERX_NON_ROOT_USER} ]]; then
-    groupmod -o -g "$PGID" dockerx
-    usermod -o -u "$PUID" dockerx
+    USERHOME=$( grep dockerx /etc/passwd | cut -d ":" -f6 )
+    usermod -d "/root" dockerx
+
+    groupmod -o -g "${PGID}" dockerx
+    usermod -o -u "${PUID}" dockerx
+
+    usermod -d "${USERHOME}" dockerx
 fi
 
-if { [[ -z ${AETHERX_READ_ONLY_FS} ]] && [[ -z ${AETHERX_NON_ROOT_USER} ]]; } || [[ ! ${AETHERX_FIRST_PARTY} = "true" ]]; then
-    cat /etc/s6-overlay/s6-rc.d/init-adduser/branding
-else
-    cat /run/branding
-fi
+# #
+#   branding
+# #
 
-if [[ -z ${AETHERX_NON_ROOT_USER} ]]; then
-echo "
-        User ID ........... $(id -u dockerx)
-        Group ID .......... $(id -g dockerx)"
-else
-echo "
-        User ID ........... $(stat /run -c %u)
-        Group ID .......... $(stat /run -c %g)"
-fi
-echo "
-        Port HTTP ......... $(echo $PORT_HTTP)
-        Port HTTPS ........ $(echo $PORT_HTTPS)"
+source /etc/s6-overlay/s6-rc.d/init-adduser/branding
 
-echo '──────────────────────────────────────────────────────────────────────────────────────────'
+# #
+#   set ownership perms
+# #
 
 if [[ -z ${AETHERX_READ_ONLY_FS} ]] && [[ -z ${AETHERX_NON_ROOT_USER} ]]; then
     aetherxown dockerx:dockerx /app
