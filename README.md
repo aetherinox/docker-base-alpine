@@ -140,7 +140,7 @@ To build a docker image using this base and the actual app you want to release, 
 When you build this **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** image, the `📄 Dockerfile` will request files from another branch we host, which is the **[docker/core](https://github.com/Aetherinox/docker-base-alpine/tree/docker/core)** branch.
 
 ```bash
-ADD --chmod=755 "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/core/docker-images.${MODS_VERSION}" "/docker-images"
+ADD --=755 "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/core/docker-images.${MODS_VERSION}" "/docker-images"
 ADD --chmod=755 "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/core/package-install.${PKG_INST_VERSION}" "/etc/s6-overlay/s6-rc.d/init-mods-package-install/run"
 ADD --chmod=755 "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/core/aetherxown.${AETHERXOWN_VERSION}" "/usr/bin/aetherxown"
 ```
@@ -185,6 +185,7 @@ If the listed tasks above are not performed, your docker container will throw th
 - `/etc/s6-overlay/s6-rc.d/init-adduser/run: /usr/bin/aetherxown: cannot execute: required file not found`
 
 <br />
+<br />
 
 #### LF over CRLF
 
@@ -207,10 +208,10 @@ For the branches **[docker/alpine-base](https://github.com/Aetherinox/docker-bas
 
 ```shell
 # Change ALL files
-find ./ -type f | grep -Ev '.git|*.jpg|*.jpeg|*.png' | xargs dos2unix --
+find ./ -type f | grep -Ev 'docs|node_modules|.git|*.jpg|*.jpeg|*.png' | xargs dos2unix --
 
 # Change run / binaries
-find ./ -type f -name 'run' | xargs dos2unix --
+find ./ -type f -name 'run' -print | xargs dos2unix --
 ```
 
 <br />
@@ -225,6 +226,7 @@ dos2unix with-contenv.v1
 ```
 
 <br />
+<br />
 
 #### Set `+x / 0755` Permissions
 
@@ -233,7 +235,7 @@ The files contained within this repo **MUST** have `chmod 755` /  `+x` executabl
 If you are building the **[docker/alpine-base](https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base)** or your main application images, you must ensure the files in those branches have the proper permissions. All of the executable files are named `run`:
 
 ```shell
-find ./ -name 'run' -exec sudo chmod +x {} \;
+find ./ -name 'run' -print -exec sudo chmod +x {} \;
 ```
 
 <br />
