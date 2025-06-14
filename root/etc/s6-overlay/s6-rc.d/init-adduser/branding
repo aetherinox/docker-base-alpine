@@ -5,8 +5,8 @@
 #   defaults
 # #
 
-PUID=${PUID:-911}
-PGID=${PGID:-911}
+PUID=${PUID:-999}
+PGID=${PGID:-999}
 DIR_BUILD=${DIR_BUILD:-/usr/src/app}
 DIR_RUN=${DIR_RUN:-/usr/bin/app}
 bHasError=false
