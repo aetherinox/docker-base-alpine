@@ -231,7 +231,7 @@ dos2unix with-contenv.v1
 You may pre-check if a file is using Windows CRLF or Linux LF by running the command `file <filename>` on the file:
 
 ```shell
-file ./root//etc/s6-overlay/s6-rc.d/ci-service-check/type
+$ file ./root//etc/s6-overlay/s6-rc.d/ci-service-check/type
 ./root//etc/s6-overlay/s6-rc.d/ci-service-check/type: ASCII text
 ```
 
