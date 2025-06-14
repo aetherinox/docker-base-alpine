@@ -95,9 +95,10 @@ app_file_bin="${app_file_this%.*}"                                              
 #                           --arch <ARCH:optional:amd64/arm64>
 # #
 
-cmd_title="Builder › Alpine"
-cmd_about="This command allows you to build a docker image for $cmd_title"
-cmd_update="07-01-2025"
+script_title="Builder › Alpine"
+script_about="This command allows you to build a docker image for $script_title"
+script_updated="07-01-2025"
+script_version="1.0.0"
 
 # #
 #   Define › Args
@@ -183,9 +184,9 @@ while [ $# -gt 0 ]; do
             ;;
         -h|--help|/?)
             echo -e
-            printf "  ${c[blue1]}${cmd_title}${c[end]}\n" 1>&2
-            printf "  ${c[grey2]}${cmd_about}${c[end]}\n" 1>&2
-            printf "  ${c[grey1]}last update:${c[end]} ${c[grey1]}$cmd_update${c[end]}\n" 1>&2
+            printf "  ${c[blue1]}${script_title}${c[end]}\n" 1>&2
+            printf "  ${c[grey2]}${script_about}${c[end]}\n" 1>&2
+            printf "  ${c[grey1]}last update: $script_updated${c[end]} | ${c[grey1]}version: v$script_version${c[end]}\n" 1>&2
             printf "  ${c[fuchsia2]}$app_file_this${c[end]} ${c[grey1]}[${c[grey2]}-h${c[grey1]} | ${c[grey2]}--help${c[grey1]}] | ${c[grey2]}--name ${c[yellow1]}arg${c[grey1]} ${c[grey2]}--version ${c[yellow1]}arg${c[grey1]} ${c[grey2]}--arch ${c[yellow1]}arg${c[end]}" 1>&2
             echo -e
             echo -e
@@ -262,8 +263,8 @@ printf '%-29s %-65s\n' "  ${c[bluel]}${app_file_this}${c[end]}" "${c[greenl]}Sta
 
 if [ ! -d "$image_path_build" ]; then
     echo
-    echo -e "  ${c[bold]}${c[orange1]}WARNING          ${c[end]}$cmd_title Source Path Does Not Exist${c[end]}"
-    echo -e "  ${c[end]}                 You must specify a valid path where the $cmd_title source files are.${c[end]}"
+    echo -e "  ${c[bold]}${c[orange1]}WARNING          ${c[end]}$script_title Source Path Does Not Exist${c[end]}"
+    echo -e "  ${c[end]}                 You must specify a valid path where the $script_title source files are.${c[end]}"
     echo -e "  ${c[bold]}${c[grey2]}                         ${c[fuchsia2]}./${app_file_this}${c[end]}"
     echo
 
