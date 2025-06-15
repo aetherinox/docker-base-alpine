@@ -11,6 +11,35 @@
 #                   ./util-build.sh --version 3.22 --arch amd64 --registry local
 #                   ./util-build.sh --dockerfile CustomDockerfile --version 3.22 --arch amd64 --registry local
 #                   ./util-build.sh --version 3.22 --arch amd64 --release beta --registry github --author Aetherinox --network default --name alpine
+#
+#                   This script includes the ability to:
+#                       fix permissions
+#                       restart docker container
+#                       use bitwarden secret's manager
+#
+#                   Fix Permissions
+#                       will chmod +x all `run` files
+#                       will change all Windows CRLF to Unix LF
+#
+#                   Restart Container
+#                       to restart the docker container after this script finishes, append `-ra` or `--restart` to your command.
+#                       if you need to load an .env file, add `--env` or `-E` to the beginning of the command; such as:
+#                           ./util-build.sh -ra --env ./.myenv
+#                       you can append as many env files as you need, simply seperate each file with a comma
+#                           ./util-build.sh -ra --env ./.env,.anotherEnv,third.env
+#                       your full command could look something like the following if you want to build and then restart:
+#                           ./util-build.sh -ra --env ./.env,.anotherEnv,third.env \
+#                               --version 3.22 \
+#                               --arch amd64 \
+#                               --release beta \
+#                               --registry github \
+#                               --author Aetherinox \
+#                               --network default \
+#                               --name alpine
+#
+#                   Bitwarden Secret's Manager
+#                       this script supports injecting secrets into your docker container. if you use the Bitwarden CLI to normally start / restart
+#                       your container, then your secrets will be automatically injected when the container restarts.
 # #
 
 # #
@@ -121,6 +150,14 @@ image_version=3.22                                                              
 image_version_1digit=`echo ${image_version} | cut -d '.' -f1-1`                     # 3
 image_version_2digit=`echo ${image_version} | cut --complement -c4`                 # 3.2
 image_use_emulator=false
+image_restart=false
+
+# #
+#   load .env on restart if -ra, --restart specified
+# #
+
+restart_env_in="${image_path_build}/.env"
+restart_env_out=
 
 # #
 #   Define › Checks
@@ -170,6 +207,34 @@ while [ $# -gt 0 ]; do
         -R|--registry)
             if [[ "$1" != *=* ]]; then shift; fi
             image_registry="${1#*=}"
+            ;;
+
+        # #
+        #   env files
+        # #
+
+        -E|--env)
+            if [[ "$1" != *=* ]]; then shift; fi
+            envList="${1#*=}"
+            restart_docker_env_list=()
+            for envfile in $(echo $envList | awk -F, '{for (i=1; i<=NF; i++) print $i}' ); do
+                restart_docker_env_list+=("$envfile")
+            done
+
+            # #
+            #   array to single string
+            #       --env-file something.env --env-file another.env --env-file third.env
+            #  #
+
+            restart_env_out=""
+            for cmd in "${restart_docker_env_list[@]}"; do
+                restart_env_out+="--env-file $cmd "
+            done
+            ;;
+
+        -ra|--restart)
+            image_restart=true
+            printf '%-29s %-65s\n' "  ${c[bluel]}${app_file_this}${c[end]}" "${c[greenl]}Container will restart after build${c[end]}"
             ;;
         -N|--network)
             if [[ "$1" != *=* ]]; then shift; fi
@@ -232,6 +297,9 @@ while [ $# -gt 0 ]; do
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-R${c[grey1]},${c[blue2]}  --registry ${c[yellow1]}<string>${c[end]}           " "registry you are releasing the image on ${c[end]} ${c[navy]}<default> ${c[peach]}$image_registry${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-N${c[grey1]},${c[blue2]}  --network ${c[yellow1]}<string>${c[end]}            " "network to use for docker buildx ${c[navy]}<default> ${c[peach]}$image_network${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-e${c[grey1]},${c[blue2]}  --emulator ${c[yellow1]}${c[end]}                   " "start QEMU emulator before building docker image ${c[navy]}<default> ${c[peach]}$image_use_emulator${c[end]}" 1>&2
+            printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-ra${c[grey1]},${c[blue2]} --restart ${c[yellow1]}${c[end]}                    " "restart docker container for the folder you are in ${c[navy]}<default> ${c[peach]}$image_restart${c[end]}" 1>&2
+            printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}  ${c[grey1]} ${c[blue2]}      ${c[yellow1]}${c[end]}                          " "   ${c[grey1]}can be used in combination with ${c[blue1]}--env${end}" 1>&2
+            printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-E${c[grey1]},${c[blue2]}  --env ${c[yellow1]}${c[end]}                        " "force docker to load your env file(s) when you restart the container ${c[end]}" 1>&2
             echo -e
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-V${c[grey1]},${c[blue2]}  --VERSION ${c[yellow1]}${c[end]}                    " "current version of ${c[blue1]}${script_title}${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-x${c[grey1]},${c[blue2]}  --dev ${c[yellow1]}${c[end]}                        " "developer mode; verbose logging${c[end]}" 1>&2
@@ -288,6 +356,12 @@ if [ -z "$image_version" ]; then
 
     exit 1
 fi
+
+# #
+#   run script fix perms
+# #
+
+source ./util-fix.sh
 
 # #
 #   change work directory
@@ -357,4 +431,29 @@ echo -e
 
 printf '%-29s %-65s\n' "  ${c[bluel]}${app_file_this}${c[end]}" "${c[greenl]}Finished build ${c[end]}"
 echo -e
+
+# #
+#   restart container
+#       only activates if -ra, --restart parameter specified
+# #
+
+if [ "${image_restart}" = true ]; then
+    if alias docker-restart >/dev/null 2>&1; then
+        docker-restart
+    else
+        if command -v bws >/dev/null 2>&1; then
+            bws run -- "docker compose ${restart_env_out} down --remove-orphans && docker compose ${restart_env_out} up -d"
+        elif command -v docker >/dev/null 2>&1; then
+            docker compose ${restart_env_out} down --remove-orphans && \
+            docker compose ${restart_env_out} up -d
+        else
+            echo
+            echo -e "  ${c[bold]}${c[redl]}ERROR            ${c[end]}Cannot restart container${c[end]}"
+            echo -e "  ${c[end]}                 Could not find docker command or docker aliases${c[end]}"
+            echo -e "  ${c[bold]}${c[grey2]}                         ${c[fuchsia2]}./${app_file_this}${c[end]} --help"
+            echo -e "  ${c[bold]}${c[grey2]}                         ${c[fuchsia2]}./${app_file_this}${c[end]} -h"
+            echo
+        fi
+    fi
+fi
 
