@@ -6,7 +6,7 @@
 #   @file                 utils.fix.sh
 #   @usage                this script allows you to fix permission issues, and convert all file line-endings from CRLF to LF
 #                             by using the package dos2unix
-#   @usage                ./utils.fix.sh
+#   @run                  ./utils.fix.sh
 #                         ./utils.fix.sh --help
 #
 #   @image:github         ghcr.io/aetherinox/alpine:latest

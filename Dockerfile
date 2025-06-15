@@ -5,7 +5,6 @@
 #   @repo                 https://github.com/aetherinox/docker-base-alpine
 #   @file                 Dockerfile
 #   @usage                base image utilized for all docker images using Ubuntu with s6-overlay integration
-#   @build                To build these images, use the following commands:
 #
 #   @image:github         ghcr.io/aetherinox/alpine:latest
 #                         ghcr.io/aetherinox/alpine:3.22
