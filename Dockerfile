@@ -5,6 +5,7 @@
 #   @repo                 https://github.com/aetherinox/docker-base-alpine
 #   @file                 Dockerfile
 #   @usage                base image utilized for all docker images using Ubuntu with s6-overlay integration
+#   @build                To build these images, use the following commands:
 #
 #   @image:github         ghcr.io/aetherinox/alpine:latest
 #                         ghcr.io/aetherinox/alpine:3.22
@@ -198,6 +199,7 @@ RUN \
 # #
 
 FROM scratch
+ENV ROOTFS=/root-out
 COPY --from=rootfs-stage $ROOTFS/ /
 
 # #
@@ -225,7 +227,6 @@ ENV MODS_VERSION="v3"
 ENV PKG_INST_VERSION="v1"
 ENV AETHERXOWN_VERSION="v1"
 ENV WITHCONTENV_VERSION="v1"
-ENV ROOTFS=/root-out
 
 # #
 #   scratch › set labels
