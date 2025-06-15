@@ -42,7 +42,10 @@ Normal users should not need to modify the files in this repository.
   - [Before Building](#before-building)
     - [LF over CRLF](#lf-over-crlf)
     - [Set `+x / 0755` Permissions](#set-x--0755-permissions)
-    - [Build arm64 on amd64](#build-arm64-on-amd64)
+    - [Building Different Architectures](#building-different-architectures)
+  - [Integrated Build Script](#integrated-build-script)
+    - [`📄 util-fix.sh`](#-util-fixsh)
+    - [`📄 util-build.sh`](#-util-buildsh)
   - [Build Images](#build-images)
     - [Build Single Architecture](#build-single-architecture)
       - [amd64](#amd64)
@@ -189,7 +192,33 @@ If the listed tasks above are not performed, your docker container will throw th
 
 #### LF over CRLF
 
-You cannot utilize Windows' `Carriage Return Line Feed`. All files must be converted to Unix' `Line Feed`.  This can be done with **[Visual Studio Code](https://code.visualstudio.com/)**. OR; you can run the Linux terminal command `🗔 dos2unix` to convert these files.
+Line endings in text files are marked using special control characters:
+- **CR**: _Carriage Return_
+  - 0x0D or decimal `13`
+- **LF**: _Line Feed_
+  - 0x0A or decimal `10`
+
+<br />
+
+Different operating systems use different conventions for line breaks:
+- **Windows** uses a `CR/LF` sequence to indicate the end of a line
+  - `\r\n`
+- **Unix/Linux** and modern `macOS > v10.0` uses only `LF`
+  - `\n`
+- **Classic** `macOS < v10.0` used only `CR`
+  - `\r`
+
+<br />
+
+If you attempt to build your Alpine docker image on Linux, and have windows CRLF in your files; you will get errors and the container will be unable to start. All files must be converted to Unix' `Line Feed`.  This can be done with **[Visual Studio Code](https://code.visualstudio.com/)**. OR; you can run the Linux terminal command `🗔 dos2unix` to convert these files.
+
+<br />
+
+> [!NOTE]
+> You no longer need to manually run these commands. We have provided a script to run these commands automatically. See the section:
+> - [📄 Integrated Fix Script](#integrated-build-script)
+
+<br />
 
 For the branches **[🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine)** and your main app image, you can use the following recursive commands:
 
@@ -238,8 +267,8 @@ $ file ./root//etc/s6-overlay/s6-rc.d/ci-service-check/type
 
 You will get one of three messages listed below:
 
-1. ASCII text, with CRLF, LF line terminators
-2. ASCII text, with CRLF line terminators
+1. ASCII text, with `CRLF, LF` line terminators
+2. ASCII text, with `CRLF` line terminators
 3. ASCII text
 
 <br />
@@ -254,6 +283,16 @@ If you get messages `1` or `2`, then you need to run `dos2unix` on the file; oth
 The files contained within this repo **MUST** have `chmod 755` /  `+x` executable permissions. If you are using our Github workflow sample **[deploy-docker-github.yml](https://github.com/aetherinox/docker-base-alpine/blob/workflows/samples/deploy-docker-github.yml)**, this is done automatically. If you are building the images manually; you need to do this. Ensure those files have the correct permissions prior to building the Alpine base docker image.
 
 If you are building the **[🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine)** or your main application images, you must ensure the files in those branches have the proper permissions. All of the executable files are named `run`:
+
+<br />
+
+> [!NOTE]
+> You no longer need to manually run these commands. We have provided a script to run these commands automatically. See the section:
+> - [📄 Integrated Fix Script](#integrated-build-script)
+
+<br />
+
+To fix the permissions, `cd` into the folder where your alpine base image files are and run the command:
 
 ```shell
 find ./ -name 'run' -print -exec sudo chmod +x {} \;
@@ -295,7 +334,7 @@ sudo chmod +x docker-images.v3 \
 <br />
 <br />
 
-#### Build arm64 on amd64
+#### Building Different Architectures
 
 Out-of-box, you cannot build an image for a different architecture than your system. If you are running **amd64**, and want to build the arm64 image; you must install `QEMU` as a docker container by running the command:
 
@@ -337,6 +376,46 @@ Make sure you change the following arguments over to `arm64`:
 
 - `--build-arg ARCH=aarch64 \`
 - `--platform linux/arm64 \`
+
+
+<br />
+<br />
+
+### Integrated Build Script
+
+This feature became available with Alpine v3.22. The [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/core) branch of this repository includes two new scripts:
+
+- `📄 util-fix.sh`
+  - Ensures that your local copy of this Alpine repository has the correct permissions; including the `+x` executable flag on all `run` files.
+- `📄 util-build.sh`
+  - Builds the alpine docker image from simply running the bash script.
+
+<br />
+
+To utilize these scripts, ensure you set the `+x` permission on the two scripts:
+
+```shell
+sudo chmod +x util-fix.sh
+sudo chmod +x util-build.sh
+```
+
+<br />
+<br />
+
+#### `📄 util-fix.sh`
+
+The `fix permissions` script will ensure that your local copy of this alpine repository has the proper permissions for all files before you create a docker image; or re-upload it to Github on your own repo. It will ensure that the `run` files have the `+x` execute permission. Without this permission; your container will fail when it starts up.
+
+This script is automatically ran when you execute the `📄 util-build.sh` script to build the container. You do not need to run this script before the build script.
+
+<br />
+<br />
+
+#### `📄 util-build.sh`
+
+The build script allows you to build the [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/core) image without having to manually execute the `docker buildx <...>` commands. It accepts a series of arguments compatible with docker so that you can customize how the image turns out.
+
+After the permissions are set up; you can now run the scripts in any order, at any time. The build script `📄 util-build.sh` will automatically run the bash script to fix permissions `📄 util-fix.sh` before it starts to build your docker image, so you don't need to run it individually.
 
 <br />
 <br />

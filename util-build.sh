@@ -17,9 +17,18 @@
 #                       restart docker container
 #                       use bitwarden secret's manager
 #
-#                   Fix Permissions
+#                   Fix Permissions & Carriage / Lines
 #                       will chmod +x all `run` files
-#                       will change all Windows CRLF to Unix LF
+#                       will change all Windows CRLF to Unix LF using dos2unix
+#                           Line endings in text files are marked using special control characters:
+#                               CR (Carriage Return, 0x0D or decimal 13)
+#                               LF (Line Feed, 0x0A or decimal 10).
+#                           Different operating systems use different conventions for line breaks:
+#                               Windows uses a CRLF (\r\n) sequence to indicate the end of a line.
+#                               Unix/Linux and modern macOS (starting from macOS 10.0) use LF (\n) only.
+#                               Classic Mac OS (prior to version 10.0) used CR (\r) alone.
+#                           If you attempt to build your Alpine docker image on Linux, and have windows CRLF
+#                               in your files; you will get errors and the container will be unable to start.
 #
 #                   Restart Container
 #                       to restart the docker container after this script finishes, append `-ra` or `--restart` to your command.
