@@ -436,7 +436,7 @@ fi
 #   run script fix perms
 # #
 
-source ./util-fix.sh
+source ./utils.fix.sh
 
 # #
 #   change work directory
