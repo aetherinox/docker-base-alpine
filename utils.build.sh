@@ -482,6 +482,7 @@ fi
 
 echo -e
 printf '%-17s %-50s %-55s\n' "        ${c[grey2]} [ app ]         " "${c[blue2]}${image_name}" "${c[end]}"
+printf '%-17s %-50s %-55s\n' "        ${c[grey2]} [ distro ]      " "${c[blue2]}${image_distro}" "${c[end]}"
 printf '%-17s %-50s %-55s\n' "        ${c[grey2]} [ arch ]        " "${c[blue2]}${image_arch}" "${c[end]}"
 printf '%-17s %-50s %-55s\n' "        ${c[grey2]} [ build-date ]  " "${c[blue2]}${image_builddate}" "${c[end]}"
 printf '%-17s %-50s %-55s\n' "        ${c[grey2]} [ version ]     " "${c[blue2]}${image_version}" "${c[end]}"
