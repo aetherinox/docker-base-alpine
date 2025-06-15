@@ -1,20 +1,23 @@
 # syntax=docker/dockerfile:1
 
 # #
-#   @project              Docker Image › Alpine Base › Docker-compose.yml
-#   @usage                base image utilized for all docker images using Alpine with s6-overlay integration
-#   @file                 docker-compose.yml
+#   @project              Docker Image › Alpine Base › Dockerfile
 #   @repo                 https://github.com/aetherinox/docker-base-alpine
+#   @file                 Dockerfile
+#   @usage                base image utilized for all docker images using Ubuntu with s6-overlay integration
+#   @build                To build these images, use the following commands:
 #
 #   @image:github         ghcr.io/aetherinox/alpine:latest
-#                         ghcr.io/aetherinox/alpine:22.04
-#                         ghcr.io/aetherinox/alpine:noble
+#                         ghcr.io/aetherinox/alpine:3.22
+#                         ghcr.io/aetherinox/alpine:3.2
+#                         ghcr.io/aetherinox/alpine:3
 #
 #   @image:dockerhub      aetherinox/alpine:latest
-#                         aetherinox/alpine:22.04
-#                         aetherinox/alpine:noble
+#                         aetherinox/alpine:3.22
+#                         aetherinox/alpine:3.2
+#                         aetherinox/alpine:3
 #
-#                         AMD64
+#   @build                AMD64
 #                         Build the image with:
 #                             docker buildx build \
 #                               --build-arg IMAGE_NAME=alpine \
@@ -26,8 +29,7 @@
 #                               --tag aetherinox/alpine:latest \
 #                               --tag aetherinox/alpine:3 \
 #                               --tag aetherinox/alpine:3.2 \
-#                               --tag aetherinox/alpine:3.22 \
-#                               --tag aetherinox/alpine:amd64 \
+#                               --tag aetherinox/alpine:3.22
 #                               --attest type=provenance,disabled=true \
 #                               --attest type=sbom,disabled=true \
 #                               --output type=docker \
@@ -56,7 +58,6 @@
 #                               --tag aetherinox/alpine:3 \
 #                               --tag aetherinox/alpine:3.2 \
 #                               --tag aetherinox/alpine:3.22 \
-#                               --tag aetherinox/alpine:amd64 \
 #                               --attest type=provenance,disabled=true \
 #                               --attest type=sbom,disabled=true \
 #                               --output type=docker \
@@ -145,7 +146,7 @@ RUN \
         ALPINE_ARCH="${ALPINE_ARCH}"; \
     fi \
     \
-    mkdir -p "$ROOTFS/etc/apk" && \
+    && mkdir -p "$ROOTFS/etc/apk" && \
     { \
         echo "$MIRROR/v$ALPINE_VERSION/main"; \
         echo "$MIRROR/v$ALPINE_VERSION/community"; \
@@ -296,6 +297,7 @@ RUN \
     apk add --no-cache \
         alpine-release \
         bash \
+        sudo \
         nano \
         ca-certificates \
         catatonit \
@@ -316,7 +318,6 @@ RUN \
       --shell /bin/false \
       ${USER1} && \
     usermod -aG ${USER1} ${USER1} && \
-        usermod -aG sudo ${USER1} && \
         usermod -aG users ${USER1} && \
     mkdir -p \
         /app \
