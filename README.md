@@ -43,7 +43,7 @@ Normal users should not need to modify the files in this repository.
     - [LF over CRLF](#lf-over-crlf)
     - [Set `+x / 0755` Permissions](#set-x--0755-permissions)
     - [Building Different Architectures](#building-different-architectures)
-  - [Integrated Build Script](#integrated-build-script)
+  - [Integrated Helper Scripts](#integrated-helper-scripts)
     - [`📄 util-fix.sh`](#-util-fixsh)
     - [`📄 util-build.sh`](#-util-buildsh)
   - [Build Images](#build-images)
@@ -216,7 +216,7 @@ If you attempt to build your Alpine docker image on Linux, and have windows CRLF
 
 > [!NOTE]
 > You no longer need to manually run these commands. We have provided a script to run these commands automatically. See the section:
-> - [📄 Integrated Fix Script](#integrated-build-script)
+> - [📄 Integrated Helper Script](#integrated-helper-scripts)
 
 <br />
 
@@ -288,7 +288,7 @@ If you are building the **[🔆 docker/alpine](https://github.com/aetherinox/doc
 
 > [!NOTE]
 > You no longer need to manually run these commands. We have provided a script to run these commands automatically. See the section:
-> - [📄 Integrated Fix Script](#integrated-build-script)
+> - [📄 Integrated Helper Script](#integrated-helper-scripts)
 
 <br />
 
@@ -381,7 +381,7 @@ Make sure you change the following arguments over to `arm64`:
 <br />
 <br />
 
-### Integrated Build Script
+### Integrated Helper Scripts
 
 This feature became available with Alpine v3.22. The [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/core) branch of this repository includes two new scripts:
 
