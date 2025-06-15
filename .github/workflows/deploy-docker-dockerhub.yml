@@ -5,7 +5,7 @@
 #   @usage              builds and releases a new docker image to Dockerhub and send message to discord
 #                       upload this workflow to the following branches:
 #                           - https://github.com/Aetherinox/docker-base-alpine/tree/main
-#                           - https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-*
+#                           - https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine
 #
 #   @secrets            secrets.SELF_TOKEN                                          self github personal access token (fine-grained)
 #                       secrets.SELF_TOKEN_CL                                       self github personal access token (classic)
