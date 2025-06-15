@@ -151,7 +151,7 @@ RUN \
         echo "$MIRROR/v$ALPINE_VERSION/community"; \
     } > "$ROOTFS/etc/apk/repositories" && \
     apk --root "$ROOTFS" --no-cache --keys-dir /etc/apk/keys add --arch $ALPINE_ARCH --initdb ${PACKAGES//,/ } && \
-    sed -i -e 's/^root::/root:!:/' /root-out/etc/shadow
+    sed -i -e 's/^root::/root:!:/' $ROOTFS/etc/shadow
 
 # #
 #   Alpine › S6 > add overlay & optional symlinks
@@ -185,20 +185,20 @@ RUN \
     fi \
     \
     && wget -P /tmp "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz" && \
-       tar -C /root-out -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
+       tar -C $ROOTFS -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
     wget -P /tmp "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_OVERLAY_ARCH}.tar.xz" && \
-       tar -C /root-out -Jxpf /tmp/s6-overlay-${S6_OVERLAY_ARCH}.tar.xz && \
+       tar -C $ROOTFS -Jxpf /tmp/s6-overlay-${S6_OVERLAY_ARCH}.tar.xz && \
     wget -P /tmp "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-arch.tar.xz" && \
-       tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-arch.tar.xz && \
+       tar -C $ROOTFS -Jxpf /tmp/s6-overlay-symlinks-arch.tar.xz && \
     wget -P /tmp "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz" && \
-       tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-noarch.tar.xz && unlink /root-out/usr/bin/with-contenv
+       tar -C $ROOTFS -Jxpf /tmp/s6-overlay-symlinks-noarch.tar.xz && unlink $ROOTFS/usr/bin/with-contenv
 
 # #
 #   scratch
 # #
 
 FROM scratch
-COPY --from=rootfs-stage /root-out/ /
+COPY --from=rootfs-stage $ROOTFS/ /
 
 # #
 #   scratch › args
