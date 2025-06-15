@@ -258,7 +258,7 @@ jobs:
                   echo "SHA1_GH=${SHA1_GH}" >> $GITHUB_ENV
 
                   #  parse version into segments
-                  IFS=. read major minor patch <<< "$${{ env.IMAGE_VERSION }}"
+                  IFS=. read major minor patch <<< "${{ env.IMAGE_VERSION }}"
                   echo "major=${major}" >> $GITHUB_OUTPUT
                   echo "minor=${minor}" >> $GITHUB_OUTPUT
                   echo "patch=${patch}" >> $GITHUB_OUTPUT
@@ -1066,7 +1066,7 @@ jobs:
                   echo "SHA1_GH=${SHA1_GH}" >> $GITHUB_ENV
 
                   #  parse version into segments
-                  IFS=. read major minor patch <<< "$${{ env.IMAGE_VERSION }}"
+                  IFS=. read major minor patch <<< "${{ env.IMAGE_VERSION }}"
                   echo "major=${major}" >> $GITHUB_OUTPUT
                   echo "minor=${minor}" >> $GITHUB_OUTPUT
                   echo "patch=${patch}" >> $GITHUB_OUTPUT

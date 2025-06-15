@@ -1,54 +1,117 @@
 #!/bin/bash
 
 # #
-#   Utility › Build Script
+#   @project              Docker Image › Alpine Base › utils.build.sh
+#   @repo                 https://github.com/aetherinox/docker-base-alpine
+#   @file                 utils.build.sh
+#   @usage                this script allows you to build the docker images in Linux, without memorizing the long commands.
+#                             ensure you run the command `sudo chmod +x utils.build.sh` to set the proper execution permission.
+#                             some of the parameters are optional, as a lot of the parameters have default values already.
+#   @usage                ./utils.build.sh --help
+#                         ./utils.build.sh --version 3.22 --arch amd64 --registry local
+#                         ./utils.build.sh --version 3.22 --arch amd64 --registry local --dockerfile CustomDockerfile
+#                         ./utils.build.sh --version 3.22 --arch amd64 --registry local --name alpine --release beta --registry github --author Aetherinox --network default
 #
-#   @desc           this script allows you to build the docker images in Linux, without memorizing the long commands.
-#                       ensure you run the command `sudo chmod +x util-build.sh` to set the proper execution permission.
-#                       some of the parameters are optional, as a lot of the parameters have default values already.
+#   @image:github         ghcr.io/aetherinox/alpine:latest
+#                         ghcr.io/aetherinox/alpine:3.22
+#                         ghcr.io/aetherinox/alpine:3.2
+#                         ghcr.io/aetherinox/alpine:3
 #
-#   @usage          ./util-build.sh --help
-#                   ./util-build.sh --version 3.22 --arch amd64 --registry local
-#                   ./util-build.sh --dockerfile CustomDockerfile --version 3.22 --arch amd64 --registry local
-#                   ./util-build.sh --version 3.22 --arch amd64 --release beta --registry github --author Aetherinox --network default --name alpine
+#   @image:dockerhub      aetherinox/alpine:latest
+#                         aetherinox/alpine:3.22
+#                         aetherinox/alpine:3.2
+#                         aetherinox/alpine:3
 #
-#                   This script includes the ability to:
-#                       fix permissions
-#                       restart docker container
-#                       use bitwarden secret's manager
+#   @note                 This script includes the ability to:
+#                             fix permissions
+#                             restart docker container
+#                             use bitwarden secret's manager
 #
-#                   Fix Permissions & Carriage / Lines
-#                       will chmod +x all `run` files
-#                       will change all Windows CRLF to Unix LF using dos2unix
-#                           Line endings in text files are marked using special control characters:
-#                               CR (Carriage Return, 0x0D or decimal 13)
-#                               LF (Line Feed, 0x0A or decimal 10).
-#                           Different operating systems use different conventions for line breaks:
-#                               Windows uses a CRLF (\r\n) sequence to indicate the end of a line.
-#                               Unix/Linux and modern macOS (starting from macOS 10.0) use LF (\n) only.
-#                               Classic Mac OS (prior to version 10.0) used CR (\r) alone.
-#                           If you attempt to build your Alpine docker image on Linux, and have windows CRLF
-#                               in your files; you will get errors and the container will be unable to start.
+#                         Fix Permissions & Carriage / Lines
+#                             will chmod +x all `run` files
+#                             will change all Windows CRLF to Unix LF using dos2unix
+#                                 Line endings in text files are marked using special control characters:
+#                                     CR (Carriage Return, 0x0D or decimal 13)
+#                                     LF (Line Feed, 0x0A or decimal 10).
+#                                 Different operating systems use different conventions for line breaks:
+#                                     Windows uses a CRLF (\r\n) sequence to indicate the end of a line.
+#                                     Unix/Linux and modern macOS (starting from macOS 10.0) use LF (\n) only.
+#                                     Classic Mac OS (prior to version 10.0) used CR (\r) alone.
+#                                 If you attempt to build your Alpine docker image on Linux, and have windows CRLF
+#                                     in your files; you will get errors and the container will be unable to start.
 #
-#                   Restart Container
-#                       to restart the docker container after this script finishes, append `-ra` or `--restart` to your command.
-#                       if you need to load an .env file, add `--env` or `-E` to the beginning of the command; such as:
-#                           ./util-build.sh -ra --env ./.myenv
-#                       you can append as many env files as you need, simply seperate each file with a comma
-#                           ./util-build.sh -ra --env ./.env,.anotherEnv,third.env
-#                       your full command could look something like the following if you want to build and then restart:
-#                           ./util-build.sh -ra --env ./.env,.anotherEnv,third.env \
-#                               --version 3.22 \
-#                               --arch amd64 \
-#                               --release beta \
-#                               --registry github \
-#                               --author Aetherinox \
-#                               --network default \
-#                               --name alpine
+#                         Restart Container
+#                             to restart the docker container after this script finishes, append `-ra` or `--restart` to your command.
+#                             if you need to load an .env file, add `--env` or `-E` to the beginning of the command; such as:
+#                                 ./util-build.sh -ra --env ./.myenv
+#                             you can append as many env files as you need, simply seperate each file with a comma
+#                                 ./util-build.sh -ra --env ./.env,.anotherEnv,third.env
+#                             your full command could look something like the following if you want to build and then restart:
+#                                 ./util-build.sh -ra --env ./.env,.anotherEnv,third.env \
+#                                     --name alpine
+#                                     --version 3.22 \
+#                                     --arch amd64 \
+#                                     --release beta \
+#                                     --registry github \
+#                                     --author Aetherinox \
+#                                     --network default
 #
-#                   Bitwarden Secret's Manager
-#                       this script supports injecting secrets into your docker container. if you use the Bitwarden CLI to normally start / restart
-#                       your container, then your secrets will be automatically injected when the container restarts.
+#                         Bitwarden Secret's Manager
+#                             this script supports injecting secrets into your docker container. if you use the Bitwarden CLI to normally start / restart
+#                             your container, then your secrets will be automatically injected when the container restarts.
+#
+#   @build                AMD64
+#                         Build the image with:
+#                             docker buildx build \
+#                               --build-arg IMAGE_NAME=alpine \
+#                               --build-arg IMAGE_ARCH=amd64 \
+#                               --build-arg IMAGE_BUILDDATE=20260812 \
+#                               --build-arg IMAGE_VERSION=3.22 \
+#                               --build-arg IMAGE_RELEASE=stable \
+#                               --build-arg IMAGE_REGISTRY=github \
+#                               --tag aetherinox/alpine:latest \
+#                               --tag aetherinox/alpine:3 \
+#                               --tag aetherinox/alpine:3.2 \
+#                               --tag aetherinox/alpine:3.22
+#                               --attest type=provenance,disabled=true \
+#                               --attest type=sbom,disabled=true \
+#                               --output type=docker \
+#                               --builder default \
+#                               --file Dockerfile \
+#                               --platform linux/amd64 \
+#                               --allow network.host \
+#                               --network host \
+#                               --no-cache \
+#                               --progress=plain \
+#                               .
+#
+#                         ARM64
+#                         For arm64, make sure you install QEMU first in docker; use the command:
+#                             docker run --privileged --rm tonistiigi/binfmt --install all
+#
+#                         Build the image with:
+#                             docker buildx build \
+#                               --build-arg IMAGE_NAME=alpine \
+#                               --build-arg IMAGE_ARCH=arm64 \
+#                               --build-arg IMAGE_BUILDDATE=20260812 \
+#                               --build-arg IMAGE_VERSION=3.22 \
+#                               --build-arg IMAGE_RELEASE=stable \
+#                               --build-arg IMAGE_REGISTRY=github \
+#                               --tag aetherinox/alpine:latest \
+#                               --tag aetherinox/alpine:3 \
+#                               --tag aetherinox/alpine:3.2 \
+#                               --tag aetherinox/alpine:3.22 \
+#                               --attest type=provenance,disabled=true \
+#                               --attest type=sbom,disabled=true \
+#                               --output type=docker \
+#                               --builder default \
+#                               --file Dockerfile \
+#                               --platform linux/arm64 \
+#                               --allow network.host \
+#                               --network host \
+#                               --no-cache \
+#                               --progress=plain \
+#                               .
 # #
 
 # #
@@ -117,26 +180,18 @@ app_dir_bin="${HOME}/bin"                                                       
 #   Define › Files
 # #
 
-app_file_this=$(basename "$0")                                                      #  util.-uild.sh (with ext)
-app_file_bin="${app_file_this%.*}"                                                  #  util.-uild (without ext)
+app_file_this=$(basename "$0")                                                      #  utils.build.sh (with ext)
+app_file_bin="${app_file_this%.*}"                                                  #  utils.build (without ext)
 
 # #
-#   Docker Containers › Alpine Base
-#
-#   These commands allow you to re-build SearXNG with your custom files into a new docker image
-#
-#   @usage              ./util-build \
-#                           --version 3.22 \
-#                           --src <PATH:optional> \
-#                           --dockerfile <PATH:optional> \
-#                           --author <AUTHOR:optional> \
-#                           --arch <ARCH:optional:amd64/arm64>
+#   Define › Script Info
 # #
 
 script_title="Builder › Alpine"
 script_about="This command allows you to build a docker image for $script_title"
 script_updated="07-01-2025"
 script_version="1.0.0"
+script_dryrun=false
 
 # #
 #   Define › Args
@@ -144,6 +199,7 @@ script_version="1.0.0"
 
 image_path_build="${app_dir_this_dir}"
 image_name=alpine
+image_distro=
 image_author=aetherinox
 image_arch=amd64
 image_release=stable
@@ -154,10 +210,10 @@ image_git_sha1_long=$(git rev-parse HEAD)
 image_git_sha1_short=${image_git_sha1_long:(-8)}
 image_build_id=$(tr -dc A-Fa-f0-9 </dev/urandom | head -c 9; echo)
 image_build_ident="$(date +%Y).$(date +%m).$(date +%d)-${image_git_sha1_short}"
-image_builddate=$(date +'%Y%m%d')                                                   # 20250225
-image_version=3.22                                                                  # 3.22
-image_version_1digit=`echo ${image_version} | cut -d '.' -f1-1`                     # 3
-image_version_2digit=`echo ${image_version} | cut --complement -c4`                 # 3.2
+image_builddate=$(date +'%Y%m%d')                                                   #  20250225
+image_version=3.22                                                                  #  3.22
+image_version_1digit=`echo ${image_version} | cut -d '.' -f1-1`                     #  3
+image_version_2digit=`echo ${image_version} | cut --complement -c4`                 #  3.2
 image_use_emulator=false
 image_restart=false
 
@@ -186,12 +242,17 @@ while [ $# -gt 0 ]; do
         -v|--ver|--version)
             if [[ "$1" != *=* ]]; then shift; fi
             image_version="${1#*=}"                                                 #  3.22
-            image_version_1digit=`echo ${image_version} | cut -d '.' -f1-1`         #  3
-            image_version_2digit=`echo ${image_version} | cut --complement -c4`     #  3.2
+            IFS=. read major minor patch <<< "${image_version}"
+            image_version_1digit=${MAJOR}                                           #  3
+            image_version_2digit=${MAJOR}.${MINOR}                                  #  3.2
             ;;
         -n|--name)
             if [[ "$1" != *=* ]]; then shift; fi
             image_name="${1#*=}"
+            ;;
+        -d|--distro)
+            if [[ "$1" != *=* ]]; then shift; fi
+            image_distro="${1#*=}"
             ;;
         -s|--src|--source)
             if [[ "$1" != *=* ]]; then shift; fi
@@ -216,6 +277,9 @@ while [ $# -gt 0 ]; do
         -R|--registry)
             if [[ "$1" != *=* ]]; then shift; fi
             image_registry="${1#*=}"
+            ;;
+        -D|--dryrun)
+            script_dryrun=true
             ;;
 
         # #
@@ -284,6 +348,8 @@ while [ $# -gt 0 ]; do
             echo -e
             printf '  %-5s %-40s\n' "${c[grey1]}Options:${c[end]}" "" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-s${c[grey1]},${c[blue2]}  --source ${c[yellow1]}<string>${c[end]}             " "specify build folder where Dockerfile exists ${c[navy]}<default> ${c[peach]}$image_path_build${c[end]}" 1>&2
+            printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-n${c[grey1]},${c[blue2]}  --name ${c[yellow1]}<string>${c[end]}               " "specify docker image name; must be lowercase${c[end]} ${c[navy]}<default> ${c[peach]}$image_name${c[end]}" 1>&2
+            printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-d${c[grey1]},${c[blue2]}  --distro ${c[yellow1]}<string>${c[end]}             " "only used with Linux distros with a distro name (such as Ubuntu Nobel)${c[end]} ${c[navy]}<default> ${c[peach]}$image_distro${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-v${c[grey1]},${c[blue2]}  --version ${c[yellow1]}<string>${c[end]}            " "version tag to use for built docker image ${c[end]} ${c[navy]}<default> ${c[peach]}$image_version${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-f${c[grey1]},${c[blue2]}  --dockerfile ${c[yellow1]}<string>${c[end]}         " "name of dockerfile to load ${c[navy]}<default> ${c[peach]}$image_dockerfile${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-a${c[grey1]},${c[blue2]}  --author ${c[yellow1]}<string>${c[end]}             " "author to use for docker image tag; must be lowercase${c[end]} ${c[navy]}<default> ${c[peach]}$image_author${c[end]}" 1>&2
@@ -291,7 +357,6 @@ while [ $# -gt 0 ]; do
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}  ${c[grey1]} ${c[blue2]}      ${c[yellow1]}${c[end]}                          " "   ${c[grey1]}docker tag: ${c[blue1]}image_author/image_name:image_version${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}  ${c[grey1]} ${c[blue2]}      ${c[yellow1]}${c[end]}                          " "   ${c[grey1]}docker tag: ${c[blue1]}$image_author/$image_name:$image_version${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}  ${c[grey1]} ${c[blue2]}      ${c[yellow1]}${c[end]}                          " "   ${c[grey1]}docker tag: ${c[blue1]}ghcr.io/$image_author/$image_name:$image_version${c[end]}" 1>&2
-            printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-n${c[grey1]},${c[blue2]}  --name ${c[yellow1]}<string>${c[end]}               " "specify docker image name; must be lowercase${c[end]} ${c[navy]}<default> ${c[peach]}$image_name${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-A${c[grey1]},${c[blue2]}  --arch ${c[yellow1]}<string>${c[end]}               " "architecture to build docker image for${c[end]} ${c[navy]}<default> ${c[peach]}$image_arch${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}  ${c[grey1]} ${c[blue2]}      ${c[yellow1]}${c[end]}                          " "   ${c[grey1]}pick any of the following options:" 1>&2
             printf '  %-5s %-30s %-40s\n' "    " "${c[blue2]}  ${c[grey1]} ${c[blue2]}      ${c[yellow1]}${c[end]}                          " "      - ${c[green1]}amd64${c[end]}" 1>&2
@@ -309,6 +374,7 @@ while [ $# -gt 0 ]; do
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-ra${c[grey1]},${c[blue2]} --restart ${c[yellow1]}${c[end]}                    " "restart docker container for the folder you are in ${c[navy]}<default> ${c[peach]}$image_restart${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}  ${c[grey1]} ${c[blue2]}      ${c[yellow1]}${c[end]}                          " "   ${c[grey1]}can be used in combination with ${c[blue1]}--env${end}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-E${c[grey1]},${c[blue2]}  --env ${c[yellow1]}${c[end]}                        " "force docker to load your env file(s) when you restart the container ${c[end]}" 1>&2
+            printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-D${c[grey1]},${c[blue2]}  --dryrun ${c[yellow1]}${c[end]}                     " "run script but does not actually create a new docker image ${c[end]} ${c[navy]}<default> ${c[peach]}$script_dryrun${c[end]}" 1>&2
             echo -e
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-V${c[grey1]},${c[blue2]}  --VERSION ${c[yellow1]}${c[end]}                    " "current version of ${c[blue1]}${script_title}${c[end]}" 1>&2
             printf '  %-5s %-81s %-40s\n' "    " "${c[blue2]}-x${c[grey1]},${c[blue2]}  --dev ${c[yellow1]}${c[end]}                        " "developer mode; verbose logging${c[end]}" 1>&2
@@ -382,28 +448,31 @@ source ./util-fix.sh
 #   build docker image
 # #
 
-docker buildx build \
-    --build-arg IMAGE_NAME=$image_name \
-    --build-arg IMAGE_ARCH=$image_arch \
-    --build-arg IMAGE_BUILDDATE=$image_builddate \
-    --build-arg IMAGE_VERSION=$image_version \
-    --build-arg IMAGE_RELEASE=$image_release \
-    --build-arg IMAGE_REGISTRY=$image_registry \
-    --tag $image_author/$image_name:latest \
-    --tag $image_author/$image_name:$image_version_1digit \
-    --tag $image_author/$image_name:$image_version_2digit \
-    --tag $image_author/$image_name:$image_version \
-    --tag $image_author/$image_name:$image_version-$image_arch \
-    --file $image_dockerfile \
-    --platform linux/$image_arch \
-    --attest type=provenance,disabled=true \
-    --attest type=sbom,disabled=true \
-    --output type=docker \
-    --allow network.${image_network} \
-    --network ${image_network} \
-    --no-cache \
-    --pull \
-    .
+if [[ $script_dryrun = false ]]; then
+    docker buildx build \
+        --build-arg IMAGE_NAME=$image_name \
+        --build-arg IMAGE_DISTRO=$image_distro \
+        --build-arg IMAGE_ARCH=$image_arch \
+        --build-arg IMAGE_BUILDDATE=$image_builddate \
+        --build-arg IMAGE_VERSION=$image_version \
+        --build-arg IMAGE_RELEASE=$image_release \
+        --build-arg IMAGE_REGISTRY=$image_registry \
+        --tag $image_author/$image_name:latest \
+        --tag $image_author/$image_name:$image_version_1digit \
+        --tag $image_author/$image_name:$image_version_2digit \
+        --tag $image_author/$image_name:$image_version \
+        --tag $image_author/$image_name:$image_version-$image_arch \
+        --file $image_dockerfile \
+        --platform linux/$image_arch \
+        --attest type=provenance,disabled=true \
+        --attest type=sbom,disabled=true \
+        --output type=docker \
+        --allow network.${image_network} \
+        --network ${image_network} \
+        --no-cache \
+        --pull \
+        .
+fi
 
 # #
 #   change back to original folder

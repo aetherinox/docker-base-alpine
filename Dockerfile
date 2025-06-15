@@ -6,13 +6,13 @@
 #   @file                 docker-compose.yml
 #   @repo                 https://github.com/aetherinox/docker-base-alpine
 #
-#   @image:github         ghcr.io/aetherinox/ubuntu:latest
-#                         ghcr.io/aetherinox/ubuntu:22.04
-#                         ghcr.io/aetherinox/ubuntu:noble
+#   @image:github         ghcr.io/aetherinox/alpine:latest
+#                         ghcr.io/aetherinox/alpine:22.04
+#                         ghcr.io/aetherinox/alpine:noble
 #
-#   @image:dockerhub      aetherinox/ubuntu:latest
-#                         aetherinox/ubuntu:22.04
-#                         aetherinox/ubuntu:noble
+#   @image:dockerhub      aetherinox/alpine:latest
+#                         aetherinox/alpine:22.04
+#                         aetherinox/alpine:noble
 #
 #                         AMD64
 #                         Build the image with:

@@ -1,18 +1,20 @@
 # #
 #   @project              Docker Image › Alpine Base › Docker-compose.yml
-#   @usage                base image utilized for all docker images using Alpine with s6-overlay integration
-#   @file                 docker-compose.yml
 #   @repo                 https://github.com/aetherinox/docker-base-alpine
+#   @file                 docker-compose.yml
+#   @usage                base image utilized for all docker images using Alpine with s6-overlay integration
 #
-#   @image:github         ghcr.io/aetherinox/ubuntu:latest
-#                         ghcr.io/aetherinox/ubuntu:22.04
-#                         ghcr.io/aetherinox/ubuntu:noble
+#   @image:github         ghcr.io/aetherinox/alpine:latest
+#                         ghcr.io/aetherinox/alpine:3.22
+#                         ghcr.io/aetherinox/alpine:3.2
+#                         ghcr.io/aetherinox/alpine:3
 #
-#   @image:dockerhub      aetherinox/ubuntu:latest
-#                         aetherinox/ubuntu:22.04
-#                         aetherinox/ubuntu:noble
+#   @image:dockerhub      aetherinox/alpine:latest
+#                         aetherinox/alpine:3.22
+#                         aetherinox/alpine:3.2
+#                         aetherinox/alpine:3
 #
-#                         AMD64
+#   @build                AMD64
 #                         Build the image with:
 #                             docker buildx build \
 #                               --build-arg IMAGE_NAME=alpine \
@@ -24,8 +26,7 @@
 #                               --tag aetherinox/alpine:latest \
 #                               --tag aetherinox/alpine:3 \
 #                               --tag aetherinox/alpine:3.2 \
-#                               --tag aetherinox/alpine:3.22 \
-#                               --tag aetherinox/alpine:amd64 \
+#                               --tag aetherinox/alpine:3.22
 #                               --attest type=provenance,disabled=true \
 #                               --attest type=sbom,disabled=true \
 #                               --output type=docker \
@@ -54,7 +55,6 @@
 #                               --tag aetherinox/alpine:3 \
 #                               --tag aetherinox/alpine:3.2 \
 #                               --tag aetherinox/alpine:3.22 \
-#                               --tag aetherinox/alpine:amd64 \
 #                               --attest type=provenance,disabled=true \
 #                               --attest type=sbom,disabled=true \
 #                               --output type=docker \
