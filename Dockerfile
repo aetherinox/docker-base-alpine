@@ -294,42 +294,42 @@ ENV GUID1=999
 
 RUN \
     echo "**** INSTALLING RUNTIME PACKAGES ****" && \
-    apk add --no-cache \
-        alpine-release \
-        bash \
-        sudo \
-        nano \
-        ca-certificates \
-        catatonit \
-        coreutils \
-        curl \
-        findutils \
-        jq \
-        git \
-        netcat-openbsd \
-        procps-ng \
-        shadow \
-        tzdata && \
+        apk add --no-cache \
+            alpine-release \
+            bash \
+            sudo \
+            nano \
+            ca-certificates \
+            catatonit \
+            coreutils \
+            curl \
+            findutils \
+            jq \
+            git \
+            netcat-openbsd \
+            procps-ng \
+            shadow \
+            tzdata && \
     echo "**** Creating user 'dockerx' and structure ****" && \
-    sudo sed -i "s|^UID_MIN.*|UID_MIN\t\t\t  100|" /etc/login.defs && \
-    useradd --uid ${UUID1} \
-      --user-group \
-      --home /config \
-      --shell /bin/false \
-      ${USER1} && \
-    usermod -aG ${USER1} ${USER1} && \
-        usermod -aG users ${USER1} && \
-    mkdir -p \
-        /app \
-        /config \
-        /defaults \
-        /aetherxpy && \
-    mkdir -p /etc/sudoers.d/ && \
-    echo ${USER1} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USER1} && \
-    chmod 0440 /etc/sudoers.d/${USER1} && \
+        sudo sed -i "s|^UID_MIN.*|UID_MIN\t\t\t  100|" /etc/login.defs && \
+        useradd --uid ${UUID1} \
+            --user-group \
+            --home /config \
+            --shell /bin/false \
+        ${USER1} && \
+        usermod -aG ${USER1} ${USER1} && \
+            usermod -aG users ${USER1} && \
+        mkdir -p \
+            /app \
+            /config \
+            /defaults \
+            /aetherxpy && \
+        mkdir -p /etc/sudoers.d/ && \
+        echo ${USER1} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USER1} && \
+        chmod 0440 /etc/sudoers.d/${USER1} && \
     echo "**** CLEANUP ****" && \
-    rm -rf \
-        /tmp/*
+        rm -rf \
+            /tmp/*
 
 # #
 #   scratch › add local files
