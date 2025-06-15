@@ -2,36 +2,109 @@
 
 # #
 #   @project        Docker Image - Alpine Base
-#   @usage          base image utilized for all docker images using alpine with s6-overlay integration
-#   @arch           amd64
+#   @usage          base image utilized for all docker images using Ubuntu with s6-overlay integration
 #   @file           Dockerfile
 #   @repo           https://github.com/aetherinox/docker-base-alpine
-# #
-
-ARG VERSION=3.22
-FROM alpine:${VERSION} AS rootfs-stage
-
-# #
-#   alpine › args
+#   @build          To build these images, use the following commands:
 #
-#   ARCH            x86_64
-#                   aarch64
+#                   AMD64
+#                       Build the image with:
+#                           docker buildx build \
+#                             --build-arg IMAGE_NAME=alpine \
+#                             --build-arg IMAGE_ARCH=amd64 \
+#                             --build-arg IMAGE_BUILDDATE=20260812 \
+#                             --build-arg IMAGE_VERSION=3.22 \
+#                             --build-arg IMAGE_RELEASE=stable \
+#                             --build-arg IMAGE_REGISTRY=github \
+#                             --tag alpine:latest \
+#                             --tag alpine:3 \
+#                             --tag alpine:3.2 \
+#                             --tag alpine:3.22 \
+#                             --tag alpine:amd64 \
+#                             --attest type=provenance,disabled=true \
+#                             --attest type=sbom,disabled=true \
+#                             --output type=docker \
+#                             --builder default \
+#                             --file Dockerfile \
+#                             --platform linux/amd64 \
+#                             --allow network.host \
+#                             --network host \
+#                             --no-cache \
+#                             --progress=plain \
+#                             .
+#
+#                   Arm64
+#                       For arm64, make sure you install QEMU first in docker; use the command:
+#                           docker run --privileged --rm tonistiigi/binfmt --install all
+#
+#                       Build the image with:
+#                           docker buildx build \
+#                             --build-arg IMAGE_NAME=alpine \
+#                             --build-arg IMAGE_ARCH=arm64 \
+#                             --build-arg IMAGE_BUILDDATE=20260812 \
+#                             --build-arg IMAGE_VERSION=3.22 \
+#                             --build-arg IMAGE_RELEASE=stable \
+#                             --build-arg IMAGE_REGISTRY=github \
+#                             --tag alpine:latest \
+#                             --tag alpine:3 \
+#                             --tag alpine:3.2 \
+#                             --tag alpine:3.22 \
+#                             --tag alpine:amd64 \
+#                             --attest type=provenance,disabled=true \
+#                             --attest type=sbom,disabled=true \
+#                             --output type=docker \
+#                             --builder default \
+#                             --file Dockerfile \
+#                             --platform linux/arm64 \
+#                             --allow network.host \
+#                             --network host \
+#                             --no-cache \
+#                             --progress=plain \
+#                             .
 # #
 
-ARG ARCH=x86_64
-ARG VERSION=3.22
-ARG REPO_AUTHOR="aetherinox"
-ARG REPO_NAME="docker-base-alpine"
-ARG S6_OVERLAY_VERSION="3.2.1.0"
-ARG S6_OVERLAY_ARCH="${ARCH}"
+ARG ALPINE_VERSION=3.22
+FROM alpine:${ALPINE_VERSION} AS rootfs-stage
+
+# #
+#   arguments
+#
+#   ARGs are the only thing you should provide in your buildx command
+#   or Github workflow. ENVs are set by args, or hard-coded values
+#
+#   IMAGE_ARCH          amd64
+#                       arm64
+#
+#   The args below will get their value depending on what you set for IMAGE_ARCH:
+#
+#   UBUNTU_ARCH         amd64
+#                       arm64
+#
+#   S6_OVERLAY_ARCH     x86_64
+#                       aarch64
+# #
+
+ARG IMAGE_REPO_AUTHOR="aetherinox"
+ARG IMAGE_REPO_NAME="docker-base-alpine"
+ARG IMAGE_NAME="alpine"
+ARG IMAGE_ARCH="amd64"
+ARG IMAGE_SHA1="0000000000000000000000000000000000000000"
+ARG IMAGE_REGISTRY="local"
+ARG IMAGE_RELEASE="stable"
+ARG IMAGE_BUILDDATE="20250101"
+ARG IMAGE_VERSION="3.22"
+
+ENV ALPINE_VERSION=${IMAGE_VERSION}
+ENV ALPINE_ARCH="x86_64"
+ENV S6_OVERLAY_VERSION="3.2.1.0"
+ENV S6_OVERLAY_ARCH="x86_64"
+ENV BASHIO_VERSION="0.16.2"
 
 # #
 #   alpine › environment
 # #
 
 ENV ROOTFS=/root-out
-ENV VERSION=${VERSION}
-ENV ARCH=${ARCH}
 ENV MIRROR=http://dl-cdn.alpinelinux.org/alpine
 ENV PACKAGES=alpine-baselayout,\
 alpine-keys,\
@@ -40,44 +113,78 @@ busybox,\
 libc-utils
 
 # #
-#   alpine › install packages
+#   install packages
 # #
 
 RUN \
-  apk add --no-cache \
-    bash \
-    xz
+    apk add --no-cache \
+        bash \
+        xz
 
 # #
 #   alpine › build rootfs
 # #
 
 RUN \
-  mkdir -p "$ROOTFS/etc/apk" && \
-  { \
-    echo "$MIRROR/v$VERSION/main"; \
-    echo "$MIRROR/v$VERSION/community"; \
-  } > "$ROOTFS/etc/apk/repositories" && \
-  apk --root "$ROOTFS" --no-cache --keys-dir /etc/apk/keys add --arch $ARCH --initdb ${PACKAGES//,/ } && \
-  sed -i -e 's/^root::/root:!:/' /root-out/etc/shadow
+    if [ "${IMAGE_ARCH}" = "armv7" ]; then \
+        ALPINE_ARCH="arm"; \
+    elif [ "${IMAGE_ARCH}" = "i386" ]; then \
+        ALPINE_ARCH="i686"; \
+    elif [ "${IMAGE_ARCH}" = "amd64" ]; then \
+        ALPINE_ARCH="x86_64"; \
+    elif [ "${IMAGE_ARCH}" = "arm64" ]; then \
+        ALPINE_ARCH="aarch64"; \
+    else \
+        ALPINE_ARCH="${ALPINE_ARCH}"; \
+    fi \
+    \
+    mkdir -p "$ROOTFS/etc/apk" && \
+    { \
+        echo "$MIRROR/v$ALPINE_VERSION/main"; \
+        echo "$MIRROR/v$ALPINE_VERSION/community"; \
+    } > "$ROOTFS/etc/apk/repositories" && \
+    apk --root "$ROOTFS" --no-cache --keys-dir /etc/apk/keys add --arch $ALPINE_ARCH --initdb ${PACKAGES//,/ } && \
+    sed -i -e 's/^root::/root:!:/' /root-out/etc/shadow
 
 # #
-#   alpine › S6 > add overlay
+#   Alpine › S6 > add overlay & optional symlinks
+#
+#   TAR         --xz, -J                      Use xz for compressing or decompressing the archives. See section Creating and Reading
+#                                                 Compressed Archives.
+#               --get, -x                     Same as ‘--extract’
+#                                             Extracts members from the archive into the file system. See section How to Extract Members
+#                                                 from an Archive.
+#               --verbose, -v                 Specifies that tar should be more verbose about the operations it is performing. This
+#                                                 option can be specified multiple times for some operations to increase the amount
+#                                                 of information displayed. See section Checking tar progress.
+#               --file=archive, -f archive    Tar will use the file archive as the tar archive it performs operations on, rather
+#                                                 than tar’s compilation dependent default. See section The ‘--file’ Option.
+#               --directory=dir, -C           Dir When this option is specified, tar will change its current directory to dir
+#                                                 before performing any operations. When this option is used during archive creation,
+#                                                 it is order sensitive. See section Changing the Working Directory.
 # #
 
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
-RUN tar -C /root-out -Jxpf /tmp/s6-overlay-noarch.tar.xz
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_OVERLAY_ARCH}.tar.xz /tmp
-RUN tar -C /root-out -Jxpf /tmp/s6-overlay-${S6_OVERLAY_ARCH}.tar.xz
-
-# #
-#   alpine › S6 > add optional symlinks
-# #
-
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz /tmp
-RUN tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-noarch.tar.xz
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-arch.tar.xz /tmp
-RUN tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-arch.tar.xz
+RUN \
+    if [ "${IMAGE_ARCH}" = "armv7" ]; then \
+        S6_OVERLAY_ARCH="arm"; \
+    elif [ "${IMAGE_ARCH}" = "i386" ]; then \
+        S6_OVERLAY_ARCH="i686"; \
+    elif [ "${IMAGE_ARCH}" = "amd64" ]; then \
+        S6_OVERLAY_ARCH="x86_64"; \
+    elif [ "${IMAGE_ARCH}" = "arm64" ]; then \
+        S6_OVERLAY_ARCH="aarch64"; \
+    else \
+        S6_OVERLAY_ARCH="${UBUNTU_ARCH}"; \
+    fi \
+    \
+    && wget -P /tmp "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz" && \
+       tar -C /root-out -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
+    wget -P /tmp "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_OVERLAY_ARCH}.tar.xz" && \
+       tar -C /root-out -Jxpf /tmp/s6-overlay-${S6_OVERLAY_ARCH}.tar.xz && \
+    wget -P /tmp "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-arch.tar.xz" && \
+       tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-arch.tar.xz && \
+    wget -P /tmp "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz" && \
+       tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-noarch.tar.xz && unlink /root-out/usr/bin/with-contenv
 
 # #
 #   scratch
@@ -90,15 +197,43 @@ COPY --from=rootfs-stage /root-out/ /
 #   scratch › args
 # #
 
+ARG IMAGE_REPO_AUTHOR="aetherinox"
+ARG IMAGE_REPO_NAME="docker-base-alpine"
+ARG IMAGE_NAME="alpine"
+ARG IMAGE_ARCH="amd64"
+ARG IMAGE_SHA1="0000000000000000000000000000000000000000"
+ARG IMAGE_REGISTRY="local"
+ARG IMAGE_RELEASE="stable"
+ARG IMAGE_BUILDDATE="20250101"
+ARG IMAGE_VERSION="3.22"
+
+ENV ALPINE_VERSION=${IMAGE_VERSION}
+ENV ALPINE_ARCH="x86_64"
+
+ENV S6_OVERLAY_VERSION="3.2.1.0"
+ENV S6_OVERLAY_ARCH="x86_64"
+ENV BASHIO_VERSION="0.16.2"
+
+ENV MODS_VERSION="v3"
+ENV PKG_INST_VERSION="v1"
+ENV AETHERXOWN_VERSION="v1"
+ENV WITHCONTENV_VERSION="v1"
+
+
+
+
+
+# # Delete after re-name
+
 ARG ARCH=x86_64
-ARG REPO_AUTHOR="aetherinox"
-ARG REPO_NAME="docker-base-alpine"
+ARG IMAGE_REPO_AUTHOR="aetherinox"
+ARG IMAGE_REPO_NAME="docker-base-alpine"
 ARG RELEASE
-ARG VERSION
+ARG ALPINE_VERSION
 ARG BUILDDATE
 ARG GIT_SHA1=0000000000000000000000000000000000000000
 ARG REGISTRY=local
-ARG VERSION=3.21
+ARG ALPINE_VERSION=3.21
 ARG MODS_VERSION="v3"
 ARG PKG_INST_VERSION="v1"
 ARG AETHERXOWN_VERSION="v1"
@@ -108,33 +243,38 @@ ARG WITHCONTENV_VERSION="v1"
 #   scratch › set labels
 # #
 
-LABEL org.opencontainers.image.authors="${REPO_AUTHOR}"
-LABEL org.opencontainers.image.vendor="aetherinox"
-LABEL org.opencontainers.image.title="Alpine Base Image"
-LABEL org.opencontainers.image.description="Alpine base image with s6-overlay integration"
-LABEL org.opencontainers.image.source="https://github.com/${REPO_AUTHOR}/${REPO_NAME}"
-LABEL org.opencontainers.image.repo.1="https://github.com/${REPO_AUTHOR}/${REPO_NAME}"
-LABEL org.opencontainers.image.repo.2="https://github.com/thebinaryninja/${REPO_NAME}"
-LABEL org.opencontainers.image.documentation="https://github.com/${REPO_AUTHOR}/${REPO_NAME}/wiki"
-LABEL org.opencontainers.image.url="https://github.com/${REPO_AUTHOR}/${REPO_NAME}"
+LABEL org.opencontainers.image.authors="${IMAGE_REPO_AUTHOR}"
+LABEL org.opencontainers.image.vendor="${IMAGE_REPO_AUTHOR}"
+LABEL org.opencontainers.image.title="${IMAGE_NAME:-Alpine} (Base) ${ALPINE_VERSION}"
+LABEL org.opencontainers.image.description="${IMAGE_NAME:-Alpine} base image with s6-overlay integration"
+LABEL org.opencontainers.image.created=
+LABEL org.opencontainers.image.source="https://github.com/${IMAGE_REPO_AUTHOR}/${IMAGE_REPO_NAME}"
+LABEL org.opencontainers.image.documentation="https://github.com/${IMAGE_REPO_AUTHOR}/${IMAGE_REPO_NAME}/wiki"
+LABEL org.opencontainers.image.issues="https://github.com/${IMAGE_REPO_AUTHOR}/${IMAGE_REPO_NAME}/issues"
 LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.architecture="${ARCH:-x86_64}"
-LABEL org.opencontainers.image.ref.name="main"
-LABEL org.opencontainers.image.registry="${REGISTRY:-local}"
-LABEL org.opencontainers.image.release="${RELEASE:-stable}"
-LABEL org.alpine.image.maintainers="${REPO_AUTHOR}"
-LABEL org.alpine.image.build-version="Version:- ${VERSION} Date:- ${BUILDDATE:-01012025}"
-LABEL org.alpine.image.build-architecture="${ARCH:-amd64}"
-LABEL org.alpine.image.build-release="${RELEASE:-stable}"
-LABEL org.alpine.image.build-sha1="${GIT_SHA1:-0000000000000000000000000000000000000000}"
+LABEL org.opencontainers.image.version="${ALPINE_VERSION}"
+LABEL org.opencontainers.image.branch="main"
+LABEL org.opencontainers.image.registry="${IMAGE_REGISTRY:-local}"
+LABEL org.opencontainers.image.release="${IMAGE_RELEASE:-stable}"
+LABEL org.opencontainers.image.development="false"
+LABEL org.opencontainers.image.sha="${IMAGE_SHA1:-0000000000000000000000000000000000000000}"
+LABEL org.opencontainers.image.architecture="${IMAGE_ARCH:-amd64}"
+LABEL org.ubuntu.image.maintainers="${IMAGE_REPO_AUTHOR}"
+LABEL org.ubuntu.image.version="Version: ${ALPINE_VERSION} Date: ${IMAGE_BUILDDATE:-20250615}"
+LABEL org.ubuntu.image.release="${IMAGE_RELEASE:-stable}"
+LABEL org.ubuntu.image.sha="${IMAGE_SHA1:-0000000000000000000000000000000000000000}"
+LABEL org.ubuntu.image.architecture="${IMAGE_ARCH:-amd64}"
+LABEL org.s6overlay.image.version="${S6_OVERLAY_VERSION:-3.0.0.0}"
+LABEL org.s6overlay.image.architecture="${S6_OVERLAY_ARCH:-x86_64}"
 
 # #
 #   scratch › add cdn > core
 # #
 
-ADD --chmod=755 "https://raw.githubusercontent.com/${REPO_AUTHOR}/${REPO_NAME}/docker/core/docker-images.${MODS_VERSION}" "/docker-images"
-ADD --chmod=755 "https://raw.githubusercontent.com/${REPO_AUTHOR}/${REPO_NAME}/docker/core/package-install.${PKG_INST_VERSION}" "/etc/s6-overlay/s6-rc.d/init-mods-package-install/run"
-ADD --chmod=755 "https://raw.githubusercontent.com/${REPO_AUTHOR}/${REPO_NAME}/docker/core/aetherxown.${AETHERXOWN_VERSION}" "/usr/bin/aetherxown"
+ADD --chmod=755 "https://raw.githubusercontent.com/${IMAGE_REPO_AUTHOR}/${IMAGE_REPO_NAME}/docker/core/docker-images.${MODS_VERSION}" "/docker-images"
+ADD --chmod=755 "https://raw.githubusercontent.com/${IMAGE_REPO_AUTHOR}/${IMAGE_REPO_NAME}/docker/core/package-install.${PKG_INST_VERSION}" "/etc/s6-overlay/s6-rc.d/init-mods-package-install/run"
+ADD --chmod=755 "https://raw.githubusercontent.com/${IMAGE_REPO_AUTHOR}/${IMAGE_REPO_NAME}/docker/core/aetherxown.${AETHERXOWN_VERSION}" "/usr/bin/aetherxown"
+ADD --chmod=755 "https://raw.githubusercontent.com/${IMAGE_REPO_AUTHOR}/${IMAGE_REPO_NAME}/docker/core/with-contenv.${WITHCONTENV_VERSION}" "/usr/bin/with-contenv"
 
 # #
 #   scratch › env vars
@@ -148,6 +288,21 @@ ENV PS1="$(whoami)@$(hostname):$(pwd)\\$ " \
     S6_STAGE2_HOOK=/docker-images \
     VIRTUAL_ENV=/aetherxpy \
     PATH="/aetherxpy/bin:$PATH"
+
+# #
+#   env variables
+# #
+
+ENV USER0="root"
+ENV USER1="dockerx"
+ENV UUID0=0
+ENV UUID1=999
+ENV GUID0=0
+ENV GUID1=999
+
+# #
+#   install packages
+# #
 
 RUN \
     echo "**** INSTALLING RUNTIME PACKAGES ****" && \
@@ -167,14 +322,22 @@ RUN \
         shadow \
         tzdata && \
     echo "**** CREATE USER 'dockerx' AND GENERATE STRUCTURE ****" && \
-    groupmod -g 1000 users && \
-    useradd -u 911 -U -d /config -s /bin/false dockerx && \
-    usermod -G users dockerx && \
+    useradd --uid ${UUID1} \
+      --user-group \
+      --home /config \
+      --shell /bin/false \
+      ${USER1} && \
+    usermod -aG ${USER1} ${USER1} && \
+        usermod -aG sudo ${USER1} && \
+        usermod -aG users ${USER1} && \
     mkdir -p \
         /app \
         /config \
         /defaults \
         /aetherxpy && \
+    mkdir -p /etc/sudoers.d/ && \
+    echo ${USER1} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USER1} && \
+    chmod 0440 /etc/sudoers.d/${USER1} && \
     echo "**** CLEANUP ****" && \
     rm -rf \
         /tmp/*
