@@ -2,7 +2,7 @@
 #   @type               github workflow
 #   @author             Aetherinox
 #   @url                https://github.com/Aetherinox
-#   @usage              deploys docker container to Github GHCR and send message to discord
+#   @usage              builds and releases a new docker image to Github GHCR and send message to discord
 #                       upload this workflow to the following branches:
 #                           - https://github.com/Aetherinox/docker-base-alpine/tree/main
 #                           - https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-*
