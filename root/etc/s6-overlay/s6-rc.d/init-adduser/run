@@ -10,12 +10,12 @@ PGID=${PGID:-999}
 
 if [[ -z ${AETHERX_READ_ONLY_FS} ]] && [[ -z ${AETHERX_NON_ROOT_USER} ]]; then
     USERHOME=$( grep dockerx /etc/passwd | cut -d ":" -f6 )
-    usermod -d "/root" dockerx
+    usermod -d "/root" dockerx > /dev/null
 
-    groupmod -o -g "${PGID}" dockerx
-    usermod -o -u "${PUID}" dockerx
+    groupmod -o -g "${PGID}" dockerx > /dev/null
+    usermod -o -u "${PUID}" dockerx > /dev/null
 
-    usermod -d "${USERHOME}" dockerx
+    usermod -d "${USERHOME}" dockerx > /dev/null
 fi
 
 # #
