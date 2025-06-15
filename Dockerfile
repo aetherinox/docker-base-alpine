@@ -1,66 +1,73 @@
 # syntax=docker/dockerfile:1
 
 # #
-#   @project        Docker Image - Alpine Base
-#   @usage          base image utilized for all docker images using Ubuntu with s6-overlay integration
-#   @file           Dockerfile
-#   @repo           https://github.com/aetherinox/docker-base-alpine
-#   @build          To build these images, use the following commands:
+#   @project              Docker Image › Alpine Base › Docker-compose.yml
+#   @usage                base image utilized for all docker images using Alpine with s6-overlay integration
+#   @file                 docker-compose.yml
+#   @repo                 https://github.com/aetherinox/docker-base-alpine
 #
-#                   AMD64
-#                       Build the image with:
-#                           docker buildx build \
-#                             --build-arg IMAGE_NAME=alpine \
-#                             --build-arg IMAGE_ARCH=amd64 \
-#                             --build-arg IMAGE_BUILDDATE=20260812 \
-#                             --build-arg IMAGE_VERSION=3.22 \
-#                             --build-arg IMAGE_RELEASE=stable \
-#                             --build-arg IMAGE_REGISTRY=github \
-#                             --tag alpine:latest \
-#                             --tag alpine:3 \
-#                             --tag alpine:3.2 \
-#                             --tag alpine:3.22 \
-#                             --tag alpine:amd64 \
-#                             --attest type=provenance,disabled=true \
-#                             --attest type=sbom,disabled=true \
-#                             --output type=docker \
-#                             --builder default \
-#                             --file Dockerfile \
-#                             --platform linux/amd64 \
-#                             --allow network.host \
-#                             --network host \
-#                             --no-cache \
-#                             --progress=plain \
-#                             .
+#   @image:github         ghcr.io/aetherinox/ubuntu:latest
+#                         ghcr.io/aetherinox/ubuntu:22.04
+#                         ghcr.io/aetherinox/ubuntu:noble
 #
-#                   Arm64
-#                       For arm64, make sure you install QEMU first in docker; use the command:
-#                           docker run --privileged --rm tonistiigi/binfmt --install all
+#   @image:dockerhub      aetherinox/ubuntu:latest
+#                         aetherinox/ubuntu:22.04
+#                         aetherinox/ubuntu:noble
 #
-#                       Build the image with:
-#                           docker buildx build \
-#                             --build-arg IMAGE_NAME=alpine \
-#                             --build-arg IMAGE_ARCH=arm64 \
-#                             --build-arg IMAGE_BUILDDATE=20260812 \
-#                             --build-arg IMAGE_VERSION=3.22 \
-#                             --build-arg IMAGE_RELEASE=stable \
-#                             --build-arg IMAGE_REGISTRY=github \
-#                             --tag alpine:latest \
-#                             --tag alpine:3 \
-#                             --tag alpine:3.2 \
-#                             --tag alpine:3.22 \
-#                             --tag alpine:amd64 \
-#                             --attest type=provenance,disabled=true \
-#                             --attest type=sbom,disabled=true \
-#                             --output type=docker \
-#                             --builder default \
-#                             --file Dockerfile \
-#                             --platform linux/arm64 \
-#                             --allow network.host \
-#                             --network host \
-#                             --no-cache \
-#                             --progress=plain \
-#                             .
+#                         AMD64
+#                         Build the image with:
+#                             docker buildx build \
+#                               --build-arg IMAGE_NAME=alpine \
+#                               --build-arg IMAGE_ARCH=amd64 \
+#                               --build-arg IMAGE_BUILDDATE=20260812 \
+#                               --build-arg IMAGE_VERSION=3.22 \
+#                               --build-arg IMAGE_RELEASE=stable \
+#                               --build-arg IMAGE_REGISTRY=github \
+#                               --tag aetherinox/alpine:latest \
+#                               --tag aetherinox/alpine:3 \
+#                               --tag aetherinox/alpine:3.2 \
+#                               --tag aetherinox/alpine:3.22 \
+#                               --tag aetherinox/alpine:amd64 \
+#                               --attest type=provenance,disabled=true \
+#                               --attest type=sbom,disabled=true \
+#                               --output type=docker \
+#                               --builder default \
+#                               --file Dockerfile \
+#                               --platform linux/amd64 \
+#                               --allow network.host \
+#                               --network host \
+#                               --no-cache \
+#                               --progress=plain \
+#                               .
+#
+#                         ARM64
+#                         For arm64, make sure you install QEMU first in docker; use the command:
+#                             docker run --privileged --rm tonistiigi/binfmt --install all
+#
+#                         Build the image with:
+#                             docker buildx build \
+#                               --build-arg IMAGE_NAME=alpine \
+#                               --build-arg IMAGE_ARCH=arm64 \
+#                               --build-arg IMAGE_BUILDDATE=20260812 \
+#                               --build-arg IMAGE_VERSION=3.22 \
+#                               --build-arg IMAGE_RELEASE=stable \
+#                               --build-arg IMAGE_REGISTRY=github \
+#                               --tag aetherinox/alpine:latest \
+#                               --tag aetherinox/alpine:3 \
+#                               --tag aetherinox/alpine:3.2 \
+#                               --tag aetherinox/alpine:3.22 \
+#                               --tag aetherinox/alpine:amd64 \
+#                               --attest type=provenance,disabled=true \
+#                               --attest type=sbom,disabled=true \
+#                               --output type=docker \
+#                               --builder default \
+#                               --file Dockerfile \
+#                               --platform linux/arm64 \
+#                               --allow network.host \
+#                               --network host \
+#                               --no-cache \
+#                               --progress=plain \
+#                               .
 # #
 
 ARG ALPINE_VERSION=3.22
@@ -321,7 +328,8 @@ RUN \
         procps-ng \
         shadow \
         tzdata && \
-    echo "**** CREATE USER 'dockerx' AND GENERATE STRUCTURE ****" && \
+    echo "**** Creating user 'dockerx' and structure ****" && \
+    sudo sed -i "s|^UID_MIN.*|UID_MIN\t\t\t  100|" /etc/login.defs && \
     useradd --uid ${UUID1} \
       --user-group \
       --home /config \
