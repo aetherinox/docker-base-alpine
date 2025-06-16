@@ -164,7 +164,7 @@ For this reason, there are a few requirements you can read about below in the se
 
 ## Building Image
 
-These instructions outline how the alpine docker image is set up, and how to build your own docker image.
+These instructions outline how the Alpine docker image is set up, and how to build your own docker image.
 
 <br />
 
@@ -590,7 +590,6 @@ docker buildx build \
   --tag ghcr.io/aetherinox/alpine:3 \
   --tag ghcr.io/aetherinox/alpine:3.2 \
   --tag ghcr.io/aetherinox/alpine:3.22 \
-  --tag ghcr.io/aetherinox/alpine:3.22-amd64 \
   --attest type=provenance,disabled=true \
   --attest type=sbom,disabled=true \
   --output type=docker \
@@ -624,7 +623,6 @@ docker buildx build \
   --tag ghcr.io/aetherinox/alpine:3 \
   --tag ghcr.io/aetherinox/alpine:3.2 \
   --tag ghcr.io/aetherinox/alpine:3.22 \
-  --tag ghcr.io/aetherinox/alpine:3.22-arm64 \
   --attest type=sbom,disabled=true \
   --output type=docker \
   --builder default \
@@ -640,7 +638,7 @@ docker buildx build \
 <br />
 
 > [!NOTE]
-> If you want to only build the alpine docker image locally; remove `--push`.
+> If you want to only build the Alpine docker image locally; remove `--push`.
 
 <br />
 
@@ -1250,8 +1248,8 @@ subgraph GRAPH_YOURAPP ["Build yourapp:latest"]
     obj_step10["`&gt; git clone github.com/aetherinox/yourapp.git`"]
     obj_step11["`Dockerfile`"]
     obj_step12["`&gt; docker build &bsol;
-    --build-arg VERSION=1.0.0 &bsol;
-    --build-arg BUILDDATE=20250220 &bsol;
+    --build-arg IMAGE_VERSION=1.0.0 &bsol;
+    --build-arg IMAGE_BUILDDATE=20250220 &bsol;
     -t yourapp:latest &bsol;
     -t yourapp:1.0.0-amd64 &bsol;
     -f Dockerfile . &bsol;`"]
@@ -1271,8 +1269,8 @@ direction TB
     obj_step20["`&gt; git clone -b docker/alpine github.com/aetherinox/docker-base-alpine.git`"]
     obj_step21["`Dockerfile`"]
     obj_step22["`&gt; docker build &bsol;
-    --build-arg VERSION=3.20 &bsol;
-    --build-arg BUILDDATE=20250220 &bsol;
+    --build-arg IMAGE_VERSION=3.22 &bsol;
+    --build-arg IMAGE_BUILDDATE=20250220 &bsol;
     -t alpine:latest &bsol;
     -t alpine:3.22-amd64 &bsol;
     -f Dockerfile . &bsol;`"]
@@ -1293,7 +1291,7 @@ GRAPH_ALPINE --> obj_step20 --> obj_step21 --> obj_step22 --> obj_step23 --> obj
 
 <br />
 
-Once the base alpine image is built, you can now use it to build the actual docker version of your app.
+Once the base Alpine image is built, you can now use it to build the actual docker version of your app.
 
 <br />
 
@@ -1303,7 +1301,7 @@ Once the base alpine image is built, you can now use it to build the actual dock
 
 ## Using Image
 
-To use your new docker alpine base image, you simply need to reference it in your project's `📄 Dockerfile`. Open your app's `📄 Dockerfile`, and add:
+To use your new docker Alpine base image, you simply need to reference it in your project's `📄 Dockerfile`. Open your app's `📄 Dockerfile`, and add:
 
 ```dockerfile
 ARG IMAGE_ARCH=amd64
@@ -1313,11 +1311,11 @@ FROM --platform=linux/${IMAGE_ARCH} ghcr.io/aetherinox/alpine:${IMAGE_VERSION}
 
 <br />
 
-In the Dockerfile code above, you will see that we are pulling from `ghcr.io/aetherinox/alpine:${IMAGE_VERSION}`; where `${IMAGE_VERSION}` gets replaced with the version of alpine we wish to use. At the time of writing this, it is `3.22`.
+In the Dockerfile code above, you will see that we are pulling from `ghcr.io/aetherinox/alpine:${IMAGE_VERSION}`; where `${IMAGE_VERSION}` gets replaced with the version of Alpine we wish to use. At the time of writing this, it is `3.22`.
 
 <br />
 
-After you reference the alpine image, you can then write the remaining parts of your project's Dockerfile. Once you are ready to build, then build the image, and the alpine base you created an image for earlier will be used as the foundation for whatever project you lay over top of it.
+After you reference the Alpine image, you can then write the remaining parts of your project's Dockerfile. Once you are ready to build, then build the image, and the Alpine base you created an image for earlier will be used as the foundation for whatever project you lay over top of it.
 
 <br />
 
