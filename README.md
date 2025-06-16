@@ -1,10 +1,10 @@
 <div align="center">
-<h6>Docker Image using alpine and s6-overlay</h6>
+<h6>Docker Image using Alpine and s6-overlay</h6>
 <h1>💿 Base Image - Alpine 💿</h1>
 
 <br />
 
-This branch `docker/alpine` contains the base docker alpine image which is utilized as a base for creating other images. This alpine image is what you will derive your app's Dockerfile from.
+This branch [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine) contains the base docker Alpine image which is utilized as a base for creating other images. This Alpine image is what you will derive your app's Dockerfile from.
 
 Normal users should not need to modify the files in this repository.
  
@@ -44,8 +44,8 @@ Normal users should not need to modify the files in this repository.
     - [Set `+x / 0755` Permissions](#set-x--0755-permissions)
     - [Building Different Architectures](#building-different-architectures)
   - [Integrated Helper Scripts](#integrated-helper-scripts)
-    - [`📄 util-fix.sh`](#-util-fixsh)
-    - [`📄 util-build.sh`](#-util-buildsh)
+    - [`📄 utils.fix.sh`](#-utilsfixsh)
+    - [`📄 utils.build.sh`](#-utilsbuildsh)
   - [Build Images](#build-images)
     - [Build Single Architecture](#build-single-architecture)
       - [amd64](#amd64)
@@ -88,9 +88,9 @@ Normal users should not need to modify the files in this repository.
 
 ## About
 
-The files contained within this branch `docker/alpine` are utilized as a foundation. This base image only provides us with a docker image which has alpine linux, Nginx, a few critical packages, and the **[s6-overlay](https://github.com/just-containers/s6-overlay)** plugin.
+The files contained within this branch [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine) are utilized as a foundation. This base image only provides us with a docker image which has alpine linux, Nginx, a few critical packages, and the **[s6-overlay](https://github.com/just-containers/s6-overlay)** plugin.
 
-This branch `docker/alpine` does **NOT** contain any applications. It is only to be used as a base image which will be called when you build your main app's `📄 Dockerfile`.
+This branch [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine) does **NOT** contain any applications. It is only to be used as a base image which will be called when you build your main app's `📄 Dockerfile`.
 
 <br />
 <br />
@@ -127,7 +127,7 @@ By S6 Overlay instructions, a service to create directores qualifies as a **ones
 
 To build a docker image using this base and the actual app you want to release, you need two different docker images:
 
-- **Step 1**: Build **[🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine)** image **(this repo)**
+- **Step 1**: Build [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine) image **(this repo)**
   - When being built, the alpine `📄 Dockerfile` will grab and install the files from the branch **[docker/core](https://github.com/aetherinox/docker-base-alpine/tree/docker/core)**
 - **Step 2**: Build your app's docker image that will run on top of this alpine image
 - **Step 3**: Release the docker image built from **Step 2** to Github's **Ghcr.io** or **hub.docker.com**
@@ -135,11 +135,11 @@ To build a docker image using this base and the actual app you want to release, 
 <br />
 
 > [!WARNING]
-> You should NOT need to modify any of the files within this branch `docker/alpine` unless you absolutely know what you are doing.
+> You should NOT need to modify any of the files within this branch [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine) unless you absolutely know what you are doing.
 
 <br />
 
-When you build this **[🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine)** image, the `📄 Dockerfile` will request files from another branch we host, which is the **[docker/core](https://github.com/aetherinox/docker-base-alpine/tree/docker/core)** branch.
+When you build this [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine) image, the `📄 Dockerfile` will request files from another branch we host, which is the **[docker/core](https://github.com/aetherinox/docker-base-alpine/tree/docker/core)** branch.
 
 ```bash
 ADD --chmod=755 "https://raw.githubusercontent.com/aetherinox/docker-base-alpine/docker/core/docker-images.${MODS_VERSION}" "/docker-images"
@@ -168,14 +168,15 @@ These instructions outline how the alpine docker image is set up, and how to bui
 
 ### Before Building
 
-Prior to building the  docker image, you **must** ensure the sections below are completed.
+Prior to building the docker image, you **must** ensure the sections below are completed.
 
 - [LF over CRLF](#lf-over-crlf)
 - [Set +x / 0755 Permissions](#set-x--0755-permissions)
+- [Building Different Architectures](#building-different-architectures)
 
 <br />
 
-You must ensure when you build this docker image **[🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine)**, the following conditions must be met. 
+You must ensure when you build this docker image [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine), the following conditions must be met. 
 
 <br />
 
@@ -220,7 +221,7 @@ If you attempt to build your Alpine docker image on Linux, and have windows CRLF
 
 <br />
 
-For the branches **[🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine)** and your main app image, you can use the following recursive commands:
+For the branches [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine) and your main app image, you can use the following recursive commands:
 
 <br />
 
@@ -282,7 +283,7 @@ If you get messages `1` or `2`, then you need to run `dos2unix` on the file; oth
 
 The files contained within this repo **MUST** have `chmod 755` /  `+x` executable permissions. If you are using our Github workflow sample **[deploy-docker-github.yml](https://github.com/aetherinox/docker-base-alpine/blob/workflows/samples/deploy-docker-github.yml)**, this is done automatically. If you are building the images manually; you need to do this. Ensure those files have the correct permissions prior to building the Alpine base docker image.
 
-If you are building the **[🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine)** or your main application images, you must ensure the files in those branches have the proper permissions. All of the executable files are named `run`:
+If you are building the [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine) or your main application images, you must ensure the files in those branches have the proper permissions. All of the executable files are named `run`:
 
 <br />
 
@@ -292,7 +293,7 @@ If you are building the **[🔆 docker/alpine](https://github.com/aetherinox/doc
 
 <br />
 
-To fix the permissions, `cd` into the folder where your alpine base image files are and run the command:
+To fix the permissions, `cd` into the folder where your Alpine base image files are and run the command:
 
 ```shell
 find ./ -name 'run' -print -exec sudo chmod +x {} \;
@@ -349,10 +350,12 @@ Once you have the above docker container running, you can now run the `docker bu
 ```shell
 # Build alpine arm64
 docker buildx build \
-  --build-arg ARCH=aarch64 \
-  --build-arg VERSION=3.22 \
-  --build-arg BUILDDATE=20260812 \
-  --build-arg RELEASE=stable \
+  --build-arg IMAGE_NAME=alpine \
+  --build-arg IMAGE_ARCH=arm64 \
+  --build-arg IMAGE_BUILDDATE=20260812 \
+  --build-arg IMAGE_VERSION=24.04 \
+  --build-arg IMAGE_RELEASE=stable \
+  --build-arg IMAGE_REGISTRY=github \
   --tag ghcr.io/aetherinox/alpine:latest \
   --tag ghcr.io/aetherinox/alpine:3 \
   --tag ghcr.io/aetherinox/alpine:3.2 \
@@ -374,7 +377,7 @@ docker buildx build \
 
 Make sure you change the following arguments over to `arm64`:
 
-- `--build-arg ARCH=aarch64 \`
+- `--build-arg IMAGE_ARCH=arm64 \`
 - `--platform linux/arm64 \`
 
 
@@ -383,26 +386,35 @@ Make sure you change the following arguments over to `arm64`:
 
 ### Integrated Helper Scripts
 
-This feature became available with Alpine v3.22. The [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/core) branch of this repository includes two new scripts:
+This feature became available with Alpine v3.22. The [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine) branch of this repository includes two new scripts:
 
-- `📄 util-fix.sh`
-  - Ensures that your local copy of this Alpine repository has the correct permissions; including the `+x` executable flag on all `run` files.
-- `📄 util-build.sh`
-  - Builds the alpine docker image from simply running the bash script.
+- `📄 utils.fix.sh`
+  - Ensures that your local copy of this Ubuntu repository has the correct permissions; including the `+x` executable flag on all `run` files.
+- `📄 utils.build.sh`
+  - Builds the Ubuntu docker image from simply running the bash script.
 
 <br />
 
 To utilize these scripts, ensure you set the `+x` permission on the two scripts:
 
 ```shell
-sudo chmod +x util-fix.sh
-sudo chmod +x util-build.sh
+sudo chmod +x utils.fix.sh
+sudo chmod +x utils.build.sh
+```
+
+<br />
+
+Then run the scripts:
+
+```shell
+./utils.fix.sh
+./utils.build.sh
 ```
 
 <br />
 <br />
 
-#### `📄 util-fix.sh`
+#### `📄 utils.fix.sh`
 
 The `fix permissions` script will ensure that your local copy of this alpine repository has the proper permissions for all files before you create a docker image; or re-upload it to Github on your own repo. It will ensure that the `run` files have the `+x` execute permission. Without this permission; your container will fail when it starts up.
 
@@ -411,18 +423,18 @@ This script is automatically ran when you execute the `📄 util-build.sh` scrip
 <br />
 <br />
 
-#### `📄 util-build.sh`
+#### `📄 utils.build.sh`
 
-The build script allows you to build the [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/core) image without having to manually execute the `docker buildx <...>` commands. It accepts a series of arguments compatible with docker so that you can customize how the image turns out.
+The build script allows you to build the [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine) image without having to manually execute the `docker buildx <...>` commands. It accepts a series of arguments compatible with docker so that you can customize how the image turns out.
 
-After the permissions are set up; you can now run the scripts in any order, at any time. The build script `📄 util-build.sh` will automatically run the bash script to fix permissions `📄 util-fix.sh` before it starts to build your docker image, so you don't need to run it individually.
+After the permissions are set up; you can now run the scripts in any order, at any time. The build script `📄 utils.build.sh` will automatically run the bash script to fix permissions `📄 utils.fix.sh` before it starts to build your docker image, so you don't need to run it individually.
 
 <br />
 <br />
 
 ### Build Images
 
-After completing the steps above; we will now build the [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/core) image.
+After completing the steps above; we will now build the Alpine image in the branch [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine).
 
 <br />
 
@@ -431,21 +443,33 @@ Open the `📄 Dockerfile` and ensure you are pulling the correct Alpine base im
 ```dockerfile
 ARG ALPINE_VERSION=3.22
 FROM alpine:${ALPINE_VERSION} AS rootfs-stage
+```
 
-ARG ARCH=x86_64
-ARG REPO_AUTHOR="aetherinox"
-ARG REPO_NAME="docker-base-alpine"
-ARG S6_OVERLAY_VERSION="3.2.1.0"
-ARG S6_OVERLAY_ARCH="${ARCH}"
+<br />
+
+This docker image contains numerous arguments you can pass which determine what versions of Ubuntu and leaf dependencies will be installed.
+
+<br />
+
+```dockerfile
+ARG IMAGE_REPO_AUTHOR="aetherinox"
+ARG IMAGE_REPO_NAME="docker-base-alpine"
+ARG IMAGE_NAME="alpine"
+ARG IMAGE_ARCH="amd64"
+ARG IMAGE_SHA1="0000000000000000000000000000000000000000"
+ARG IMAGE_REGISTRY="local"
+ARG IMAGE_RELEASE="stable"
+ARG IMAGE_BUILDDATE="20250101"
+ARG IMAGE_VERSION="3.22"
 ```
 
 <br />
 
 > [!NOTE]
-> The `ARCH` argument supports two options; which you will specify by using the argument `--build-arg ARCH=x86_64` in your buildx command:
+> The `IMAGE_ARCH` argument supports two options; which you will specify by using the argument `--build-arg IMAGE_ARCH=amd64` in your buildx command:
 > 
-> - `x86_64`
-> - `aarch64`
+> - `amd64`
+> - `arm64`
 
 <br />
 
@@ -478,12 +502,14 @@ docker buildx create --driver docker-container --name container --bootstrap --us
 
 <br />
 
-<sub><sup>Optional - </sup></sub> If you first need to remove the provider container because you created it previously, run the command:
-
-```shell
-docker buildx rm container
-docker buildx create --driver docker-container --name container --bootstrap --use
-```
+> [!NOTE]
+> **Optional:**
+> If you first need to remove the provider container because you created it previously, run the command:
+>
+> ```shell
+> docker buildx rm container
+> docker buildx create --driver docker-container --name container --bootstrap --use
+> ```
 
 <br />
 
@@ -552,10 +578,12 @@ Creates the alpine `amd64` docker image:
 ```shell
 # Build alpine amd64
 docker buildx build \
-  --build-arg ARCH=x86_64 \
-  --build-arg VERSION=3.22 \
-  --build-arg BUILDDATE=20260812 \
-  --build-arg RELEASE=stable \
+  --build-arg IMAGE_NAME=ubuntu \
+  --build-arg IMAGE_ARCH=amd64 \
+  --build-arg IMAGE_BUILDDATE=20260812 \
+  --build-arg IMAGE_VERSION=3.22 \
+  --build-arg IMAGE_RELEASE=stable \
+  --build-arg IMAGE_REGISTRY=github \
   --tag ghcr.io/aetherinox/alpine:latest \
   --tag ghcr.io/aetherinox/alpine:3 \
   --tag ghcr.io/aetherinox/alpine:3.2 \
@@ -583,10 +611,13 @@ Creates the alpine `arm64` docker image:
 ```shell
 # Build alpine arm64
 docker buildx build \
-  --build-arg ARCH=aarch64 \
-  --build-arg VERSION=3.22 \
-  --build-arg BUILDDATE=20260812 \
-  --build-arg RELEASE=stable \
+  --build-arg IMAGE_NAME=ubuntu \
+  --build-arg IMAGE_DISTRO=noble \
+  --build-arg IMAGE_ARCH=arm64 \
+  --build-arg IMAGE_BUILDDATE=20260812 \
+  --build-arg IMAGE_VERSION=3.22 \
+  --build-arg IMAGE_RELEASE=stable \
+  --build-arg IMAGE_REGISTRY=github \
   --tag ghcr.io/aetherinox/alpine:latest \
   --tag ghcr.io/aetherinox/alpine:3 \
   --tag ghcr.io/aetherinox/alpine:3.2 \
@@ -616,7 +647,6 @@ After building the image, you can now use the image either with `🗔 docker run
 - [🗔 Docker Run](#docker-run-1)
 - [📄 Docker Compose](#docker-compose-1)
 
-
 <br />
 <br />
 
@@ -643,12 +673,14 @@ docker buildx create --driver docker-container --name container --bootstrap --us
 
 <br />
 
-<sub><sup>Optional - </sup></sub> If you first need to remove the container because you created it previously, run the command:
-
-```shell
-docker buildx rm container
-docker buildx create --driver docker-container --name container --bootstrap --use
-```
+> [!NOTE]
+> **Optional:**
+> If you first need to remove the provider container because you created it previously, run the command:
+>
+> ```shell
+> docker buildx rm container
+> docker buildx create --driver docker-container --name container --bootstrap --use
+> ```
 
 <br />
 
@@ -761,10 +793,13 @@ Creates the alpine **Stable** release `amd64` docker image:
 ```shell
 # Build alpine amd64 - (stable release)
 docker buildx build \
-  --build-arg ARCH=x86_64 \
-  --build-arg VERSION=3.22 \
-  --build-arg BUILDDATE=20260812 \
-  --build-arg RELEASE=stable \
+  --build-arg IMAGE_NAME=ubuntu \
+  --build-arg IMAGE_DISTRO=noble \
+  --build-arg IMAGE_ARCH=amd64 \
+  --build-arg IMAGE_BUILDDATE=20260812 \
+  --build-arg IMAGE_VERSION=3.22 \
+  --build-arg IMAGE_RELEASE=stable \
+  --build-arg IMAGE_REGISTRY=github \
   --tag ghcr.io/aetherinox/alpine:3.22-amd64 \
   --attest type=provenance,disabled=true \
   --attest type=sbom,disabled=true \
@@ -789,10 +824,13 @@ Creates the Alpine **Stable** release `arm64` docker image:
 ```shell
 # Build alpine arm64 - (stable release)
 docker buildx build \
-  --build-arg ARCH=aarch64 \
-  --build-arg VERSION=3.22 \
-  --build-arg BUILDDATE=20260812 \
-  --build-arg RELEASE=stable \
+  --build-arg IMAGE_NAME=ubuntu \
+  --build-arg IMAGE_DISTRO=noble \
+  --build-arg IMAGE_ARCH=arm64 \
+  --build-arg IMAGE_BUILDDATE=20260812 \
+  --build-arg IMAGE_VERSION=3.22 \
+  --build-arg IMAGE_RELEASE=stable \
+  --build-arg IMAGE_REGISTRY=github \
   --tag ghcr.io/aetherinox/alpine:3.22-arm64 \
   --attest type=provenance,disabled=true \
   --attest type=sbom,disabled=true \
@@ -817,10 +855,13 @@ Creates the Alpine **Development** release `amd64` docker image:
 ```shell
 # Build alpine amd64 - (development release)
 docker buildx build \
-  --build-arg ARCH=x86_64 \
-  --build-arg VERSION=3.22 \
-  --build-arg BUILDDATE=20260812 \
-  --build-arg RELEASE=development \
+  --build-arg IMAGE_NAME=ubuntu \
+  --build-arg IMAGE_DISTRO=noble \
+  --build-arg IMAGE_ARCH=amd64 \
+  --build-arg IMAGE_BUILDDATE=20260812 \
+  --build-arg IMAGE_VERSION=3.22 \
+  --build-arg IMAGE_RELEASE=development \
+  --build-arg IMAGE_REGISTRY=github \
   --tag ghcr.io/aetherinox/alpine:development-amd64 \
   --attest type=provenance,disabled=true \
   --attest type=sbom,disabled=true \
@@ -845,10 +886,13 @@ Creates the Alpine **Development** release `arm64` docker image:
 ```shell
 # Build alpine arm64 - (development release)
 docker buildx build \
-  --build-arg ARCH=aarch64 \
-  --build-arg VERSION=3.22 \
-  --build-arg BUILDDATE=20260812 \
-  --build-arg RELEASE=development \
+  --build-arg IMAGE_NAME=ubuntu \
+  --build-arg IMAGE_DISTRO=noble \
+  --build-arg IMAGE_ARCH=arm64 \
+  --build-arg IMAGE_BUILDDATE=20260812 \
+  --build-arg IMAGE_VERSION=3.22 \
+  --build-arg IMAGE_RELEASE=development \
+  --build-arg IMAGE_REGISTRY=github \
   --tag ghcr.io/aetherinox/alpine:development-arm64 \
   --attest type=provenance,disabled=true \
   --attest type=sbom,disabled=true \
@@ -1129,14 +1173,14 @@ Once the base alpine image is built, you can now use it to build the actual dock
 To use your new docker alpine base image, you simply need to reference it in your project's `📄 Dockerfile`. Open your app's `📄 Dockerfile`, and add:
 
 ```dockerfile
-ARG ARCH=amd64
-ARG ALPINE_VERSION=3.22
-FROM --platform=linux/${ARCH} ghcr.io/aetherinox/alpine::${ALPINE_VERSION}
+ARG IMAGE_ARCH=amd64
+ARG IMAGE_VERSION=3.22
+FROM --platform=linux/${IMAGE_ARCH} ghcr.io/aetherinox/alpine:${IMAGE_VERSION}
 ```
 
 <br />
 
-In the Dockerfile code above, you will see that we are pulling from `ghcr.io/aetherinox/alpine::${ALPINE_VERSION}`; where `${ALPINE_VERSION}` gets replaced with the version of alpine we wish to use. At the time of writing this, it is `3.22`.
+In the Dockerfile code above, you will see that we are pulling from `ghcr.io/aetherinox/alpine:${IMAGE_VERSION}`; where `${IMAGE_VERSION}` gets replaced with the version of alpine we wish to use. At the time of writing this, it is `3.22`.
 
 <br />
 
@@ -1150,7 +1194,7 @@ After you reference the alpine image, you can then write the remaining parts of 
 
 ## Extra Notes
 
-The following are other things to take into consideration when creating the **[docker/alpine:](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine)** and your app docker image that will use this base image:
+The following are other things to take into consideration when creating the [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine) and your app docker image that will use this base image:
 
 <br />
 
@@ -1163,7 +1207,7 @@ Any project docker image built using this base image contains Alpine Linux, but 
 #### ash
 
 ```shell
-docker exec -it alpine: ash
+docker exec -it base-alpine ash
 ```
 
 <br />
@@ -1171,7 +1215,7 @@ docker exec -it alpine: ash
 #### sh
 
 ```shell
-docker exec -it alpine: sh
+docker exec -it base-alpine sh
 ```
 
 <br />
@@ -1179,7 +1223,7 @@ docker exec -it alpine: sh
 #### bash
 
 ```shell
-docker exec -it alpine: bash
+docker exec -it base-alpine bash
 ```
 
 <br />
@@ -1798,7 +1842,7 @@ When you start your project's docker image up, this service will be executed.
 
 ### Custom Docker Image Scripts
 
-The `docker/alpine:` and any project docker images which use this alpine base image, support the ability of adding custom scripts that will be ran when the container is started. To create / add a new custom script to the container, you need to create a new folder in the container source files `/root` folder
+The [🔆 docker/alpine](https://github.com/aetherinox/docker-base-alpine/tree/docker/alpine) and any project docker images which use this alpine base image, support the ability of adding custom scripts that will be ran when the container is started. To create / add a new custom script to the container, you need to create a new folder in the container source files `/root` folder
 
 ```shell
 mkdir -p /root/custom-cont-init.d/
@@ -1888,7 +1932,21 @@ Then navigate to the newly mounted folder and add your `📄 cert.crt` and `🔑
 
 ### Logs
 
-This base alpine image contains detailed logs which will output what the docker container is currently doing.
+This base Ubuntu image contains detailed logs which will output what the docker container is currently doing. On top of built-in logs, the s6-overlay also has an env variable you can set to view logs for the container as it boots up. Modify your `🗔 docker run` command or in a `📄 docker-compose.yml` file; add the env variable `S6_VERBOSITY=5`
+
+```yml
+    base-alpine:
+        container_name: base-alpine
+        image: aetherinox/alpine:3.22
+        hostname: alpine
+        environment:
+            - TZ=Etc/UTC
+            - S6_VERBOSITY=2
+```
+
+<br />
+
+You can pick a number between `1-5`; with `5` being the most verbose and will output every little thing that the container is doing. The default value is `S6_VERBOSITY=2`.
 
 <br />
 
