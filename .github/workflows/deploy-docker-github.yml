@@ -2,10 +2,10 @@
 #   @type               github workflow
 #   @author             Aetherinox
 #   @url                https://github.com/Aetherinox
-#   @usage              deploys docker container to Github GHCR and send message to discord
+#   @usage              builds and releases a new docker image to Github GHCR and send message to discord
 #                       upload this workflow to the following branches:
 #                           - https://github.com/Aetherinox/docker-base-alpine/tree/main
-#                           - https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-base
+#                           - https://github.com/Aetherinox/docker-base-alpine/tree/docker/alpine-*
 #
 #   @secrets            secrets.SELF_TOKEN                                          self github personal access token (fine-grained)
 #                       secrets.SELF_TOKEN_CL                                       self github personal access token (classic)
@@ -34,7 +34,7 @@
 #                       Add system env var with path to act.exe
 #                       Run the commands:
 #                           git pull https://github.com/username/repo
-#                           act -W .github/workflows/deploy-docker-github.yml -P ubuntu-latest=catthehacker/ubuntu:full-22.04
+#                           act -W .github/workflows/deploy-docker-github.yml -P ubuntu-latest=catthehacker/ubuntu:full-24.04
 #                           act -W .github/workflows/deploy-docker-github.yml -s TOKEN_CL=XXXXXXXXXX --pull=false
 # #
 
@@ -57,20 +57,19 @@ on:
         inputs:
 
             # #
-            #   Image Name
+            #   Github › Release Name
             #
-            #   used in github image path
-            #       ghcr.io/${{ env.IMAGE_GHCR_AUTHOR }}/${{ env.IMAGE_NAME }}
+            #   name of release; ubuntu, alpine, etc
             # #
 
             IMAGE_NAME:
-                description:    '📦 Image Name'
+                description:    '📦 Release Name'
                 required:       true
-                default:        'alpine-base'
+                default:        'alpine'
                 type:           string
 
             # #
-            #   Image Version
+            #   Github › Image Version
             #
             #   used to create new release tag, and add version to docker image name
             # #
@@ -78,11 +77,11 @@ on:
             IMAGE_VERSION:
                 description:    '🏷️ Image Version'
                 required:       true
-                default:        '3.22'
+                default:        '24.04'
                 type:           string
 
             # #
-            #   Image Registry
+            #   Github › Image Registry
             #
             #   Options:
             #       - github
@@ -103,10 +102,10 @@ on:
                     - Local
 
             # #
-            #   Image Author
+            #   Github › Image Author
             #
             #   used in github image path
-            #       ghcr.io/${{ env.IMAGE_GHCR_AUTHOR }}/${{ env.IMAGE_NAME }}
+            #       ghcr.io/${{ env.IMAGE_GHCR_AUTHOR }}/${{ env.IMAGE_DISTRO }}
             # #
 
             IMAGE_GHCR_AUTHOR:
@@ -116,7 +115,7 @@ on:
                 type:           string
 
             # #
-            #   Image ghcr username
+            #   Github › Image ghcr username
             #
             #   this is the user to sign into ghcr as.
             # #
@@ -162,13 +161,20 @@ on:
 # #
 
 env:
-    IMAGE_NAME:                 ${{ github.event.inputs.IMAGE_NAME || 'alpine-base' }}
-    IMAGE_VERSION:              ${{ github.event.inputs.IMAGE_VERSION || '3.22' }}
-    IMAGE_GHCR_AUTHOR:          ${{ github.event.inputs.IMAGE_GHCR_AUTHOR || 'Aetherinox' }}
-    IMAGE_GHCR_USERNAME:        ${{ github.event.inputs.IMAGE_GHCR_USERNAME || 'Aetherinox' }}
-    IMAGE_REGISTRY:             ${{ github.event.inputs.IMAGE_REGISTRY || 'Github' }}
-    BOT_NAME_1:                 EuropaServ
-    BOT_NAME_DEPENDABOT:        dependabot[bot]
+    IMAGE_NAME:                       ${{ github.event.inputs.IMAGE_NAME || 'alpine' }}
+    IMAGE_VERSION:                    ${{ github.event.inputs.IMAGE_VERSION || '3.22' }}
+    IMAGE_GHCR_AUTHOR:                ${{ github.event.inputs.IMAGE_GHCR_AUTHOR || 'Aetherinox' }}
+    IMAGE_GHCR_USERNAME:              ${{ github.event.inputs.IMAGE_GHCR_USERNAME || 'Aetherinox' }}
+    IMAGE_REGISTRY:                   ${{ github.event.inputs.IMAGE_REGISTRY || 'Github' }}
+    DISCORD_BOT_NAME:                 'Europa'
+    DISCORD_BOT_AVATAR:               'https://i.imgur.com/UqwMom1.jpeg'
+    DISCORD_BOT_EMBED_AUTHOR_ICON:    'https://avatars.githubusercontent.com/u/200161462'
+    DISCORD_BOT_EMBED_THUMBNAIL:      'https://avatars.githubusercontent.com/u/200161462'
+
+    BOT_NAME_1:                       EuropaServ
+    BOT_NAME_2:                       BinaryServ
+    BOT_NAME_DEPENDABOT:              dependabot[bot]
+    BOT_NAME_RENOVATE:                renovate[bot]
 
 # #
 #   Jobs
@@ -239,7 +245,7 @@ jobs:
                   NOW_LONG="$(date +'%m-%d-%Y %H:%M')"                                              #  02-25-2025 12:49
                   echo "NOW_LONG=${NOW_LONG}" >> $GITHUB_ENV
 
-                  NOW_DOCKER="$(date +'%Y%m%d')"                                                    #  20250225
+                  NOW_DOCKER="$(date +'%Y%m%d')"                                                    #  20250225 | YYYYMMDD
                   echo "NOW_DOCKER=${NOW_DOCKER}" >> $GITHUB_ENV
 
                   NOW_DOCKER_TS="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
@@ -250,6 +256,12 @@ jobs:
 
                   SHA1_GH="$(echo ${GITHUB_SHA})"                                                   #  71fad013cfce9116ec62779e4a7e627fe4c33627
                   echo "SHA1_GH=${SHA1_GH}" >> $GITHUB_ENV
+
+                  #  parse version into segments
+                  IFS=. read major minor patch <<< "${{ env.IMAGE_VERSION }}"
+                  echo "major=${major}" >> $GITHUB_OUTPUT
+                  echo "minor=${minor}" >> $GITHUB_OUTPUT
+                  echo "patch=${patch}" >> $GITHUB_OUTPUT
 
                   PKG_VER_1DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
                   echo "PKG_VER_1DIGIT=${PKG_VER_1DIGIT}" >> $GITHUB_ENV
@@ -358,7 +370,7 @@ jobs:
             📦 Release › Github
         runs-on: ubuntu-latest
       # runs-on: apollo-x64
-        timeout-minutes: 10
+        timeout-minutes: 20
         permissions:
             contents: write
             packages: write
@@ -389,7 +401,6 @@ jobs:
             #   Release › Github › Start
             # #
 
-
             - name: >-
                   ✅ Start
               run: |
@@ -410,7 +421,7 @@ jobs:
                   NOW_LONG="$(date +'%m-%d-%Y %H:%M')"                                              #  02-25-2025 12:49
                   echo "NOW_LONG=${NOW_LONG}" >> $GITHUB_ENV
 
-                  NOW_DOCKER="$(date +'%Y%m%d')"                                                    #  20250225
+                  NOW_DOCKER="$(date +'%Y%m%d')"                                                    #  20250225 | YYYYMMDD
                   echo "NOW_DOCKER=${NOW_DOCKER}" >> $GITHUB_ENV
 
                   NOW_DOCKER_TS="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
@@ -421,6 +432,12 @@ jobs:
 
                   SHA1_GH="$(echo ${GITHUB_SHA})"                                                   #  71fad013cfce9116ec62779e4a7e627fe4c33627
                   echo "SHA1_GH=${SHA1_GH}" >> $GITHUB_ENV
+
+                  #  parse version into segments
+                  IFS=. read major minor patch <<< "$${{ env.IMAGE_VERSION }}"
+                  echo "major=${major}" >> $GITHUB_OUTPUT
+                  echo "minor=${minor}" >> $GITHUB_OUTPUT
+                  echo "patch=${patch}" >> $GITHUB_OUTPUT
 
                   PKG_VER_1DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
                   echo "PKG_VER_1DIGIT=${PKG_VER_1DIGIT}" >> $GITHUB_ENV
@@ -487,14 +504,13 @@ jobs:
                   echo "‎"
 
             # #
-            #   Release › Github › Get Timestamp
+            #   Release › Github › Set Vars
             # #
 
-            - name: '🕛 Get Timestamp'
-              id: task_release_set_timestamp
+            - name: '🕛 Set Vars'
               run: |
-                  echo "REGISTRY_REPO_ORG_AUTHOR_LC=`echo ${{ env.IMAGE_GHCR_AUTHOR }}/${{ env.IMAGE_NAME }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}        #  aetherinox/docker-base-alpine
-                  echo "REGISTRY_REPO_AUTHOR_LC=`echo ${{ env.IMAGE_GHCR_AUTHOR }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}                                  #  aetherinox
+                  echo "REGISTRY_REPO_ORG_AUTHOR_LC=`echo ${{ env.IMAGE_GHCR_AUTHOR }}/${{ env.IMAGE_DISTRO }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}        #  aetherinox/docker-base-alpine
+                  echo "REGISTRY_REPO_AUTHOR_LC=`echo ${{ env.IMAGE_GHCR_AUTHOR }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}                                    #  aetherinox
 
             # #
             #   Release › Github › Install Dependencies
@@ -558,7 +574,7 @@ jobs:
               with:
                   registry: ghcr.io
                   username: ${{ env.IMAGE_GHCR_USERNAME }}
-                  password: ${{ secrets.IMAGE_GHCR_TOKEN }}
+                  password: ${{ secrets.SELF_TOKEN_CL }}
 
             # #
             #   Release › Github › Read Readme
@@ -570,20 +586,20 @@ jobs:
               id: task_release_gh_readme_cache
               uses: actions/github-script@v7
               with:
-                github-token: ${{ secrets.IMAGE_GHCR_TOKEN }}
-                script: |
-                    'use strict'
+                  github-token: ${{ secrets.SELF_TOKEN_CL }}
+                  script: |
+                      'use strict'
 
-                    const { promises: fs } = require('fs')
+                      const { promises: fs } = require('fs')
 
-                    const main = async () => {
-                      const path = "README.md"
-                      let content = await fs.readFile(path, 'utf8')
+                      const main = async () => {
+                        const path = "README.md"
+                        let content = await fs.readFile(path, 'utf8')
 
-                      core.setOutput('content', content)
-                    }
+                        core.setOutput('content', content)
+                      }
 
-                    main().catch(err => core.setFailed(err.message))
+                      main().catch(err => core.setFailed(err.message))
 
             # #
             #   Release › Github › Meta
@@ -605,7 +621,7 @@ jobs:
                       #  tag            add pr tag            ( PR or push only )
                       type=ref,enable=${{ github.event_name == 'pull_request' || github.event_name == 'push' }},priority=600,prefix=,suffix=,event=tag
 
-                      #  tag            add 1.0.0             ( dispatch only + no dev )
+                      #  tag            add 24.04             ( dispatch only + no dev )
                       type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=450,prefix=,suffix=,value=${{ env.IMAGE_VERSION }}
 
                       #  tag            add 1.0               ( dispatch only + no dev )
@@ -622,31 +638,49 @@ jobs:
                   flavor: |
                       latest=false
                   labels: |
-                      org.opencontainers.image.description=Alpine base image
-                      org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
-                      org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
-                      org.opencontainers.image.licenses=MIT
-                      org.opencontainers.image.revision=${{ github.sha }}
+                      org.opencontainers.image.authors=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
-                      org.opencontainers.image.ref.name=${{ github.ref_name }}
-                      org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
+                      org.opencontainers.image.title=${{ env.IMAGE_NAME }} (Base) ${{ env.IMAGE_VERSION }} (${{ env.IMAGE_DISTRO }})
+                      org.opencontainers.image.description=${{ env.IMAGE_NAME }} base image with s6-overlay integration
+                      org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
+                      org.opencontainers.image.source=https://github.com/${{ github.repository }}
+                      org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/wiki
+                      org.opencontainers.image.issues=https://github.com/${{ github.repository }}/issues
+                      org.opencontainers.image.licenses=MIT
+                      org.opencontainers.image.version=${{ env.IMAGE_VERSION || '24.04' }}
+                      org.opencontainers.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
+                      org.opencontainers.image.branch=${{ github.ref_name }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
-                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}"
-                      org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
-                      org.alpine.image.build-sha1=${{ env.SHA1 }}
+                      org.opencontainers.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
+                      org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
+                      org.opencontainers.image.sha=${{ github.sha }}
+                      org.alpine.image.maintainers=${{ env.REGISTRY_REPO_AUTHOR_LC }}
+                      org.alpine.image.version=Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}
+                      org.alpine.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
+                      org.alpine.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
+                      org.alpine.image.sha=${{ github.sha }}
                   annotations: |
-                      org.opencontainers.image.description=Alpine base image
-                      org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
-                      org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
-                      org.opencontainers.image.licenses=MIT
-                      org.opencontainers.image.revision=${{ github.sha }}
+                      org.opencontainers.image.authors=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
-                      org.opencontainers.image.ref.name=${{ github.ref_name }}
-                      org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
+                      org.opencontainers.image.title=${{ env.IMAGE_NAME }} (Base) ${{ env.IMAGE_VERSION }} (${{ env.IMAGE_DISTRO }})
+                      org.opencontainers.image.description=${{ env.IMAGE_NAME }} base image with s6-overlay integration
+                      org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
+                      org.opencontainers.image.source=https://github.com/${{ github.repository }}
+                      org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/wiki
+                      org.opencontainers.image.issues=https://github.com/${{ github.repository }}/issues
+                      org.opencontainers.image.licenses=MIT
+                      org.opencontainers.image.version=${{ env.IMAGE_VERSION || '24.04' }}
+                      org.opencontainers.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
+                      org.opencontainers.image.branch=${{ github.ref_name }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
-                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}"
-                      org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
-                      org.alpine.image.build-sha1=${{ env.SHA1 }}
+                      org.opencontainers.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
+                      org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
+                      org.opencontainers.image.sha=${{ github.sha }}
+                      org.alpine.image.maintainers=${{ env.REGISTRY_REPO_AUTHOR_LC }}
+                      org.alpine.image.version=Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}
+                      org.alpine.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
+                      org.alpine.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
+                      org.alpine.image.sha=${{ github.sha }}
 
             # #
             #   Release › Github › Build and Push › Amd64
@@ -670,26 +704,37 @@ jobs:
                   tags: |
                       ${{ steps.task_release_gh_meta.outputs.tags }}
                   build-args: |-
-                      ARCH=x86_64
-                      RELEASE=${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}
-                      VERSION=${{ env.IMAGE_VERSION }}
-                      BUILDDATE=${{ env.NOW_DOCKER }}
-                      GIT_SHA1=${{ env.SHA1 }}
+                      IMAGE_NAME=${{ env.IMAGE_NAME }}
+                      IMAGE_DISTRO=${{ env.IMAGE_DISTRO }}
+                      IMAGE_ARCH=amd64
+                      IMAGE_BUILDDATE=${{ env.NOW_DOCKER }}
+                      IMAGE_RELEASE=${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}
+                      IMAGE_REGISTRY=${{ env.IMAGE_REGISTRY }}
+                      IMAGE_SHA1=${{ env.SHA1 }}
                   annotations: |
-                      org.opencontainers.image.description=Alpine base image
-                      org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
-                      org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
-                      org.opencontainers.image.licenses=MIT
-                      org.opencontainers.image.architecture=amd64
-                      org.opencontainers.image.revision=${{ github.sha }}
+                      org.opencontainers.image.authors=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
-                      org.opencontainers.image.ref.name=${{ github.ref_name }}
-                      org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
+                      org.opencontainers.image.title=${{ env.IMAGE_NAME }} (Base) ${{ env.IMAGE_VERSION }} (${{ env.IMAGE_DISTRO }})
+                      org.opencontainers.image.description=${{ env.IMAGE_NAME }} base image with s6-overlay integration
+                      org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
+                      org.opencontainers.image.source=https://github.com/${{ github.repository }}
+                      org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/wiki
+                      org.opencontainers.image.issues=https://github.com/${{ github.repository }}/issues
+                      org.opencontainers.image.licenses=MIT
+                      org.opencontainers.image.version=${{ env.IMAGE_VERSION || '24.04' }}
+                      org.opencontainers.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
+                      org.opencontainers.image.branch=${{ github.ref_name }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
-                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}"
-                      org.alpine.image.build-architecture=amd64
-                      org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
-                      org.alpine.image.build-sha1=${{ env.SHA1 }}
+                      org.opencontainers.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
+                      org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
+                      org.opencontainers.image.sha=${{ github.sha }}
+                      org.opencontainers.image.architecture=amd64
+                      org.alpine.image.maintainers=${{ env.REGISTRY_REPO_AUTHOR_LC }}
+                      org.alpine.image.version=Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}
+                      org.alpine.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
+                      org.alpine.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
+                      org.alpine.image.sha=${{ github.sha }}
+                      org.alpine.image.architecture=amd64
 
             # #
             #   Release › Github › Export Digest › Amd64
@@ -741,26 +786,37 @@ jobs:
                   tags: |
                       ${{ steps.task_release_gh_meta.outputs.tags }}
                   build-args: |-
-                      ARCH=aarch64
-                      RELEASE=${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}
-                      VERSION=${{ env.IMAGE_VERSION }}
-                      BUILDDATE=${{ env.NOW_DOCKER }}
-                      GIT_SHA1=${{ env.SHA1 }}
+                      IMAGE_NAME=${{ env.IMAGE_NAME }}
+                      IMAGE_DISTRO=${{ env.IMAGE_DISTRO }}
+                      IMAGE_ARCH=arm64
+                      IMAGE_BUILDDATE=${{ env.NOW_DOCKER }}
+                      IMAGE_RELEASE=${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}
+                      IMAGE_REGISTRY=${{ env.IMAGE_REGISTRY }}
+                      IMAGE_SHA1=${{ env.SHA1 }}
                   annotations: |-
-                      org.opencontainers.image.description=Alpine base image
-                      org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
-                      org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
-                      org.opencontainers.image.licenses=MIT
-                      org.opencontainers.image.architecture=arm64
-                      org.opencontainers.image.revision=${{ github.sha }}
+                      org.opencontainers.image.authors=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
-                      org.opencontainers.image.ref.name=${{ github.ref_name }}
-                      org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
+                      org.opencontainers.image.title=${{ env.IMAGE_NAME }} (Base) ${{ env.IMAGE_VERSION }} (${{ env.IMAGE_DISTRO }})
+                      org.opencontainers.image.description=${{ env.IMAGE_NAME }} base image with s6-overlay integration
+                      org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
+                      org.opencontainers.image.source=https://github.com/${{ github.repository }}
+                      org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/wiki
+                      org.opencontainers.image.issues=https://github.com/${{ github.repository }}/issues
+                      org.opencontainers.image.licenses=MIT
+                      org.opencontainers.image.version=${{ env.IMAGE_VERSION || '24.04' }}
+                      org.opencontainers.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
+                      org.opencontainers.image.branch=${{ github.ref_name }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
-                      org.alpine.image.build-version="Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}"
-                      org.alpine.image.build-architecture=arm64
-                      org.alpine.image.build-release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
-                      org.alpine.image.build-sha1=${{ env.SHA1 }}
+                      org.opencontainers.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
+                      org.opencontainers.image.development=${{ inputs.DEV_RELEASE == true && 'true' || 'false' }}
+                      org.opencontainers.image.sha=${{ github.sha }}
+                      org.opencontainers.image.architecture=arm64
+                      org.alpine.image.maintainers=${{ env.REGISTRY_REPO_AUTHOR_LC }}
+                      org.alpine.image.version=Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}
+                      org.alpine.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
+                      org.alpine.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
+                      org.alpine.image.sha=${{ github.sha }}
+                      org.alpine.image.architecture=arm64
 
             # #
             #   Release › Github › Export Digest › Arm64
@@ -796,7 +852,8 @@ jobs:
 
             - name: '⚠️ Checkpoint'
               run: |
-                  echo ""
+                  echo "‎"
+                  echo "‎"
                   echo "---- [ GITHUB ] ----------------------------------------------------------------------------------------"
                   echo "github.actor.............................. ${{ github.actor }}"
                   echo "github.ref ............................... ${{ github.ref }}"
@@ -805,17 +862,21 @@ jobs:
                   echo "github.repository_owner .................. ${{ github.repository_owner }}"
                   echo "github.repository ........................ ${{ github.repository }}"
                   echo "github.sha ............................... ${{ github.sha }}"
-                  echo -e ""
+                  echo "‎"
+                  echo "‎"
                   echo "---- [ INPUTS ] ----------------------------------------------------------------------------------------"
-                  echo "inputs.IMAGE_NAME ........................ ${{ inputs.IMAGE_NAME }}"
+                  echo "inputs.IMAGE_DISTRO ...................... ${{ inputs.IMAGE_NAME }}"
+                  echo "inputs.IMAGE_DISTRO ...................... ${{ inputs.IMAGE_DISTRO }}"
                   echo "inputs.IMAGE_VERSION ..................... ${{ inputs.IMAGE_VERSION }}"
                   echo "inputs.IMAGE_GHCR_AUTHOR ................. ${{ inputs.IMAGE_GHCR_AUTHOR }}"
                   echo "inputs.IMAGE_GHCR_USERNAME ............... ${{ inputs.IMAGE_GHCR_USERNAME }}"
                   echo "inputs.DEV_RELEASE ....................... ${{ inputs.DEV_RELEASE }}"
                   echo "inputs.DRY_RUN ........................... ${{ inputs.DRY_RUN }}"
-                  echo -e ""
+                  echo "‎"
+                  echo "‎"
                   echo "---- [ ENV ] -------------------------------------------------------------------------------------------"
                   echo "env.IMAGE_NAME ........................... ${{ env.IMAGE_NAME }}"
+                  echo "env.IMAGE_DISTRO ......................... ${{ env.IMAGE_DISTRO }}"
                   echo "env.IMAGE_VERSION ........................ ${{ env.IMAGE_VERSION }}"
                   echo "env.PKG_VER_1DIGIT ....................... ${{ env.PKG_VER_1DIGIT }}"
                   echo "env.PKG_VER_2DIGIT ....................... ${{ env.PKG_VER_2DIGIT }}"
@@ -829,21 +890,26 @@ jobs:
                   echo "env.REGISTRY_REPO_ORG_AUTHOR_LC .......... ${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}"
                   echo "env.REGISTRY_REPO_AUTHOR_LC .............. ${{ env.REGISTRY_REPO_AUTHOR_LC }}"
                   echo "env.SHA1 ................................. ${{ env.SHA1 }}"
-                  echo -e ""
+                  echo "‎"
+                  echo "‎"
                   echo "---- [ DOCKER IMAGES ] ---------------------------------------------------------------------------------"
                   echo "registry ................................. ${{ env.IMAGE_REGISTRY }} GHCR"
                   echo "tags ..................................... ${{ steps.task_release_gh_meta.outputs.tags }}"
                   echo "labels ................................... ${{ steps.task_release_gh_meta.outputs.labels }}"
                   echo "digest ................................... ${{ steps.task_release_gh_push_amd64.outputs.digest }}"
-                  echo -e ""
+                  echo "‎"
+                  echo "‎"
                   echo "(release) tags ........................... ${{ steps.task_release_gh_meta.outputs.tags }}"
                   echo "(release) labels ......................... ${{ steps.task_release_gh_meta.outputs.labels }}"
-                  echo -e ""
+                  echo "‎"
+                  echo "‎"
                   echo "---- [ DOCKER DIGESTS ] --------------------------------------------------------------------------------"
                   echo "docker image id (amd64) .................. ${{ steps.task_release_gh_push_amd64.outputs.imageid }}"
                   echo "docker digest (amd64) .................... ${{ steps.task_release_gh_push_amd64.outputs.digest }}"
                   echo "docker image id (arm64) .................. ${{ steps.task_release_gh_push_arm64.outputs.imageid }}"
                   echo "docker digest (arm64) .................... ${{ steps.task_release_gh_push_arm64.outputs.digest }}"
+                  echo "‎"
+                  echo "‎"
 
             # #
             #   Release › Github › Push Manifest
@@ -880,18 +946,18 @@ jobs:
               uses: tsickert/discord-webhook@v6.0.0
               if: success()
               with:
-                  username: 'Io'
-                  avatar-url: 'https://i.imgur.com/8BVDkla.jpg'
+                  username: ${{ env.DISCORD_BOT_NAME }}
+                  avatar-url: ${{ env.DISCORD_BOT_AVATAR }}
                   webhook-url: ${{ secrets.DISCORD_WEBHOOK_CHAN_GITHUB_BASEALPINE_RELEASES }}
                   embed-title: "⚙️ ${{ github.workflow_ref }}"
                   embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  embed-thumbnail-url: 'https://i.imgur.com/zDIzE8T.jpg'
+                  embed-thumbnail-url: ${{ env.DISCORD_BOT_EMBED_THUMBNAIL }}
                   embed-description: |
-                      ### 📦 ᲼Deploy (${{ env.IMAGE_REGISTRY }}) ᲼${{ job.status == 'success' && '✅' || '❌' }}᲼ › `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}${{ inputs.DEV_RELEASE == true && '-development' || '' }}`
+                      ### 📦 ᲼Deploy (${{ env.IMAGE_REGISTRY }}) ᲼${{ job.status == 'success' && '✅' || '❌' }}᲼ › `${{ env.IMAGE_DISTRO }}-${{ env.IMAGE_VERSION }}${{ inputs.DEV_RELEASE == true && '-development' || '' }}`
                       ${{ inputs.DEV_RELEASE == true && '### ⚠️⚠️ Development / Pre-release ⚠️⚠️' || '' }}
 
-                      A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github to ${{ env.IMAGE_REGISTRY }} GHCR. The image is available at:
-                      - https://github.com/${{ github.repository }}/pkgs/container/${{ env.IMAGE_NAME }}
+                      A new version of the docker container `${{ env.IMAGE_DISTRO }}` has been released from Github to ${{ env.IMAGE_REGISTRY }} GHCR. The image is available at:
+                      - https://github.com/${{ github.repository }}/pkgs/container/${{ env.IMAGE_DISTRO }}
 
                       - Version: `${{ env.IMAGE_VERSION }}`
                       - Release Type: `${{ inputs.DEV_RELEASE == true && '⚠️⚠️ Development / Pre-release ⚠️⚠️' || 'Stable' }}`
@@ -900,7 +966,7 @@ jobs:
                       - Pull (arm64): `docker pull ghcr.io/${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}@${{ steps.task_release_gh_push_arm64.outputs.digest }}`
                       - Dry Run: `${{ inputs.DRY_RUN }}`
                       - Source: `${{ env.IMAGE_REGISTRY }}` https://github.com/${{ github.repository }}
-                      - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}${{ inputs.DEV_RELEASE == true && '-development' || '' }}`
+                      - Docker Image: `${{ env.IMAGE_DISTRO }}-${{ env.IMAGE_VERSION }}${{ inputs.DEV_RELEASE == true && '-development' || '' }}`
                       - Branch: `${{ github.ref_name }}`
                       - Workflow: `${{ github.workflow }} (#${{github.run_number}})`
                       - Runner: `${{ runner.name }}`
@@ -925,7 +991,7 @@ jobs:
                   embed-timestamp: "${{ env.NOW_LONG }}"
                   embed-author-name: "${{ github.repository_owner }}"
                   embed-author-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  embed-author-icon-url: "https://avatars.githubusercontent.com/u/200161462"
+                  embed-author-icon-url: ${{ env.DISCORD_BOT_EMBED_AUTHOR_ICON }}
 
     # #
     #   Job › Docker Release › Cleanup
@@ -967,7 +1033,6 @@ jobs:
             #   Cleanup › Tags › Start
             # #
 
-
             - name: >-
                   ✅ Start
               run: |
@@ -988,7 +1053,7 @@ jobs:
                   NOW_LONG="$(date +'%m-%d-%Y %H:%M')"                                              #  02-25-2025 12:49
                   echo "NOW_LONG=${NOW_LONG}" >> $GITHUB_ENV
 
-                  NOW_DOCKER="$(date +'%Y%m%d')"                                                    #  20250225
+                  NOW_DOCKER="$(date +'%Y%m%d')"                                                    #  20250225 | YYYYMMDD
                   echo "NOW_DOCKER=${NOW_DOCKER}" >> $GITHUB_ENV
 
                   NOW_DOCKER_TS="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
@@ -999,6 +1064,12 @@ jobs:
 
                   SHA1_GH="$(echo ${GITHUB_SHA})"                                                   #  71fad013cfce9116ec62779e4a7e627fe4c33627
                   echo "SHA1_GH=${SHA1_GH}" >> $GITHUB_ENV
+
+                  #  parse version into segments
+                  IFS=. read major minor patch <<< "${{ env.IMAGE_VERSION }}"
+                  echo "major=${major}" >> $GITHUB_OUTPUT
+                  echo "minor=${minor}" >> $GITHUB_OUTPUT
+                  echo "patch=${patch}" >> $GITHUB_OUTPUT
 
                   PKG_VER_1DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
                   echo "PKG_VER_1DIGIT=${PKG_VER_1DIGIT}" >> $GITHUB_ENV
@@ -1073,7 +1144,7 @@ jobs:
               uses: quartx-analytics/ghcr-cleaner@v1
               with:
                   owner-type: user
-                  token: ${{ secrets.IMAGE_GHCR_TOKEN }}
+                  token: ${{ secrets.SELF_TOKEN_CL }}
                   repository-owner: ${{ github.repository_owner }}
                   repository-name: ${{ github.repository }}
                   delete-untagged: true
