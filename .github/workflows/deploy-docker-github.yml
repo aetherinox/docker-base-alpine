@@ -77,7 +77,7 @@ on:
             IMAGE_VERSION:
                 description:    '🏷️ Image Version'
                 required:       true
-                default:        '24.04'
+                default:        '3.22'
                 type:           string
 
             # #
@@ -621,13 +621,13 @@ jobs:
                       #  tag            add pr tag            ( PR or push only )
                       type=ref,enable=${{ github.event_name == 'pull_request' || github.event_name == 'push' }},priority=600,prefix=,suffix=,event=tag
 
-                      #  tag            add 24.04             ( dispatch only + no dev )
+                      #  tag            add 3.22              ( dispatch only + no dev )
                       type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=450,prefix=,suffix=,value=${{ env.IMAGE_VERSION }}
 
-                      #  tag            add 1.0               ( dispatch only + no dev )
+                      #  tag            add 3.2               ( dispatch only + no dev )
                       type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=425,prefix=,suffix=,value=${{ env.PKG_VER_2DIGIT }}
 
-                      #  tag            add 1                 ( dispatch only + no dev )
+                      #  tag            add 3                 ( dispatch only + no dev )
                       type=raw,enable=${{ github.event_name == 'workflow_dispatch' && inputs.DEV_RELEASE == false }},priority=400,prefix=,suffix=,value=${{ env.PKG_VER_1DIGIT }}
 
                       #  tag            add development       ( dispatch only + only dev )
@@ -647,7 +647,7 @@ jobs:
                       org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/wiki
                       org.opencontainers.image.issues=https://github.com/${{ github.repository }}/issues
                       org.opencontainers.image.licenses=MIT
-                      org.opencontainers.image.version=${{ env.IMAGE_VERSION || '24.04' }}
+                      org.opencontainers.image.version=${{ env.IMAGE_VERSION || '3.22' }}
                       org.opencontainers.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
                       org.opencontainers.image.branch=${{ github.ref_name }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
@@ -669,7 +669,7 @@ jobs:
                       org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/wiki
                       org.opencontainers.image.issues=https://github.com/${{ github.repository }}/issues
                       org.opencontainers.image.licenses=MIT
-                      org.opencontainers.image.version=${{ env.IMAGE_VERSION || '24.04' }}
+                      org.opencontainers.image.version=${{ env.IMAGE_VERSION || '3.22' }}
                       org.opencontainers.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
                       org.opencontainers.image.branch=${{ github.ref_name }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
@@ -721,7 +721,7 @@ jobs:
                       org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/wiki
                       org.opencontainers.image.issues=https://github.com/${{ github.repository }}/issues
                       org.opencontainers.image.licenses=MIT
-                      org.opencontainers.image.version=${{ env.IMAGE_VERSION || '24.04' }}
+                      org.opencontainers.image.version=${{ env.IMAGE_VERSION || '3.22' }}
                       org.opencontainers.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
                       org.opencontainers.image.branch=${{ github.ref_name }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
@@ -803,7 +803,7 @@ jobs:
                       org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/wiki
                       org.opencontainers.image.issues=https://github.com/${{ github.repository }}/issues
                       org.opencontainers.image.licenses=MIT
-                      org.opencontainers.image.version=${{ env.IMAGE_VERSION || '24.04' }}
+                      org.opencontainers.image.version=${{ env.IMAGE_VERSION || '3.22' }}
                       org.opencontainers.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
                       org.opencontainers.image.branch=${{ github.ref_name }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
