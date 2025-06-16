@@ -55,6 +55,8 @@ Normal users should not need to modify the files in this repository.
       - [Stable - arm64](#stable---arm64)
       - [Development - amd64](#development---amd64)
       - [Development - arm64](#development---arm64)
+      - [Using `Buildx Imagetools`](#using-buildx-imagetools)
+      - [Using `Manifest Create`](#using-manifest-create)
 - [Using Image](#using-image)
 - [Extra Notes](#extra-notes)
   - [Accessing Container Shell](#accessing-container-shell)
@@ -943,13 +945,13 @@ $ docker buildx imagetools inspect ghcr.io/aetherinox/alpine:3.22-amd64
 
 Name:      ghcr.io/aetherinox/alpine:3.22-amd64
 MediaType: application/vnd.docker.distribution.manifest.v2+json
-Digest:    sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8
+Digest:    sha256:a0665eee26ee666c1639b85399509268c9de935957223681a21f29d71963ef24
 
 $ docker buildx imagetools inspect ghcr.io/aetherinox/alpine:3.22-arm64
 
 Name:      ghcr.io/aetherinox/alpine:3.22-arm64
 MediaType: application/vnd.docker.distribution.manifest.v2+json
-Digest:    sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda
+Digest:    sha256:db3cb2ddd6902395a90494cc8fda43a14805fb32d4844465fd0e149a886a6df7
 ```
 
 <br />
@@ -961,7 +963,7 @@ If you are building the **development release** images; you should see the follo
 
 <br />
 
-<p align="center"><img style="width: 70%;text-align: center;" src="docs/img/core/04.png"><br><sub><sup><b>Registry v2:</b> Newly created <code>development-amd64</code> and <code>development-arm64</code> images</sup></sub></p>
+<p align="center"><img style="width: 70%;text-align: center;" src="docs/img/core/02.png"><br><sub><sup><b>Registry v2:</b> Newly created <code>development-amd64</code> and <code>development-arm64</code> images</sup></sub></p>
 
 <br />
 
@@ -974,14 +976,20 @@ $ docker buildx imagetools inspect ghcr.io/aetherinox/alpine:development-amd64
 
 Name:      ghcr.io/aetherinox/alpine:development-amd64
 MediaType: application/vnd.docker.distribution.manifest.v2+json
-Digest:    sha256:8f36385a28c8f6eb7394d903c9a7a2765b06f94266b32628389ee9e3e3d7e69d
+Digest:    sha256:3e71b1b5ef5957058a0472498ad4647f2d1e149f8abc17d731d04127257e9b9f
 
 $ docker buildx imagetools inspect ghcr.io/aetherinox/alpine:development-arm64
 
 Name:      ghcr.io/aetherinox/alpine:development-arm64
 MediaType: application/vnd.docker.distribution.manifest.v2+json
-Digest:    sha256:c719ccb034946e3f0625003f25026d001768794e38a1ba8aafc9146291d548c5
+Digest:    sha256:0cafbe42a02ff54422ba9df734aac712d0218429b33cd82111a45a99e51c8197
 ```
+
+<br />
+
+If you opted to build both the **stable** and **development** releases; you should see:
+
+<p align="center"><img style="width: 80%;text-align: center;" src="docs/img/core/03.png"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images for both <code>Stable</code> and <code>Development</code> releases</sup></sub></p>
 
 <br />
 <br />
@@ -994,9 +1002,10 @@ Digest:    sha256:c719ccb034946e3f0625003f25026d001768794e38a1ba8aafc9146291d548
 > ```shell
 > $ docker images --all --no-trunc | grep aetherinox
 > 
-> ghcr.io/aetherinox/alpine   3.22-arm64        sha256:bb425429e98ab467fd91474701da2e5c0a7cb4a5f218a710d950eb0ff595486c   3 minutes ago   38.8MB
-> 
-> ghcr.io/aetherinox/alpine   3.22-amd64        sha256:dea4cb91379dba289d8d3e8842d4fb7b7857faa7f3d02d5b9a043a1ee58e61d7   4 minutes ago   27.3MB
+> ghcr.io/aetherinox/alpine   3.22-amd64                    sha256:34144d8396abf2545921a800c1b0e0b0a32f25574e928648986b71bf33dfdfd7   10 minutes ago   37.4MB
+> ghcr.io/aetherinox/alpine   3.22-arm64                    sha256:b0c4c88646c42659140a2086fd09f45710dcd3dc5251ade9d615a050cdadcffb   12 minutes ago   49.9MB
+> ghcr.io/aetherinox/alpine   development-amd64             sha256:26c4953a73880c15735d022debb103cf9a5c65cc2771b4ee93b89279a6913bc4   15 minutes ago   37.4MB
+> ghcr.io/aetherinox/alpine   development-arm64             sha256:b0bddc3839904ccad328eb08a609600bcce51670502e1887bca613f50e03660e   16 minutes ago   49.9MB
 > ```
 >
 > To get the correct sha256 digest, use:
@@ -1007,9 +1016,22 @@ Digest:    sha256:c719ccb034946e3f0625003f25026d001768794e38a1ba8aafc9146291d548
 > 
 
 <br />
+
+At this point, you should have all of your images created for amd64 and arm64, however, each image sits by itself. If you want to merge both architectures into a single image; you must manipulate the manifest to merge them. The next section will explain how to do so.
+
+There are two ways to do this; you can pick either one:
+
+- [Using Buildx Imagetools](#using-buildx-imagetools)
+- [Using Manifest Create](#using-manifest-create)
+
+<br />
 <br />
 
-Once you have the correct `SHA256` hash digests; paste them into the command below. This command is where you can specify the real `--tag` that the public image will have. The previous tags were simply placeholders and no longer matter.
+##### Using `Buildx Imagetools`
+
+This section explains how you to take your individual images, and merge them so that you end up with a single image with both arcitectures.
+
+Once you have all of your images list of `SHA256` hash digests; paste them into the command below. This command is where you can specify the real `--tag` that the public image will have. The previous tags were simply placeholders and no longer matter.
 
 <br />
 
@@ -1025,16 +1047,26 @@ docker buildx imagetools create \
   --tag ghcr.io/aetherinox/alpine:3 \
   --tag ghcr.io/aetherinox/alpine:3.2 \
   --tag ghcr.io/aetherinox/alpine:3.22 \
+  sha256:a0665eee26ee666c1639b85399509268c9de935957223681a21f29d71963ef24 \
+  sha256:db3cb2ddd6902395a90494cc8fda43a14805fb32d4844465fd0e149a886a6df7
 
-  sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8 \
-  sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda
-
-[+] Building 0.2s (4/4) FINISHED                                                                                                                                                                                                      
- => [internal] pushing ghcr.io/aetherinox/alpine:latest     0.2s
- => [internal] pushing ghcr.io/aetherinox/alpine:3          0.2s
- => [internal] pushing ghcr.io/aetherinox/alpine:3.2        0.2s
- => [internal] pushing ghcr.io/aetherinox/alpine:3.22       0.2s
+# OUTPUT
+[+] Building 0.3s (4/4) FINISHED
+ => [internal] pushing ghcr.io/aetherinox/ubuntu:latest               0.2s
+ => [internal] pushing ghcr.io/aetherinox/ubuntu:3                    0.3s
+ => [internal] pushing ghcr.io/aetherinox/ubuntu:3.2                  0.2s
+ => [internal] pushing ghcr.io/aetherinox/ubuntu:3.22                 0.2s
 ```
+
+<br />
+
+The command above will give you the following images:
+
+<p align="center"><img style="width: 80%;text-align: center;" src="docs/img/core/04.png"><br><sub><sup><b>Registry v2:</b> merged <code>amd64</code> and <code>arm64</code> for <code>Stable</code> release</sup></sub></p>
+
+<br />
+
+The image above will give you one image for each of the `--tag` you specified, and it will list both arcitectures for each image.
 
 <br />
 
@@ -1047,21 +1079,39 @@ For the **development** releases, use:
 
 docker buildx imagetools create \
   --tag ghcr.io/aetherinox/alpine:development \
-  sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda \
-  sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8
+  sha256:3e71b1b5ef5957058a0472498ad4647f2d1e149f8abc17d731d04127257e9b9f \
+  sha256:0cafbe42a02ff54422ba9df734aac712d0218429b33cd82111a45a99e51c8197
 
-[+] Building 0.1s (1/1) FINISHED
+# OUTPUT
+[+] Building 0.3s (1/1) FINISHED
  => [internal] pushing ghcr.io/aetherinox/alpine:development   0.1s
 ```
 
 <br />
 
 > [!NOTE]
-> Compared to the **stable** release which has 4 tags; the **development** release only has one tag.
+> Compared to the **stable** release which has 4 tags; the **development** release only has 1 tag.
 
 <br />
 
-Alternatively, you could use the `🗔 manifest create` command; as an example, you can merge multiple architecture images together into a single image. The top line with `🔖 aetherinox/alpine:latest` can be any name. However, all images after `--amend` MUST be already existing images uploaded to the registry.
+The command above will output the following image:
+
+<p align="center"><img style="width: 80%;text-align: center;" src="docs/img/core/05.png"><br><sub><sup><b>Registry v2:</b> merged <code>amd64</code> and <code>arm64</code> for <code>Development</code> release</sup></sub></p>
+
+<br />
+
+The image above will give you **one image**, since we only specified one `--tag`, and it will list both arcitectures for each image.
+
+Alternatively, you could use the [🗔 manifest create](#using-manifest-create) command
+
+<br />
+<br />
+
+##### Using `Manifest Create`
+
+This section explains how you to take your individual images, and merge them so that you end up with a single image with both arcitectures.
+
+As an example, you can merge multiple architecture images together into a single image. The top line with `🔖 aetherinox/alpine:latest` can be any name. However, all images after `--amend` MUST be already existing images uploaded to the registry.
 
 ```shell
 docker manifest create ghcr.io/aetherinox/alpine:latest \
@@ -1077,32 +1127,115 @@ docker manifest push ghcr.io/aetherinox/alpine:latest
 In this example, we take the existing two files we created earlier, and merge them into one. You can either specify the image by `SHA256 digest`, or tag:
 
 ```shell
-# Example 1 (using tag)
-docker manifest create ghcr.io/aetherinox/alpine:latest \
+# Stable - Create Manifest
+$ docker manifest create ghcr.io/aetherinox/alpine:latest \
     --amend ghcr.io/aetherinox/alpine:3.22-amd64 \
     --amend ghcr.io/aetherinox/alpine:3.22-arm64
 
-# Example 2 (using sha256 hash)
-docker manifest create ghcr.io/aetherinox/alpine:latest \
-    --amend ghcr.io/aetherinox/alpine@sha256:657fd74ebfa6577c069d1d74fec291b8b5309f762e7ad2d0d14b51de64a841b8 \
-    --amend ghcr.io/aetherinox/alpine@sha256:2750bb927d8e4434d21c9f9941632310b98bbb2729389af236888ebbc4d75dda
-
-# Push manifest changes to registry
-docker manifest push ghcr.io/aetherinox/alpine:latest
+# OUTPUT
+Created manifest list ghcr.io/aetherinox/alpine:latest
 ```
 
 <br />
 
-If you go back to your registry; you should now see multiple new entries, all with different tags. Two of the images are your old `amd64` and `arm64` images, and then you should have your official one with the four tags specified above. You can delete the two original images if you do not want them.
+Then push the manifest to your registry:
 
-<p align="center"><img style="width: 80%;text-align: center;" src="docs/img/core/02.png"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images, and merged containers with both architectures</sup></sub></p>
+```shell
+# Push Manifest
+$ docker manifest push ghcr.io/aetherinox/alpine:latest
+
+# OUTPUT
+sha256:4785b6a0ff36459ddfe2d2f054fb6a89f9b011db9a5eb6d35ca6e51e3075d1db
+```
+
+<br />
+
+If you look at your docker registry, you should see:
+
+<br />
+
+<p align="center"><img style="width: 80%;text-align: center;" src="docs/img/core/06.png"><br><sub><sup><b>Registry v2:</b> merged <code>amd64</code> and <code>arm64</code> for <code>Stable</code> release; using <code>docker manifest create</code></sup></sub></p>
+
+<br />
+
+For the **development** release:
+
+```shell
+# Development - Create Manifest
+docker manifest create ghcr.io/aetherinox/alpine:development \
+    --amend ghcr.io/aetherinox/alpine:development-amd64 \
+    --amend ghcr.io/aetherinox/alpine:development-arm64
+
+# OUTPUT
+Created manifest list ghcr.io/aetherinox/alpine:development
+```
+
+<br />
+
+Then push the manifest to your registry:
+
+```shell
+# Push Manifest
+$ docker manifest push ghcr.io/aetherinox/alpine:development
+
+# OUTPUT
+sha256:f6b293dbd5f87c7abc6fccb5ea9a988e101c16afd08d82986866a2e94e5b62bc
+```
+
+<br />
+
+If you look at your docker registry, you should see:
+
+<br />
+
+<p align="center"><img style="width: 80%;text-align: center;" src="docs/img/core/07.png"><br><sub><sup><b>Registry v2:</b> merged <code>amd64</code> and <code>arm64</code> for <code>Development</code> release; using <code>docker manifest create</code></sup></sub></p>
+
+<br />
+
+> [!NOTE]
+> If you push the manifest to your online registry, and notice that the image contains duplicate architecture images; you need to remove the manifest and re-create it using:
+>
+> ```shell
+> docker manifest rm ghcr.io/aetherinox/alpine:latest
+> docker manifest rm ghcr.io/aetherinox/alpine:3.22-amd64
+> docker manifest rm ghcr.io/aetherinox/alpine:3.22-arm64
+> docker manifest rm ghcr.io/aetherinox/alpine:development
+> ```
+
+<br />
+
+If you want to create the manifest using the `SHA256`, you can use one of these altnerative commands:
+
+```shell
+# Example 1 - Stable - (using sha256 hash)
+docker manifest create ghcr.io/aetherinox/alpine:latest \
+    --amend ghcr.io/aetherinox/alpine@sha256:a0665eee26ee666c1639b85399509268c9de935957223681a21f29d71963ef24 \
+    --amend ghcr.io/aetherinox/alpine@sha256:db3cb2ddd6902395a90494cc8fda43a14805fb32d4844465fd0e149a886a6df7
+
+# Push Manifest
+docker manifest push ghcr.io/aetherinox/alpine:latest
+
+
+
+# Example 2 - Development - (using sha256 hash)
+docker manifest create ghcr.io/aetherinox/alpine:development \
+    --amend ghcr.io/aetherinox/alpine@sha256:3e71b1b5ef5957058a0472498ad4647f2d1e149f8abc17d731d04127257e9b9f \
+    --amend ghcr.io/aetherinox/alpine@sha256:0cafbe42a02ff54422ba9df734aac712d0218429b33cd82111a45a99e51c8197
+
+# Push Manifest
+docker manifest push ghcr.io/aetherinox/alpine:development
+```
+
+<br />
+
+You should now have your generated images, with all architectures combined into a single image that others can pull.
 
 <br />
 <br />
 
 If you are pushing to Github's GHCR; the interface will look different, as Github merges all tags into a single listing, instead of Registry v2 listing each tag on its own:
 
-<p align="center"><img style="width: 80%;text-align: center;" src="docs/img/core/03.png"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images, and merged containers with both architectures</sup></sub></p>
+<p align="center"><img style="width: 80%;text-align: center;" src="docs/img/core/10.png"><br><sub><sup><b>Registry v2:</b> Newly created <code>amd64</code> and <code>arm64</code> images, and merged containers with both architectures</sup></sub></p>
 
 <br />
 
