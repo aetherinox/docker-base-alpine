@@ -499,7 +499,7 @@ jobs:
 
             - name: '🕛 Set Vars'
               run: |
-                  echo "REGISTRY_REPO_ORG_AUTHOR_LC=`echo ${{ env.IMAGE_DOCKERHUB_AUTHOR }}/${{ env.IMAGE_DISTRO }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}        #  aetherinox/docker-base-alpine
+                  echo "REGISTRY_REPO_ORG_AUTHOR_LC=`echo ${{ env.IMAGE_DOCKERHUB_AUTHOR }}/${{ env.IMAGE_NAME }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}        #  aetherinox/docker-base-alpine
                   echo "REGISTRY_REPO_AUTHOR_LC=`echo ${{ env.IMAGE_DOCKERHUB_AUTHOR }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}                                    #  aetherinox
 
             # #
