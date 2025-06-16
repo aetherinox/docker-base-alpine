@@ -105,7 +105,7 @@ on:
             #   Github › Image Author
             #
             #   used in github image path
-            #       ghcr.io/${{ env.IMAGE_GHCR_AUTHOR }}/${{ env.IMAGE_DISTRO }}
+            #       ghcr.io/${{ env.IMAGE_GHCR_AUTHOR }}/${{ env.IMAGE_NAME }}
             # #
 
             IMAGE_GHCR_AUTHOR:
@@ -509,7 +509,7 @@ jobs:
 
             - name: '🕛 Set Vars'
               run: |
-                  echo "REGISTRY_REPO_ORG_AUTHOR_LC=`echo ${{ env.IMAGE_GHCR_AUTHOR }}/${{ env.IMAGE_DISTRO }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}        #  aetherinox/docker-base-alpine
+                  echo "REGISTRY_REPO_ORG_AUTHOR_LC=`echo ${{ env.IMAGE_GHCR_AUTHOR }}/${{ env.IMAGE_NAME }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}          #  aetherinox/docker-base-alpine
                   echo "REGISTRY_REPO_AUTHOR_LC=`echo ${{ env.IMAGE_GHCR_AUTHOR }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}                                    #  aetherinox
 
             # #
@@ -640,7 +640,7 @@ jobs:
                   labels: |
                       org.opencontainers.image.authors=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
-                      org.opencontainers.image.title=${{ env.IMAGE_NAME }} (Base) ${{ env.IMAGE_VERSION }} (${{ env.IMAGE_DISTRO }})
+                      org.opencontainers.image.title=${{ env.IMAGE_NAME }} (Base) ${{ env.IMAGE_VERSION }})
                       org.opencontainers.image.description=${{ env.IMAGE_NAME }} base image with s6-overlay integration
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
                       org.opencontainers.image.source=https://github.com/${{ github.repository }}
@@ -648,7 +648,6 @@ jobs:
                       org.opencontainers.image.issues=https://github.com/${{ github.repository }}/issues
                       org.opencontainers.image.licenses=MIT
                       org.opencontainers.image.version=${{ env.IMAGE_VERSION || '3.22' }}
-                      org.opencontainers.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
                       org.opencontainers.image.branch=${{ github.ref_name }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
                       org.opencontainers.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
@@ -656,13 +655,12 @@ jobs:
                       org.opencontainers.image.sha=${{ github.sha }}
                       org.alpine.image.maintainers=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.alpine.image.version=Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}
-                      org.alpine.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
                       org.alpine.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
                       org.alpine.image.sha=${{ github.sha }}
                   annotations: |
                       org.opencontainers.image.authors=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
-                      org.opencontainers.image.title=${{ env.IMAGE_NAME }} (Base) ${{ env.IMAGE_VERSION }} (${{ env.IMAGE_DISTRO }})
+                      org.opencontainers.image.title=${{ env.IMAGE_NAME }} (Base) ${{ env.IMAGE_VERSION }})
                       org.opencontainers.image.description=${{ env.IMAGE_NAME }} base image with s6-overlay integration
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
                       org.opencontainers.image.source=https://github.com/${{ github.repository }}
@@ -670,7 +668,6 @@ jobs:
                       org.opencontainers.image.issues=https://github.com/${{ github.repository }}/issues
                       org.opencontainers.image.licenses=MIT
                       org.opencontainers.image.version=${{ env.IMAGE_VERSION || '3.22' }}
-                      org.opencontainers.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
                       org.opencontainers.image.branch=${{ github.ref_name }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
                       org.opencontainers.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
@@ -678,7 +675,6 @@ jobs:
                       org.opencontainers.image.sha=${{ github.sha }}
                       org.alpine.image.maintainers=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.alpine.image.version=Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}
-                      org.alpine.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
                       org.alpine.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
                       org.alpine.image.sha=${{ github.sha }}
 
@@ -705,7 +701,6 @@ jobs:
                       ${{ steps.task_release_gh_meta.outputs.tags }}
                   build-args: |-
                       IMAGE_NAME=${{ env.IMAGE_NAME }}
-                      IMAGE_DISTRO=${{ env.IMAGE_DISTRO }}
                       IMAGE_ARCH=amd64
                       IMAGE_BUILDDATE=${{ env.NOW_DOCKER }}
                       IMAGE_RELEASE=${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}
@@ -714,7 +709,7 @@ jobs:
                   annotations: |
                       org.opencontainers.image.authors=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
-                      org.opencontainers.image.title=${{ env.IMAGE_NAME }} (Base) ${{ env.IMAGE_VERSION }} (${{ env.IMAGE_DISTRO }})
+                      org.opencontainers.image.title=${{ env.IMAGE_NAME }} (Base) ${{ env.IMAGE_VERSION }})
                       org.opencontainers.image.description=${{ env.IMAGE_NAME }} base image with s6-overlay integration
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
                       org.opencontainers.image.source=https://github.com/${{ github.repository }}
@@ -722,7 +717,6 @@ jobs:
                       org.opencontainers.image.issues=https://github.com/${{ github.repository }}/issues
                       org.opencontainers.image.licenses=MIT
                       org.opencontainers.image.version=${{ env.IMAGE_VERSION || '3.22' }}
-                      org.opencontainers.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
                       org.opencontainers.image.branch=${{ github.ref_name }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
                       org.opencontainers.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
@@ -731,7 +725,6 @@ jobs:
                       org.opencontainers.image.architecture=amd64
                       org.alpine.image.maintainers=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.alpine.image.version=Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}
-                      org.alpine.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
                       org.alpine.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
                       org.alpine.image.sha=${{ github.sha }}
                       org.alpine.image.architecture=amd64
@@ -787,7 +780,6 @@ jobs:
                       ${{ steps.task_release_gh_meta.outputs.tags }}
                   build-args: |-
                       IMAGE_NAME=${{ env.IMAGE_NAME }}
-                      IMAGE_DISTRO=${{ env.IMAGE_DISTRO }}
                       IMAGE_ARCH=arm64
                       IMAGE_BUILDDATE=${{ env.NOW_DOCKER }}
                       IMAGE_RELEASE=${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}
@@ -796,7 +788,7 @@ jobs:
                   annotations: |-
                       org.opencontainers.image.authors=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.opencontainers.image.vendor=${{ env.REGISTRY_REPO_AUTHOR_LC }}
-                      org.opencontainers.image.title=${{ env.IMAGE_NAME }} (Base) ${{ env.IMAGE_VERSION }} (${{ env.IMAGE_DISTRO }})
+                      org.opencontainers.image.title=${{ env.IMAGE_NAME }} (Base) ${{ env.IMAGE_VERSION }})
                       org.opencontainers.image.description=${{ env.IMAGE_NAME }} base image with s6-overlay integration
                       org.opencontainers.image.created=${{ env.NOW_DOCKER_TS }}
                       org.opencontainers.image.source=https://github.com/${{ github.repository }}
@@ -804,7 +796,6 @@ jobs:
                       org.opencontainers.image.issues=https://github.com/${{ github.repository }}/issues
                       org.opencontainers.image.licenses=MIT
                       org.opencontainers.image.version=${{ env.IMAGE_VERSION || '3.22' }}
-                      org.opencontainers.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
                       org.opencontainers.image.branch=${{ github.ref_name }}
                       org.opencontainers.image.registry=${{ env.IMAGE_REGISTRY }}
                       org.opencontainers.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
@@ -813,7 +804,6 @@ jobs:
                       org.opencontainers.image.architecture=arm64
                       org.alpine.image.maintainers=${{ env.REGISTRY_REPO_AUTHOR_LC }}
                       org.alpine.image.version=Version:- ${{ env.IMAGE_VERSION }} Date:- ${{ env.NOW_DOCKER }}
-                      org.alpine.image.distro=${{ env.IMAGE_DISTRO || 'noble' }}
                       org.alpine.image.release="${{ inputs.DEV_RELEASE == true && 'development' || 'stable' }}"
                       org.alpine.image.sha=${{ github.sha }}
                       org.alpine.image.architecture=arm64
@@ -865,8 +855,7 @@ jobs:
                   echo "‎"
                   echo "‎"
                   echo "---- [ INPUTS ] ----------------------------------------------------------------------------------------"
-                  echo "inputs.IMAGE_DISTRO ...................... ${{ inputs.IMAGE_NAME }}"
-                  echo "inputs.IMAGE_DISTRO ...................... ${{ inputs.IMAGE_DISTRO }}"
+                  echo "inputs.IMAGE_NAME ........................ ${{ inputs.IMAGE_NAME }}"
                   echo "inputs.IMAGE_VERSION ..................... ${{ inputs.IMAGE_VERSION }}"
                   echo "inputs.IMAGE_GHCR_AUTHOR ................. ${{ inputs.IMAGE_GHCR_AUTHOR }}"
                   echo "inputs.IMAGE_GHCR_USERNAME ............... ${{ inputs.IMAGE_GHCR_USERNAME }}"
@@ -876,7 +865,6 @@ jobs:
                   echo "‎"
                   echo "---- [ ENV ] -------------------------------------------------------------------------------------------"
                   echo "env.IMAGE_NAME ........................... ${{ env.IMAGE_NAME }}"
-                  echo "env.IMAGE_DISTRO ......................... ${{ env.IMAGE_DISTRO }}"
                   echo "env.IMAGE_VERSION ........................ ${{ env.IMAGE_VERSION }}"
                   echo "env.PKG_VER_1DIGIT ....................... ${{ env.PKG_VER_1DIGIT }}"
                   echo "env.PKG_VER_2DIGIT ....................... ${{ env.PKG_VER_2DIGIT }}"
@@ -953,11 +941,11 @@ jobs:
                   embed-url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   embed-thumbnail-url: ${{ env.DISCORD_BOT_EMBED_THUMBNAIL }}
                   embed-description: |
-                      ### 📦 ᲼Deploy (${{ env.IMAGE_REGISTRY }}) ᲼${{ job.status == 'success' && '✅' || '❌' }}᲼ › `${{ env.IMAGE_DISTRO }}-${{ env.IMAGE_VERSION }}${{ inputs.DEV_RELEASE == true && '-development' || '' }}`
+                      ### 📦 ᲼Deploy (${{ env.IMAGE_REGISTRY }}) ᲼${{ job.status == 'success' && '✅' || '❌' }}᲼ › `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}${{ inputs.DEV_RELEASE == true && '-development' || '' }}`
                       ${{ inputs.DEV_RELEASE == true && '### ⚠️⚠️ Development / Pre-release ⚠️⚠️' || '' }}
 
-                      A new version of the docker container `${{ env.IMAGE_DISTRO }}` has been released from Github to ${{ env.IMAGE_REGISTRY }} GHCR. The image is available at:
-                      - https://github.com/${{ github.repository }}/pkgs/container/${{ env.IMAGE_DISTRO }}
+                      A new version of the docker container `${{ env.IMAGE_NAME }}` has been released from Github to ${{ env.IMAGE_REGISTRY }} GHCR. The image is available at:
+                      - https://github.com/${{ github.repository }}/pkgs/container/${{ env.IMAGE_NAME }}
 
                       - Version: `${{ env.IMAGE_VERSION }}`
                       - Release Type: `${{ inputs.DEV_RELEASE == true && '⚠️⚠️ Development / Pre-release ⚠️⚠️' || 'Stable' }}`
@@ -966,7 +954,7 @@ jobs:
                       - Pull (arm64): `docker pull ghcr.io/${{ env.REGISTRY_REPO_ORG_AUTHOR_LC }}@${{ steps.task_release_gh_push_arm64.outputs.digest }}`
                       - Dry Run: `${{ inputs.DRY_RUN }}`
                       - Source: `${{ env.IMAGE_REGISTRY }}` https://github.com/${{ github.repository }}
-                      - Docker Image: `${{ env.IMAGE_DISTRO }}-${{ env.IMAGE_VERSION }}${{ inputs.DEV_RELEASE == true && '-development' || '' }}`
+                      - Docker Image: `${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}${{ inputs.DEV_RELEASE == true && '-development' || '' }}`
                       - Branch: `${{ github.ref_name }}`
                       - Workflow: `${{ github.workflow }} (#${{github.run_number}})`
                       - Runner: `${{ runner.name }}`
