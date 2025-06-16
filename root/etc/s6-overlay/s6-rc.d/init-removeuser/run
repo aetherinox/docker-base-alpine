@@ -82,6 +82,7 @@ removeUsers=(
     "man"
     "news"
     "postmaster"
+    "guest"
     "sasl"
     "src"
     "staff"
