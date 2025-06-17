@@ -1128,12 +1128,10 @@ jobs:
             # #
 
             - name: '🧹 Clean Untagged Images'
-              id: task_cleanup_clean
-              uses: quartx-analytics/ghcr-cleaner@v1
+              uses: Chizkiyahu/delete-untagged-ghcr-action@v6
               with:
-                  owner-type: user
+                  owner_type: user
                   token: ${{ secrets.SELF_TOKEN_CL }}
-                  repository-owner: ${{ github.repository_owner }}
-                  repository-name: ${{ github.repository }}
-                  delete-untagged: true
-                # keep-at-most: 0
+                  repository_owner: ${{ github.repository_owner }}
+                  repository: ${{ github.repository }}
+                  untagged_only: true
