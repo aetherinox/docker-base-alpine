@@ -305,6 +305,7 @@ RUN \
             coreutils \
             curl \
             findutils \
+            openssl \
             jq \
             git \
             netcat-openbsd \
