@@ -4,7 +4,7 @@
 # #
 #   @version        1
 #   @file           package-install.v1
-#   @date           12-18-2024
+#   @date           06-16-2025
 #   @usage          makes use of s6-overlay for docker containers
 #                   https://github.com/just-containers/s6-overlay
 # #
@@ -15,12 +15,14 @@ PKG_SCRIPT_VER='1.20241218'
 #   Funcs
 # #
 
-exec_info() {
+exec_info()
+{
     local MSG=$*
     echo "[package-install] [ $MSG ]"
 }
 
-exec_debug() {
+exec_debug()
+{
     local MSG=$*
     if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then echo "[package-install] (DEBUG) $MSG"; fi
 }
@@ -34,7 +36,7 @@ exec_debug "Package install script version ${PKG_SCRIPT_VER}"
 if [[ -f "/mod-pip-packages-to-install.list" ]]; then
     IFS=' ' read -ra PIP_PACKAGES <<< "$(tr '\n' ' ' < /mod-pip-packages-to-install.list)"
     if [[ ${#PIP_PACKAGES[@]} -ne 0 ]] && [[ ${PIP_PACKAGES[*]} != "" ]]; then
-        if [[ "$(command -v python3)" != "/lsiopy/bin/python3" ]]; then
+        if [[ "$(command -v python3)" != "/aetherxpy/bin/python3" ]]; then
             CREATE_VENV="true"
 
             exec_debug "Marking venv for creation and adding python os dependencies to install list."
@@ -49,7 +51,7 @@ if [[ -f "/mod-pip-packages-to-install.list" ]]; then
             fi
 
         else
-            exec_debug "Venv at /lsiopy is already active"
+            exec_debug "Venv at /aetherxpy is already active"
         fi
     else
         exec_debug "No pip packages identified in install list, skipping."
@@ -91,7 +93,7 @@ if [[ -f "/mod-pip-packages-to-install.list" ]]; then
         exec_info "Installing requested pip packages"
         if [[ ${CREATE_VENV} == "true" ]]; then
             exec_info "Creating venv"
-            python3 -m venv /lsiopy
+            python3 -m venv /aetherxpy
         fi
 
         exec_debug "Updating/installing pip, wheel and setuptools."
@@ -99,10 +101,10 @@ if [[ -f "/mod-pip-packages-to-install.list" ]]; then
         PIP_ARGS=()
 
         if [[ -f /usr/bin/apt ]] && grep -q 'ID=ubuntu' /etc/os-release; then
-            PIP_ARGS+=("-f" "https://raw.githubusercontent.com/aetherinox/docker-base-alpine/docker/wheels/ubuntu/")
+            PIP_ARGS+=("-f" "https://raw.githubusercontent.com/aetherinox/docker-base-ubuntu/docker/wheels/ubuntu/")
         elif [[ -f /sbin/apk ]]; then
             ALPINE_VER=$(grep main /etc/apk/repositories | sed 's|.*alpine/v||' | sed 's|/main.*||')
-            PIP_ARGS+=("-f" "https://raw.githubusercontent.com/Aetherinox/docker-base-alpine/docker/wheels/alpine-${ALPINE_VER}/")
+            PIP_ARGS+=("-f" "https://raw.githubusercontent.com/aetherinox/docker-base-alpine/docker/wheels/alpine-${ALPINE_VER}/")
         fi
 
         exec_debug "Installing defined pip packages: ${PIP_PACKAGES[*]}"

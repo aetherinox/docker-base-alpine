@@ -4,9 +4,96 @@
 # #
 #   @version        3
 #   @file           docker-images.v3
-#   @date           12-18-2024
+#   @date           06-16-2025
 #   @usage          makes use of s6-overlay for docker containers
 #                   https://github.com/just-containers/s6-overlay
+# #
+
+# #
+#   define > colors
+#
+#   Use the color table at:
+#       - https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+# #
+
+declare -A c=(
+    [end]=$'\e[0m'
+    [white]=$'\e[97m'
+    [bold]=$'\e[1m'
+    [dim]=$'\e[2m'
+    [underline]=$'\e[4m'
+    [strike]=$'\e[9m'
+    [blink]=$'\e[5m'
+    [inverted]=$'\e[7m'
+    [hidden]=$'\e[8m'
+    [black]=$'\e[0;30m'
+    [redl]=$'\e[0;91m'
+    [redd]=$'\e[0;31m'
+    [red1]=$'\e[38;5;160m'
+    [red2]=$'\e[38;5;196m'
+    [magental]=$'\e[0;95m'
+    [magentad]=$'\e[0;35mm'
+    [fuchsia1]=$'\e[38;5;205m'
+    [fuchsia2]=$'\e[38;5;198m'
+    [bluel]=$'\e[0;94m'
+    [blued]=$'\e[0;34m'
+    [blue1]=$'\e[38;5;033m'
+    [blue2]=$'\e[38;5;033m'
+    [blue3]=$'\e[38;5;68m'
+    [cyanl]=$'\e[0;96m'
+    [cyand]=$'\e[0;36m'
+    [greenl]=$'\e[0;92m'
+    [greend]=$'\e[0;32m'
+    [green1]=$'\e[38;5;2m'
+    [green2]=$'\e[38;5;76m'
+    [yellowl]=$'\e[0;93m'
+    [yellowd]=$'\e[0;33m'
+    [yellow1]=$'\e[38;5;184m'
+    [yellow2]=$'\e[38;5;190m'
+    [yellow3]=$'\e[38;5;193m'
+    [orange1]=$'\e[38;5;202m'
+    [orange2]=$'\e[38;5;208m'
+    [greyl]=$'\e[0;37m'
+    [greyd]=$'\e[0;90m'
+    [grey1]=$'\e[38;5;240m'
+    [grey2]=$'\e[38;5;244m'
+    [grey3]=$'\e[38;5;250m'
+    [navy]=$'\e[38;5;62m'
+    [olive]=$'\e[38;5;144m'
+    [peach]=$'\e[38;5;210m'
+)
+
+# #
+#   unicode for emojis
+#       https://apps.timwhitlock.info/emoji/tables/unicode
+# #
+
+declare -A icon=(
+    ["symbolic link"]=$'\xF0\x9F\x94\x97' # 🔗
+    ["regular file"]=$'\xF0\x9F\x93\x84' # 📄
+    ["directory"]=$'\xF0\x9F\x93\x81' # 📁
+    ["regular empty file"]=$'\xe2\xad\x95' # ⭕
+    ["log"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["1"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["2"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["3"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["4"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["5"]=$'\xF0\x9F\x93\x9C' # 📜
+    ["pem"]=$'\xF0\x9F\x94\x92' # 🔑
+    ["pub"]=$'\xF0\x9F\x94\x91' # 🔒
+    ["pfx"]=$'\xF0\x9F\x94\x92' # 🔑
+    ["p12"]=$'\xF0\x9F\x94\x92' # 🔑
+    ["key"]=$'\xF0\x9F\x94\x91' # 🔒
+    ["crt"]=$'\xF0\x9F\xAA\xAA ' # 🪪
+    ["gz"]=$'\xF0\x9F\x93\xA6' # 📦
+    ["zip"]=$'\xF0\x9F\x93\xA6' # 📦
+    ["gzip"]=$'\xF0\x9F\x93\xA6' # 📦
+    ["deb"]=$'\xF0\x9F\x93\xA6' # 📦
+    ["sh"]=$'\xF0\x9F\x97\x94' # 🗔
+)
+
+# #
+#   script version
 # #
 
 MOD_SCRIPT_VER='3.20241218'
@@ -23,16 +110,17 @@ SERVICES_DIR='/custom-services.d'
 # #
 
 if [[ ${DOCKER_MODS_DEBUG_CURL,,} = 'true' ]]; then
-  CURL_NOISE_LEVEL='-v'
+    CURL_NOISE_LEVEL='-v'
 else
-  CURL_NOISE_LEVEL='--silent'
+    CURL_NOISE_LEVEL='--silent'
 fi
 
 # #
 #   Tamper check
 # #
 
-tamper_check() {
+tamper_check()
+{
     # Tamper check custom service locations
     if [[ -d "${SERVICES_DIR}" ]] && [[ -n "$(find ${SERVICES_DIR}/* ! -user root 2>/dev/null)" ]]; then
 echo "╔═════════════════════════════════════════════════════════════════════════╗
@@ -87,7 +175,8 @@ echo "╔═══════════════════════�
 #   Custom Services
 # #
 
-process_custom_services() {
+process_custom_services()
+{
 
     # #
     #   Remove all existing custom services before continuing to ensure
@@ -95,7 +184,7 @@ process_custom_services() {
     # #
 
     if [[ -n "$(/bin/ls -A /etc/s6-overlay/s6-rc.d/custom-svc-* 2>/dev/null)" ]]; then
-        echo -e " CustomInit   : Removing existing custom services..."
+        printf '%-29s %-65s\n' "  ${c[bluel]}Custom${c[end]}" "${c[end]}Removing existing custom services${c[end]}"
         rm -rf /etc/s6-overlay/s6-rc.d/custom-svc-*
         rm /etc/s6-overlay/s6-rc.d/user/contents.d/custom-svc-*
     fi
@@ -105,25 +194,26 @@ process_custom_services() {
     # #
 
     if [[ -e "${SERVICES_DIR}" ]] && [[ -n "$(/bin/ls -A ${SERVICES_DIR} 2>/dev/null)" ]]; then
-        echo -e " CustomInit   : Service files found in ${SERVICES_DIR}"
+
+        printf '%-29s %-65s\n' "  ${c[bluel]}Custom${c[end]}" "${c[end]}Service files found in ${c[yellow2]} ${SERVICES_DIR} ${c[end]}"
 
         for SERVICE in "${SERVICES_DIR}"/*; do
             NAME="$(basename "${SERVICE}")"
             if [[ -f "${SERVICE}" ]]; then
-                echo -e " CustomInit   : Service detected - ${NAME} - copying..."
+                printf '%-29s %-65s\n' "  ${c[bluel]}Custom${c[end]}" "${c[end]}${c[bluel]}${NAME}${c[end]} detected, copying files${c[end]}"
                 mkdir -p /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/dependencies.d/
                 cp "${SERVICE}" /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/run
                 chmod +x /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/run
                 echo "longrun" >/etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/type
                 touch /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/dependencies.d/init-services
                 touch /etc/s6-overlay/s6-rc.d/user/contents.d/custom-svc-"${NAME}"
-                echo -e " CustomInit   : Service copied - ${NAME}"
+                printf '%-29s %-65s\n' "  ${c[bluel]}Custom${c[end]}" "${c[end]}${c[bluel]}${NAME}${c[end]} copied${c[end]}"
             elif [[ ! -f "${SERVICE}" ]]; then
-                echo -e " CustomInit   : ${NAME} is not a valid service file, skipping"
+                printf '%-29s %-65s\n' "  ${c[bluel]}Custom${c[end]}" "${c[end]}${c[bluel]}${NAME}${c[end]} is not a valid service file, skipping ${c[end]}"
             fi
         done
     else
-        echo -e " CustomInit   : No custom services found, skipping..."
+        printf '%-29s %-65s\n' "  ${c[bluel]}Custom${c[end]}" "${c[end]}No custom services detected, skipping ${c[end]}"
     fi
 }
 
@@ -131,7 +221,8 @@ process_custom_services() {
 #   Create with-contenv alias with umask support
 # #
 
-create_with_contenv_alias() {
+create_with_contenv_alias()
+{
     if [[ ! -f /command/with-contenv ]]; then
         echo "/command/with-contenv not found, skipping alias creation"
         return
@@ -155,7 +246,8 @@ create_with_contenv_alias() {
 #   Check for curl
 # #
 
-curl_check() {
+curl_check()
+{
     if [[ ! -f /usr/bin/curl ]] || [[ ! -f /usr/bin/jq ]]; then
         exec_info "Curl/JQ was not found on this system for Docker mods installing"
         if [[ -f /usr/bin/apt ]]; then
@@ -188,17 +280,20 @@ curl_check() {
 #   Define > Message Types
 # #
 
-exec_info() {
+exec_info()
+{
     local MSG=$*
     echo "[mod-init] $MSG"
 }
 
-exec_err() {
+exec_err()
+{
     local MSG=$*
     echo "[mod-init] (ERROR) $MSG"
 }
 
-exec_debug() {
+exec_debug()
+{
     local MSG=$*
     if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then echo "[mod-init] (DEBUG) $MSG"; fi
 }
@@ -209,7 +304,8 @@ exec_debug() {
 #   Use different filtering depending on the URL
 # #
 
-get_blob_sha() {
+get_blob_sha()
+{
     MULTIDIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
         ${CURL_NOISE_LEVEL} \
         --location \
@@ -266,7 +362,8 @@ get_blob_sha() {
 #   Get > Auth URL
 # #
 
-get_auth_url() {
+get_auth_url()
+{
     local auth_header
     local realm_url
     local service
@@ -297,7 +394,8 @@ get_auth_url() {
 #   Get > Architecture
 # #
 
-get_arch(){
+get_arch()
+{
     local arch
 
     if [[ -f /sbin/apk ]]; then
@@ -324,7 +422,8 @@ get_arch(){
 #   Run > main
 # #
 
-runtime() {
+runtime()
+{
     exec_info "Running Docker Modification Logic"
     exec_debug "Running in debug mode"
     exec_debug "Mod script version ${MOD_SCRIPT_VER}"
@@ -530,7 +629,8 @@ runtime() {
 #   run > local
 # #
 
-runtime_local() {
+runtime_local()
+{
     exec_info "Running Local Docker Modification Logic"
     for DOCKER_MOD in $(echo "${DOCKER_MODS}" | tr '|' '\n'); do
 
@@ -627,10 +727,11 @@ runtime_local() {
 #   Run > branding
 # #
 
-run_branding() {
+run_branding()
+{
   cat <<-EOF | tee /run/branding /etc/s6-overlay/s6-rc.d/init-adduser/branding > /dev/null 2>&1
 ──────────────────────────────────────────────────────────────────────────────────────────
-                             Linux Alpine - Base Image
+                              Aetherinox - Base Image
 ──────────────────────────────────────────────────────────────────────────────────────────
 	EOF
 }
