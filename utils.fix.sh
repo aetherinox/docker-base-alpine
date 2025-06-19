@@ -7,7 +7,7 @@
 #   @usage                this script allows you to fix permission issues, and convert all file line-endings from CRLF to LF
 #                             by using the package dos2unix
 #   @run                  ./utils.fix.sh
-#                         ./utils.fix.sh --help
+#                         ./utils.fix.sh true             enable dry-run
 #
 #   @image:github         ghcr.io/aetherinox/alpine:latest
 #                         ghcr.io/aetherinox/alpine:3.22
@@ -104,7 +104,7 @@ script_title="Builder › Alpine"
 script_about="This command allows you to fix docker image permissions $script_title"
 script_updated="07-01-2025"
 script_version="1.0.0"
-script_dryrun=false
+script_dryrun=${1:-false}
 
 # #
 #   start
@@ -114,20 +114,31 @@ echo -e
 printf '%-29s %-65s\n' "  ${c[bluel]}${app_file_this}${c[end]}" "${c[greenl]}Starting to fix permissions ... ${c[end]}"
 
 # #
-#   set execute on run files
+#   only run if --dryrun not enabled
 # #
 
-find ./ -name 'run' -print -exec sudo chmod +x {} \;
+if [[ $script_dryrun = false ]]; then
 
-# #
-#   fix CRLF (Windows) to LF (Linux) line-endings
-# #
+    # #
+    #   set execute on run files
+    # #
 
-find ./ -type f | grep -Ev 'docs|node_modules|.git|*.jpg|*.jpeg|*.gif|*.png' | xargs dos2unix --
+    find ./ -name 'run' -print -exec sudo chmod +x {} \;
+
+    # #
+    #   fix CRLF (Windows) to LF (Linux) line-endings
+    # #
+
+    find ./ -type f | grep -Ev 'docs|node_modules|.git|*.jpg|*.jpeg|*.gif|*.png' | xargs dos2unix --
+fi
 
 # #
 #   finish
 # #
 
-printf '%-29s %-65s\n' "  ${c[bluel]}${app_file_this}${c[end]}" "${c[greenl]}Finished fixing permissions ${c[end]}"
+if [[ $script_dryrun = false ]]; then
+    printf '%-29s %-65s\n' "  ${c[bluel]}${app_file_this}${c[end]}" "${c[greenl]}Finished fixing permissions ${c[end]}"
+else
+    printf '%-29s %-65s\n' "  ${c[bluel]}${app_file_this}${c[end]}" "${c[yellow1]}No permissions modified; ${c[orange1]}--dryrun${c[yellow1]} enabled ${c[end]}"
+fi
 echo -e

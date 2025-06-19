@@ -278,8 +278,14 @@ while [ $# -gt 0 ]; do
             if [[ "$1" != *=* ]]; then shift; fi
             image_registry="${1#*=}"
             ;;
-        -D|--dryrun)
+        -D|--dryrun|--dry-run)
             script_dryrun=true
+
+            echo
+            echo -e "  ${c[bold]}${c[orange1]}WARNING          ${c[end]}Dryrun Enabled${c[end]}"
+            echo -e "  ${c[end]}                 No images will be created, and permissions will not be modified since you passed the ${c[orange1]}--dryrun${c[end]} arg${c[end]}"
+            echo -e "  ${c[bold]}${c[grey2]}                         ${c[fuchsia2]}./${app_file_this}${c[end]} --dryrun"
+            echo
             ;;
 
         # #
@@ -436,7 +442,7 @@ fi
 #   run script fix perms
 # #
 
-source ./utils.fix.sh
+source ./utils.fix.sh "$script_dryrun"
 
 # #
 #   change work directory
