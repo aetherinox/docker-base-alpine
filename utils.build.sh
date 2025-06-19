@@ -11,6 +11,9 @@
 #                         ./utils.build.sh --version 3.22 --arch amd64 --registry local
 #                         ./utils.build.sh --version 3.22 --arch amd64 --registry local --dockerfile CustomDockerfile
 #                         ./utils.build.sh --version 3.22 --arch amd64 --registry local --name alpine --release beta --registry github --author Aetherinox --network default
+#                         ./utils.build.sh --restart
+#                         ./utils.build.sh --restart --env ./.env,.anotherEnv,third.env
+#                         ./utils.build.sh --dryrun
 #
 #   @image:github         ghcr.io/aetherinox/alpine:latest
 #                         ghcr.io/aetherinox/alpine:3.22
@@ -47,7 +50,9 @@
 #                             you can append as many env files as you need, simply seperate each file with a comma
 #                                 ./util-build.sh -ra --env ./.env,.anotherEnv,third.env
 #                             your full command could look something like the following if you want to build and then restart:
-#                                 ./util-build.sh -ra --env ./.env,.anotherEnv,third.env \
+#                                 ./util-build.sh \
+#                                     -ra \
+#                                     --env ./.env,.anotherEnv,third.env \
 #                                     --name alpine
 #                                     --version 3.22 \
 #                                     --arch amd64 \
@@ -206,16 +211,20 @@ image_release=stable
 image_registry=local
 image_dockerfile=Dockerfile
 image_network=host
-image_git_sha1_long=$(git rev-parse HEAD)
-image_git_sha1_short=${image_git_sha1_long:(-8)}
-image_build_id=$(tr -dc A-Fa-f0-9 </dev/urandom | head -c 9; echo)
-image_build_ident="$(date +%Y).$(date +%m).$(date +%d)-${image_git_sha1_short}"
+image_use_emulator=false
+image_restart=false
+image_git_sha1_long=$(git rev-parse HEAD)                                           #  9cda4061d512d0bccdab87ac9d911d81bcfc4ffe
+image_git_sha1_short=${image_git_sha1_long:(-8)}                                    #  bcfc4ffe
+image_version_date_1digit=$(date -u +%Y.%-m.%-d)                                    #  2025.6.19, 2025.6.1, {...}
+image_version_date_2digit=$(date -u +%Y.%m.%d)                                      #  2025.06.19, 2025.06.01, {...}
+image_version_date_biweekly=$(date -u +%-Y.%-m).$((($(date -u +%-d)-1)/14))         #  2025.6.[0,1]
+image_version_date_quarterly=$(date -u +%-Y.%-m).$((($(date -u +%-d)-1)/7))         #  2025.6.[0,1,2,3,4]
+image_build_id=$(tr -dc A-Fa-f0-9 </dev/urandom | head -c 9; echo)                  #  61fAFAb9b
+image_build_ident="$(date +%Y).$(date +%m).$(date +%d)-${image_git_sha1_short}"     #  2025.06.19-bcfc4ffe
 image_builddate=$(date +'%Y%m%d')                                                   #  20250225
 image_version=3.22                                                                  #  3.22
 image_version_1digit=`echo ${image_version} | cut -d '.' -f1-1`                     #  3
 image_version_2digit=`echo ${image_version} | cut --complement -c4`                 #  3.2
-image_use_emulator=false
-image_restart=false
 
 # #
 #   load .env on restart if -ra, --restart specified
@@ -242,7 +251,7 @@ while [ $# -gt 0 ]; do
         -v|--ver|--version)
             if [[ "$1" != *=* ]]; then shift; fi
             image_version="${1#*=}"                                                 #  3.22
-            IFS=. read major minor patch <<< "${image_version}"
+            IFS="." read major minor patch <<< "${image_version}"
             image_version_1digit=${major}                                           #  3
             image_version_2digit=${major}.${minor}                                  #  3.2
             ;;
