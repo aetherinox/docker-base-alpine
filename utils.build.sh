@@ -243,8 +243,8 @@ while [ $# -gt 0 ]; do
             if [[ "$1" != *=* ]]; then shift; fi
             image_version="${1#*=}"                                                 #  3.22
             IFS=. read major minor patch <<< "${image_version}"
-            image_version_1digit=${MAJOR}                                           #  3
-            image_version_2digit=${MAJOR}.${MINOR}                                  #  3.2
+            image_version_1digit=${major}                                           #  3
+            image_version_2digit=${major}.${minor}                                  #  3.2
             ;;
         -n|--name)
             if [[ "$1" != *=* ]]; then shift; fi
